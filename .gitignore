@@ -1,0 +1,14 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+artifacts/
+TestResults/
+StrykerOutput/
+[Dd]ebug/
+[Rr]elease/
+*.received.*
+collectary-data/
+z21sniffer-data/
+.nuke/temp/

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.en.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>Z21Sniffer.Presentation.Resources.Strings.en.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings.de.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>Z21Sniffer.Presentation.Resources.Strings.de.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Z21Sniffer.Core\Z21Sniffer.Core.csproj" />
+  </ItemGroup>
+
+</Project>

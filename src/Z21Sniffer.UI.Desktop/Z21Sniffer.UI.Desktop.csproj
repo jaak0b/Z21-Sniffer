@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Z21Sniffer.Core\Z21Sniffer.Core.csproj" />
+    <ProjectReference Include="..\Z21Sniffer.Infrastructure\Z21Sniffer.Infrastructure.csproj" />
+    <ProjectReference Include="..\Z21Sniffer.Mcp\Z21Sniffer.Mcp.csproj" />
+    <ProjectReference Include="..\Z21Sniffer.Presentation\Z21Sniffer.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

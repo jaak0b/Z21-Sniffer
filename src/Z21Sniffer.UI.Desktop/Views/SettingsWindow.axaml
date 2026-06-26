@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Z21Sniffer.Presentation.ViewModels;assembly=Z21Sniffer.Presentation"
+        x:Class="Z21Sniffer.UI.Desktop.Views.SettingsWindow"
+        x:DataType="vm:WorkspaceViewModel"
+        Title="{Binding Localization[Settings]}"
+        Width="440" SizeToContent="Height"
+        CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource BackgroundBrush}">
+
+  <StackPanel Margin="18" Spacing="16">
+
+    <TextBlock Text="{Binding Localization[Connection]}" FontWeight="SemiBold" />
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="8,0,0,0">
+      <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Localization[Source]}" VerticalAlignment="Center" Margin="0,0,10,6" />
+      <ComboBox Grid.Row="0" Grid.Column="1" x:Name="SourceCombo" HorizontalAlignment="Stretch" Margin="0,0,0,6"
+                SelectedItem="{Binding Connection.Source}" IsEnabled="{Binding Connection.CanEditConnection}" />
+      <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Localization[Host]}" VerticalAlignment="Center" Margin="0,0,10,6"
+                 IsVisible="{Binding Connection.ShowZ21Settings, FallbackValue=False}" />
+      <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,0,6" Text="{Binding Connection.Host}"
+               IsEnabled="{Binding Connection.CanEditConnection}"
+               IsVisible="{Binding Connection.ShowZ21Settings, FallbackValue=False}" />
+      <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Localization[Port]}" VerticalAlignment="Center" Margin="0,0,10,0"
+                 IsVisible="{Binding Connection.ShowZ21Settings, FallbackValue=False}" />
+      <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Connection.Port}"
+               IsEnabled="{Binding Connection.CanEditConnection}"
+               IsVisible="{Binding Connection.ShowZ21Settings, FallbackValue=False}" />
+    </Grid>
+
+    <TextBlock Text="{Binding Localization[Appearance]}" FontWeight="SemiBold" />
+    <StackPanel Orientation="Horizontal" Spacing="10" Margin="8,0,0,0">
+      <CheckBox Content="{Binding Localization[DarkTheme]}" IsChecked="{Binding Theme.IsDark}" VerticalAlignment="Center" />
+      <Button Content="EN" Command="{Binding SetLanguageCommand}" CommandParameter="en" />
+      <Button Content="DE" Command="{Binding SetLanguageCommand}" CommandParameter="de" />
+    </StackPanel>
+
+    <TextBlock Text="{Binding Localization[McpServer]}" FontWeight="SemiBold" />
+    <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+      <CheckBox Content="{Binding Localization[Enabled]}" IsChecked="{Binding Mcp.IsRunning}"
+                Command="{Binding Mcp.ToggleCommand}" VerticalAlignment="Center" />
+      <TextBox Width="80" Text="{Binding Mcp.Port}" VerticalAlignment="Center" />
+      <TextBlock Text="{Binding Mcp.Url}" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center"
+                 IsVisible="{Binding Mcp.IsRunning, FallbackValue=False}" />
+    </StackPanel>
+
+    <Button Content="{Binding Localization[Close]}" HorizontalAlignment="Right" Click="OnClose" />
+  </StackPanel>
+</Window>

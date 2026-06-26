@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Z21Sniffer.Core/Z21Sniffer.Core.csproj" />
+    <Project Path="src/Z21Sniffer.Infrastructure/Z21Sniffer.Infrastructure.csproj" />
+    <Project Path="src/Z21Sniffer.Presentation/Z21Sniffer.Presentation.csproj" />
+    <Project Path="src/Z21Sniffer.Mcp/Z21Sniffer.Mcp.csproj" />
+    <Project Path="src/Z21Sniffer.UI.Desktop/Z21Sniffer.UI.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Z21Sniffer.Core.Tests/Z21Sniffer.Core.Tests.csproj" />
+    <Project Path="tests/Z21Sniffer.Infrastructure.Tests/Z21Sniffer.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Z21Sniffer.Presentation.Tests/Z21Sniffer.Presentation.Tests.csproj" />
+    <Project Path="tests/Z21Sniffer.Mcp.Tests/Z21Sniffer.Mcp.Tests.csproj" />
+    <Project Path="tests/Z21Sniffer.UI.Tests/Z21Sniffer.UI.Tests.csproj" />
+  </Folder>
+</Solution>

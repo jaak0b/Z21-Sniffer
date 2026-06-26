@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppTitle" xml:space="preserve"><value>Z21 Rückmelde-Sniffer</value></data>
+  <data name="Host" xml:space="preserve"><value>Host</value></data>
+  <data name="Port" xml:space="preserve"><value>Port</value></data>
+  <data name="Connect" xml:space="preserve"><value>Verbinden</value></data>
+  <data name="Disconnect" xml:space="preserve"><value>Trennen</value></data>
+  <data name="TrackPower" xml:space="preserve"><value>Gleisspannung</value></data>
+  <data name="Clear" xml:space="preserve"><value>Leeren</value></data>
+  <data name="Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="Resume" xml:space="preserve"><value>Fortsetzen</value></data>
+  <data name="SaveSession" xml:space="preserve"><value>Sitzung speichern</value></data>
+  <data name="ImportSession" xml:space="preserve"><value>Sitzung importieren</value></data>
+  <data name="Session" xml:space="preserve"><value>Sitzung</value></data>
+  <data name="TrafficLog" xml:space="preserve"><value>Datenverkehr</value></data>
+  <data name="Sensors" xml:space="preserve"><value>Sensoren</value></data>
+  <data name="Rename" xml:space="preserve"><value>Umbenennen</value></data>
+  <data name="Language" xml:space="preserve"><value>Sprache</value></data>
+  <data name="McpServer" xml:space="preserve"><value>MCP-Server</value></data>
+  <data name="Live" xml:space="preserve"><value>Live</value></data>
+  <data name="DarkTheme" xml:space="preserve"><value>Dunkel</value></data>
+  <data name="Settings" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="Connection" xml:space="preserve"><value>Verbindung</value></data>
+  <data name="Appearance" xml:space="preserve"><value>Darstellung</value></data>
+  <data name="Source" xml:space="preserve"><value>Quelle</value></data>
+  <data name="Enabled" xml:space="preserve"><value>Aktiviert</value></data>
+  <data name="Close" xml:space="preserve"><value>Schließen</value></data>
+  <data name="Off" xml:space="preserve"><value>aus</value></data>
+  <data name="UnitSeconds" xml:space="preserve"><value>s</value></data>
+  <data name="ThresholdTooltip" xml:space="preserve"><value>Hebt Kontakte hervor, deren EIN-Dauer kürzer als diese Sekundenzahl ist. 0 deaktiviert die Hervorhebung.</value></data>
+  <data name="ConfirmRemove" xml:space="preserve"><value>Sensor entfernen</value></data>
+  <data name="Yes" xml:space="preserve"><value>Ja</value></data>
+  <data name="No" xml:space="preserve"><value>Nein</value></data>
+  <data name="TimelineTab" xml:space="preserve"><value>Zeitleiste</value></data>
+  <data name="Search" xml:space="preserve"><value>Suchen</value></data>
+  <data name="Copy" xml:space="preserve"><value>Kopieren</value></data>
+  <data name="Export" xml:space="preserve"><value>Exportieren</value></data>
+  <data name="Follow" xml:space="preserve"><value>Folgen</value></data>
+  <data name="FilterTypes" xml:space="preserve"><value>Typen ▾</value></data>
+  <data name="SelectAll" xml:space="preserve"><value>Alle auswählen</value></data>
+  <data name="DeselectAll" xml:space="preserve"><value>Alle abwählen</value></data>
+  <data name="KindConnection" xml:space="preserve"><value>Verbindung</value></data>
+  <data name="KindTrackPower" xml:space="preserve"><value>Gleisspannung</value></data>
+  <data name="KindSensor" xml:space="preserve"><value>Rückmelder</value></data>
+  <data name="KindSystem" xml:space="preserve"><value>System</value></data>
+  <data name="KindLoco" xml:space="preserve"><value>Lok</value></data>
+  <data name="KindTurnout" xml:space="preserve"><value>Weiche</value></data>
+  <data name="KindOther" xml:space="preserve"><value>Sonstige</value></data>
+  <data name="LogConnected" xml:space="preserve"><value>Verbunden</value></data>
+  <data name="LogDisconnected" xml:space="preserve"><value>Getrennt</value></data>
+  <data name="LogSimulatedSuffix" xml:space="preserve"><value> (Simulation)</value></data>
+  <data name="LogTrackPowerOn" xml:space="preserve"><value>Gleisspannung ein</value></data>
+  <data name="LogTrackPowerOff" xml:space="preserve"><value>Gleisspannung aus</value></data>
+  <data name="LogSensorOccupied" xml:space="preserve"><value>{0} → belegt</value></data>
+  <data name="LogSensorClear" xml:space="preserve"><value>{0} → frei</value></data>
+  <data name="LogSystemTelemetry" xml:space="preserve"><value>{0} mA · {1} V · {2} °C</value></data>
+  <data name="LogFaultShortCircuit" xml:space="preserve"><value>Kurzschluss</value></data>
+  <data name="LogFaultEmergencyStop" xml:space="preserve"><value>Nothalt</value></data>
+  <data name="LogFaultTrackVoltageOff" xml:space="preserve"><value>Gleisspannung aus</value></data>
+  <data name="LogFaultPowerLost" xml:space="preserve"><value>Spannungsverlust</value></data>
+  <data name="LogFaultHighTemperature" xml:space="preserve"><value>Übertemperatur</value></data>
+  <data name="LogLoco" xml:space="preserve"><value>Lok {0}: {1}, Fahrstufe {2}</value></data>
+  <data name="LogForward" xml:space="preserve"><value>vorwärts</value></data>
+  <data name="LogBackward" xml:space="preserve"><value>rückwärts</value></data>
+  <data name="LogTurnout" xml:space="preserve"><value>Weiche {0} → {1}</value></data>
+  <data name="LogTurnoutOutput1" xml:space="preserve"><value>Ausgang 1</value></data>
+  <data name="LogTurnoutOutput2" xml:space="preserve"><value>Ausgang 2</value></data>
+  <data name="LogTurnoutUnknown" xml:space="preserve"><value>unbekannt</value></data>
+</root>

@@ -1,0 +1,115 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Headless.NUnit;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
+using FakeItEasy;
+using NUnit.Framework;
+using Z21Sniffer.Core.Model;
+using Z21Sniffer.Core.Ports;
+using Z21Sniffer.Core.Recording;
+using Z21Sniffer.Presentation.ViewModels;
+using Z21Sniffer.UI.Desktop.Controls;
+using Z21Sniffer.UI.Desktop.Views;
+
+namespace Z21Sniffer.UI.Tests;
+
+[TestFixture]
+public class WorkspaceViewTest
+{
+    private sealed class StubClock : IClock
+    {
+        public DateTimeOffset Now { get; set; } = DateTimeOffset.UnixEpoch;
+    }
+
+    private static WorkspaceViewModel BuildWorkspace()
+    {
+        var settings = A.Fake<ISettingsStore>();
+        A.CallTo(() => settings.Load()).Returns(new AppSettings("192.168.0.111", 21105, "en", []));
+        return new WorkspaceViewModel(
+            A.Fake<ICommandStationConnectionFactory>(),
+            settings,
+            A.Fake<ISessionStore>(),
+            new StubClock(),
+            new SensorLabeler(),
+            A.Fake<IMcpServerController>(),
+            A.Fake<IThemeController>(),
+            A.Fake<ILogTextStore>(),
+            post: action => action(),
+            chooseSaveJsonPath: () => Task.FromResult<string?>(null),
+            chooseOpenJsonPath: () => Task.FromResult<string?>(null),
+            chooseExportLogPath: () => Task.FromResult<string?>(null),
+            confirmRemove: _ => Task.FromResult(false),
+            openSettings: () => Task.CompletedTask);
+    }
+
+    [AvaloniaTest]
+    public void WorkspaceView_LoadsAndHostsTimelineControl()
+    {
+        var window = new Window
+        {
+            Content = new WorkspaceView { DataContext = BuildWorkspace() },
+            Width = 1000,
+            Height = 600
+        };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var control = window.GetVisualDescendants().OfType<FeedbackTimelineControl>().FirstOrDefault();
+        Assert.That(control, Is.Not.Null);
+    }
+
+    [AvaloniaTest]
+    public void WorkspaceView_LogTab_RendersAppendedEntries()
+    {
+        var workspace = BuildWorkspace();
+        var window = new Window
+        {
+            Content = new WorkspaceView { DataContext = workspace },
+            Width = 1000,
+            Height = 600
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        workspace.Timeline.OnFeedback([new SensorState(new SensorKey(1, 1), Occupied: true)]);
+        var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
+        tabs.SelectedIndex = 1;
+        Dispatcher.UIThread.RunJobs();
+
+        var logList = window.GetVisualDescendants().OfType<ListBox>().FirstOrDefault(l => l.Name == "LogList");
+        Assert.That(logList, Is.Not.Null);
+        Assert.That(workspace.Log.Filtered, Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_WithFeedback_RendersWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var vm = new TimelineViewModel(new FeedbackRecorder(clock), new SensorLabeler(), clock, [], []);
+        vm.OnFeedback([new SensorState(new SensorKey(1, 1), Occupied: true)]);
+        var control = new FeedbackTimelineControl { DataContext = vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_EmptyArea_IsHitTestVisibleForPanAndZoom()
+    {
+        var clock = new StubClock();
+        var vm = new TimelineViewModel(new FeedbackRecorder(clock), new SensorLabeler(), clock, [], []);
+        var control = new FeedbackTimelineControl { DataContext = vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var hit = window.GetVisualAt(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2));
+        Assert.That(hit, Is.SameAs(control));
+    }
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="blame" enabled="True">
+        <Configuration>
+          <CollectDumpOnTestSessionHang TestTimeout="60000" HangDumpType="None" />
+        </Configuration>
+      </DataCollector>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <SkipAutoProps>true</SkipAutoProps>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <Exclude>
+            [*.Tests]*,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.Views.*,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.Controls.*,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.Converters.*,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.App,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.Program,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.ViewLocator,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.UiModule,
+            [Z21Sniffer.UI.Desktop]CompiledAvaloniaXaml.*,
+            [Z21Sniffer.UI.Desktop]XamlGeneratedNamespace.*,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.AvaloniaSnifferApi,
+            [Z21Sniffer.UI.Desktop]Z21Sniffer.UI.Desktop.AvaloniaThemeController,
+            [Z21Sniffer.Mcp]Z21Sniffer.Mcp.KestrelMcpServerController
+          </Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

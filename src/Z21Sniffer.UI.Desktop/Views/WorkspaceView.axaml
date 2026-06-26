@@ -1,0 +1,131 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Z21Sniffer.Presentation.ViewModels;assembly=Z21Sniffer.Presentation"
+             xmlns:logging="clr-namespace:Z21Sniffer.Presentation.Logging;assembly=Z21Sniffer.Presentation"
+             xmlns:controls="clr-namespace:Z21Sniffer.UI.Desktop.Controls"
+             xmlns:conv="clr-namespace:Z21Sniffer.UI.Desktop.Converters"
+             x:Class="Z21Sniffer.UI.Desktop.Views.WorkspaceView"
+             x:DataType="vm:WorkspaceViewModel"
+             Background="{DynamicResource BackgroundBrush}">
+
+  <UserControl.Resources>
+    <conv:KindToBrushConverter x:Key="KindToBrush" />
+    <conv:KindToLocalizedConverter x:Key="KindToLocalized" />
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.faultMessage">
+      <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Ellipse.statusDot">
+      <Setter Property="Fill" Value="{DynamicResource DangerBrush}" />
+    </Style>
+    <Style Selector="Ellipse.statusDot.connected">
+      <Setter Property="Fill" Value="{DynamicResource PrimaryBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Panel>
+  <DockPanel>
+
+    <Border DockPanel.Dock="Top" Padding="8" Background="{DynamicResource SurfaceBrush}">
+      <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Button Content="⚙" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{Binding Localization[Settings]}" Margin="0,0,12,0" />
+        <Ellipse Classes="statusDot" Classes.connected="{Binding Connection.IsConnected}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0" />
+        <Button Content="{Binding Connection.ToggleLabel}" Command="{Binding Connection.ToggleConnectionCommand}" MinWidth="92" Margin="0,0,12,0" />
+        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="4,0" />
+        <controls:UnitInputBox Width="96" Value="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
+                               Unit="{Binding Localization[UnitSeconds]}" Watermark="{Binding Localization[Off]}"
+                               ToolTip.Tip="{Binding Localization[ThresholdTooltip]}"
+                               VerticalAlignment="Center" Margin="0,0,12,0" />
+        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="4,0" />
+        <Button Content="{Binding Localization[Session]}" Click="OnSessionMenu" />
+      </WrapPanel>
+    </Border>
+
+    <TabControl>
+      <TabItem Header="{Binding Localization[TimelineTab]}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="8,6">
+            <Button Content="{Binding Localization[Pause]}" Command="{Binding Timeline.TogglePauseCommand}" />
+            <Button Content="{Binding Localization[Live]}" Command="{Binding Timeline.JumpToLiveCommand}" />
+            <Button Content="{Binding Localization[Clear]}" Command="{Binding Timeline.ClearCommand}" />
+          </StackPanel>
+
+          <ScrollBar x:Name="TimeScrollBar" DockPanel.Dock="Bottom" Orientation="Horizontal" Height="16"
+                     Minimum="0" Scroll="OnTimeScroll" AllowAutoHide="False" />
+
+          <Grid ColumnDefinitions="220,*">
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+              <ListBox x:Name="LegendList" ItemsSource="{Binding Timeline.Rows}">
+                <ListBox.Styles>
+                  <Style Selector="ListBoxItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="MinHeight" Value="26" />
+                  </Style>
+                </ListBox.Styles>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SensorRowViewModel">
+                    <DockPanel Height="26" LastChildFill="True">
+                      <TextBlock DockPanel.Dock="Left" Text="≡" VerticalAlignment="Center" Margin="2,0,6,0"
+                                 Cursor="SizeAll" Foreground="{DynamicResource TextSecondaryBrush}"
+                                 PointerPressed="OnDragHandlePressed" />
+                      <Button DockPanel.Dock="Right" Content="✕" Width="22" Padding="0" Margin="4,0,0,0"
+                              IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}"
+                              Command="{Binding $parent[ListBox].((vm:WorkspaceViewModel)DataContext).RemoveSensorCommand}"
+                              CommandParameter="{Binding}" />
+                      <TextBox Text="{Binding Label}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
+                               LostFocus="OnAliasLostFocus" KeyDown="OnAliasKeyDown" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Border>
+
+            <DockPanel Grid.Column="1">
+              <controls:TimeAxisControl DockPanel.Dock="Bottom" Height="18" DataContext="{Binding Timeline}" />
+              <controls:FeedbackTimelineControl x:Name="BarsControl" DataContext="{Binding Timeline}" />
+            </DockPanel>
+          </Grid>
+        </DockPanel>
+      </TabItem>
+
+      <TabItem Header="{Binding Localization[TrafficLog]}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Margin="8,6" Orientation="Horizontal" Spacing="6">
+            <controls:MultiSelectDropDown MinWidth="150" Title="{Binding Localization[FilterTypes]}"
+                                          ItemsSource="{Binding Log.KindToggles}" />
+            <TextBox Width="220" Text="{Binding Log.SearchText}" Watermark="{Binding Localization[Search]}" />
+            <ToggleButton x:Name="FollowToggle" Content="{Binding Localization[Follow]}" IsChecked="True" />
+            <Button Content="{Binding Localization[Copy]}" Click="OnCopyLog" />
+            <Button Content="{Binding Localization[Export]}" Command="{Binding ExportLogCommand}" />
+            <Button Content="{Binding Localization[Clear]}" Command="{Binding Log.ClearCommand}" />
+          </StackPanel>
+
+          <ListBox x:Name="LogList" ItemsSource="{Binding Log.Filtered}" SelectionMode="Multiple"
+                   FontFamily="Consolas" Background="{DynamicResource BackgroundBrush}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="logging:LogEntry">
+                <Grid ColumnDefinitions="Auto,Auto,*" >
+                  <TextBlock Grid.Column="0" Text="{Binding Timestamp, StringFormat='HH:mm:ss.fff'}"
+                             Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                  <Border Grid.Column="1" CornerRadius="3" Padding="6,1" Margin="0,0,10,0" MinWidth="78"
+                          Background="{Binding Kind, Converter={StaticResource KindToBrush}}">
+                    <TextBlock Text="{Binding Kind, Converter={StaticResource KindToLocalized}}"
+                               Foreground="{DynamicResource PrimaryForegroundBrush}" FontSize="11" HorizontalAlignment="Center" />
+                  </Border>
+                  <TextBlock Grid.Column="2" Text="{Binding Message}" VerticalAlignment="Center"
+                             Classes.faultMessage="{Binding Fault}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+
+  </DockPanel>
+  <Canvas x:Name="GhostLayer" IsHitTestVisible="False" />
+  </Panel>
+</UserControl>
