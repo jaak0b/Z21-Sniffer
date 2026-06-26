@@ -23,7 +23,7 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.HighlightOutline] = "DangerBrush",
         [TimelineInkKeys.BarText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.ConnectionText] = "PrimaryForegroundBrush",
-        [TimelineInkKeys.Connected] = "PrimaryBrush",
+        [TimelineInkKeys.Connected] = "SuccessBrush",
         [TimelineInkKeys.Disconnected] = "DangerBrush",
         [TimelineInkKeys.StoppedFlag] = "DangerBrush",
     };

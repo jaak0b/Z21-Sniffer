@@ -67,6 +67,8 @@
   <data name="Clear" xml:space="preserve"><value>Leeren</value></data>
   <data name="Pause" xml:space="preserve"><value>Pause</value></data>
   <data name="Resume" xml:space="preserve"><value>Fortsetzen</value></data>
+  <data name="StartRecording" xml:space="preserve"><value>Aufnahme starten</value></data>
+  <data name="StopRecording" xml:space="preserve"><value>Aufnahme stoppen</value></data>
   <data name="SaveSession" xml:space="preserve"><value>Sitzung speichern</value></data>
   <data name="ImportSession" xml:space="preserve"><value>Sitzung importieren</value></data>
   <data name="Session" xml:space="preserve"><value>Sitzung</value></data>
@@ -83,6 +85,8 @@
   <data name="German" xml:space="preserve"><value>Deutsch</value></data>
   <data name="Settings" xml:space="preserve"><value>Einstellungen</value></data>
   <data name="Connection" xml:space="preserve"><value>Verbindung</value></data>
+  <data name="Connected" xml:space="preserve"><value>Verbunden</value></data>
+  <data name="Disconnected" xml:space="preserve"><value>Getrennt</value></data>
   <data name="Appearance" xml:space="preserve"><value>Darstellung</value></data>
   <data name="Source" xml:space="preserve"><value>Quelle</value></data>
   <data name="Enabled" xml:space="preserve"><value>Aktiviert</value></data>

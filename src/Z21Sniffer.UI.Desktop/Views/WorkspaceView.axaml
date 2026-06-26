@@ -42,8 +42,13 @@
     <Border DockPanel.Dock="Top" Padding="8" Background="{DynamicResource SurfaceBrush}">
       <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
         <Button Content="⚙" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{Binding Localization[Settings]}" Margin="0,0,12,0" />
-        <Ellipse Classes="statusDot" Classes.connected="{Binding Connection.IsConnected}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,6,0" />
-        <Button Content="{Binding Connection.ToggleLabel}" Command="{Binding Connection.ToggleConnectionCommand}" MinWidth="92" Margin="0,0,12,0" />
+        <Button Command="{Binding Connection.ToggleConnectionCommand}" MinWidth="92" Margin="0,0,12,0">
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Ellipse Classes="statusDot" Classes.connected="{Binding Connection.IsConnected}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding Connection.ToggleLabel}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Content="{Binding Recording.ToggleLabel}" Command="{Binding Recording.ToggleCommand}" Margin="0,0,12,0" />
         <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="4,0" />
         <controls:UnitInputBox Width="96" Value="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
                                Unit="{Binding Localization[UnitSeconds]}" Watermark="{Binding Localization[Off]}"

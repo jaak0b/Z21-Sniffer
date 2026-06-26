@@ -30,6 +30,7 @@ public class WorkspaceViewModelTest
     private ISessionStore _sessionStore = null!;
     private ICommandStationConnection _connection = null!;
     private ILogTextStore _logTextStore = null!;
+    private StubClock _clock = null!;
     private string? _savePath;
     private string? _importPath;
     private string? _exportLogPath;
@@ -44,6 +45,7 @@ public class WorkspaceViewModelTest
         _sessionStore = A.Fake<ISessionStore>();
         _connection = A.Fake<ICommandStationConnection>();
         _logTextStore = A.Fake<ILogTextStore>();
+        _clock = new StubClock();
         A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
         A.CallTo(() => _factory.Create(A<bool>._)).Returns(_connection);
         _savePath = null;
@@ -69,7 +71,7 @@ public class WorkspaceViewModelTest
         });
 
         return new WorkspaceViewModel(
-            _factory, _settings, _sessionStore, new StubClock(), registry, new FeedbackSensorIngest(registry), chart, legend,
+            _factory, _settings, _sessionStore, _clock, registry, new FeedbackSensorIngest(registry), chart, legend,
             A.Fake<IMcpServerController>(),
             A.Fake<IThemeController>(),
             _logTextStore,
@@ -82,15 +84,122 @@ public class WorkspaceViewModelTest
 
     private async Task ActivateConnection() => await _vm.Connection.ToggleConnectionCommand.ExecuteAsync(null);
 
-    [Test]
-    public async Task ActivatedConnectionFeedback_FeedsTimeline()
+    private async Task StartRecording()
     {
         await ActivateConnection();
+        _connection.ConnectionChanged += Raise.With(_connection, true);
+        _vm.Recording.ToggleCommand.Execute(null);
+    }
+
+    [Test]
+    public async Task ActivatedConnectionFeedback_WhileRecording_FeedsTimeline()
+    {
+        await StartRecording();
 
         _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
             [new SensorState(SensorA, true)]);
 
         Assert.That(_vm.Timeline.Sources.OfType<FeedbackSensorSource>().Select(s => s.Sensor), Does.Contain(SensorA));
+    }
+
+    [Test]
+    public async Task Feedback_WhenNotRecording_IsIgnored()
+    {
+        await ActivateConnection();
+        _connection.ConnectionChanged += Raise.With(_connection, true);
+
+        _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
+            [new SensorState(SensorA, true)]);
+
+        Assert.That(_vm.Timeline.Sources.OfType<FeedbackSensorSource>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task ConnectionLostWhileRecording_KeepsRecordingAndRecordsDisconnectedInterval()
+    {
+        await StartRecording();
+
+        _connection.ConnectionChanged += Raise.With(_connection, false);
+
+        Assert.That(_vm.Recording.IsRecording, Is.True);
+        var connection = _vm.Timeline.Sources.OfType<ConnectionSource>().Single();
+        Assert.That(connection.Intervals.Last().Connected, Is.False);
+    }
+
+    [Test]
+    public async Task ConnectionChanged_WhenNotRecording_DoesNotCreateConnectionSource()
+    {
+        await ActivateConnection();
+
+        _connection.ConnectionChanged += Raise.With(_connection, true);
+
+        Assert.That(_vm.Timeline.Sources.OfType<ConnectionSource>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task SensorEdgeLog_UsesWallClock()
+    {
+        await StartRecording();
+        _clock.Now = DateTimeOffset.UnixEpoch.AddMinutes(3);
+
+        _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
+            [new SensorState(SensorA, true)]);
+
+        var entry = _vm.Log.Filtered.Single(e => e.Kind == LogEntryKind.Sensor);
+        Assert.That(entry.Timestamp, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
+    public void SelectedLanguage_SetToEnglishAfterGerman_AppliesEnglish()
+    {
+        _vm.SelectedLanguage = AppLanguage.German;
+
+        _vm.SelectedLanguage = AppLanguage.English;
+
+        Assert.That(_vm.Localization.CurrentCode, Is.EqualTo("en"));
+    }
+
+    [Test]
+    public void TimelineClock_IsFrozenWhenNotRecording()
+    {
+        var before = _vm.TimelineClock.Now;
+        _clock.Now = _clock.Now.AddSeconds(30);
+
+        Assert.That(_vm.TimelineClock.Now, Is.EqualTo(before));
+    }
+
+    [Test]
+    public async Task TimelineClock_TracksWallClockWhileRecording()
+    {
+        await StartRecording();
+        _clock.Now = DateTimeOffset.UnixEpoch.AddMinutes(2);
+
+        Assert.That(_vm.TimelineClock.Now, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
+    public void Timeline_DoesNotAdvanceWhenNotRecording()
+    {
+        _vm.Timeline.Tick();
+        var before = _vm.Timeline.ViewportEnd;
+        _clock.Now = _clock.Now.AddSeconds(30);
+
+        _vm.Timeline.Tick();
+
+        Assert.That(_vm.Timeline.ViewportEnd, Is.EqualTo(before));
+    }
+
+    [Test]
+    public async Task Timeline_AdvancesWhileRecording()
+    {
+        await StartRecording();
+        _vm.Timeline.Tick();
+        var before = _vm.Timeline.ViewportEnd;
+        _clock.Now = _clock.Now.AddSeconds(30);
+
+        _vm.Timeline.Tick();
+
+        Assert.That(_vm.Timeline.ViewportEnd, Is.GreaterThan(before));
     }
 
     [Test]
@@ -117,7 +226,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ActivatedConnectionFeedbackEdge_AppendsSensorLog()
     {
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
             [new SensorState(SensorA, true)]);

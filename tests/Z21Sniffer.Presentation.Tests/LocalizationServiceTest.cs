@@ -27,6 +27,42 @@ public class LocalizationServiceTest
     }
 
     [Test]
+    public void RecordingKeys_English_ReturnEnglishText()
+    {
+        LocalizationService.Instance.Apply("en");
+
+        Assert.That(LocalizationService.Instance["StartRecording"], Is.EqualTo("Start recording"));
+        Assert.That(LocalizationService.Instance["StopRecording"], Is.EqualTo("Stop recording"));
+    }
+
+    [Test]
+    public void RecordingKeys_German_ReturnGermanText()
+    {
+        LocalizationService.Instance.Apply("de");
+
+        Assert.That(LocalizationService.Instance["StartRecording"], Is.EqualTo("Aufnahme starten"));
+        Assert.That(LocalizationService.Instance["StopRecording"], Is.EqualTo("Aufnahme stoppen"));
+    }
+
+    [Test]
+    public void ConnectionStateKeys_English_ReturnEnglishText()
+    {
+        LocalizationService.Instance.Apply("en");
+
+        Assert.That(LocalizationService.Instance["Connected"], Is.EqualTo("Connected"));
+        Assert.That(LocalizationService.Instance["Disconnected"], Is.EqualTo("Disconnected"));
+    }
+
+    [Test]
+    public void ConnectionStateKeys_German_ReturnGermanText()
+    {
+        LocalizationService.Instance.Apply("de");
+
+        Assert.That(LocalizationService.Instance["Connected"], Is.EqualTo("Verbunden"));
+        Assert.That(LocalizationService.Instance["Disconnected"], Is.EqualTo("Getrennt"));
+    }
+
+    [Test]
     public void Indexer_UnknownKey_ReturnsKeyItself()
     {
         Assert.That(LocalizationService.Instance["NoSuchKey"], Is.EqualTo("NoSuchKey"));

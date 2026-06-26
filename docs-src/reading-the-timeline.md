@@ -2,11 +2,23 @@
 
 The timeline is the heart of the app. It works like a logic analyzer: time runs left to right, and every feedback contact that has reported activity gets its own row.
 
+## Starting and stopping a recording
+
+The timeline only moves while you are recording. The **Start recording** button sits in the top toolbar, right next to Connect/Disconnect, and is always available — recording is a session-wide action, not tied to one tab. Press it and the clock starts, the axis begins to advance, and feedback is captured into rows. Press **Stop recording** and the clock freezes where it stands: every bar that was still on is closed off and marked as ended by the stop, so you can see exactly what was occupied at the moment you stopped.
+
+Each **Start** begins a fresh recording — the previous rows and bars are cleared and the clock resets. Before you ever press Start, the axis stays still; it never ticks away on its own while you're just connected and watching.
+
+Disconnecting does **not** stop a recording. If the link to the station drops mid-run, the timeline keeps going and the gap is captured on the connection row (below) instead.
+
 ## Rows and bars
 
 Each row is one R-Bus feedback contact. A filled bar means the contact was reporting *occupied* for that span; a gap means it was clear. A train sitting on a section is one long bar; a **ghost** is a short, stray bar where nothing should have triggered.
 
 Hover any bar for a tooltip showing the sensor's name, its address, and how long it was on — e.g. `Station track 2 (M3.5) · on 0.04 s`. **Zoom in** far enough and that same text is drawn right inside the bar.
+
+## The connection row
+
+While you record, the app also tracks whether it was talking to the command station. A dedicated **Connection** row shows this as a coloured bar: green while connected, red across any stretch where the link was lost. Each segment is labelled with its state and how long it lasted (e.g. `Connected · 142 s`), just like a sensor bar. If a ghost lines up with a red patch, you know the station — not the layout — was the culprit. The row appears the moment you start recording and follows the connection for the rest of the run.
 
 ## Scrolling and zooming through history
 

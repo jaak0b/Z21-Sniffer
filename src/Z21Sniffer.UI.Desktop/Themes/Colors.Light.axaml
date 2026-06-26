@@ -19,6 +19,7 @@
     <Color x:Key="DangerColor">#DC2626</Color>
     <Color x:Key="DangerForegroundColor">#FFFFFF</Color>
     <Color x:Key="WarningColor">#D97706</Color>
+    <Color x:Key="SuccessColor">#16A34A</Color>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
@@ -39,4 +40,5 @@
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
     <SolidColorBrush x:Key="DangerForegroundBrush" Color="{StaticResource DangerForegroundColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
 </ResourceDictionary>

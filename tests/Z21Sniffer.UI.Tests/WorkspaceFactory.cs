@@ -26,7 +26,7 @@ internal sealed class AlwaysConfirm : IRemovalConfirmation
 
 internal sealed record WorkspaceContext(WorkspaceViewModel Vm, FeedbackSensorIngest Ingest);
 
-internal sealed record TimelineContext(TimelineViewModel Vm, FeedbackSensorIngest Ingest);
+internal sealed record TimelineContext(TimelineViewModel Vm, FeedbackSensorIngest Ingest, IntervalSourceRegistry Registry);
 
 internal static class WorkspaceFactory
 {
@@ -36,7 +36,7 @@ internal static class WorkspaceFactory
     {
         var registry = new IntervalSourceRegistry();
         var vm = new TimelineViewModel(registry, ChartStrategies(), LegendStrategies(registry), clock);
-        return new TimelineContext(vm, new FeedbackSensorIngest(registry));
+        return new TimelineContext(vm, new FeedbackSensorIngest(registry), registry);
     }
 
     public static WorkspaceViewModel Build(ISettingsStore settings, IClock clock) => BuildContext(settings, clock).Vm;

@@ -50,7 +50,7 @@ public partial class App : Application
                 picker.ExportLogAsync,
                 () => new SettingsWindow { DataContext = workspace }.ShowDialog(window));
 
-            api = new AvaloniaSnifferApi(workspace, container.Resolve<IClock>(), new SensorSummaryCalculator());
+            api = new AvaloniaSnifferApi(workspace, workspace.TimelineClock, new SensorSummaryCalculator());
             window.DataContext = workspace;
 
             desktop.ShutdownRequested += async (_, _) => await mcpController.StopAsync();

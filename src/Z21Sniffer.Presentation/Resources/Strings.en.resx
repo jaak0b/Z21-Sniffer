@@ -67,6 +67,8 @@
   <data name="Clear" xml:space="preserve"><value>Clear</value></data>
   <data name="Pause" xml:space="preserve"><value>Pause</value></data>
   <data name="Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="StartRecording" xml:space="preserve"><value>Start recording</value></data>
+  <data name="StopRecording" xml:space="preserve"><value>Stop recording</value></data>
   <data name="SaveSession" xml:space="preserve"><value>Save session</value></data>
   <data name="ImportSession" xml:space="preserve"><value>Import session</value></data>
   <data name="Session" xml:space="preserve"><value>Session</value></data>
@@ -83,6 +85,8 @@
   <data name="German" xml:space="preserve"><value>German</value></data>
   <data name="Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="Connection" xml:space="preserve"><value>Connection</value></data>
+  <data name="Connected" xml:space="preserve"><value>Connected</value></data>
+  <data name="Disconnected" xml:space="preserve"><value>Disconnected</value></data>
   <data name="Appearance" xml:space="preserve"><value>Appearance</value></data>
   <data name="Source" xml:space="preserve"><value>Source</value></data>
   <data name="Enabled" xml:space="preserve"><value>Enabled</value></data>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Presentation.Localization;
@@ -16,6 +17,8 @@ public sealed class ConnectionIntervalChartDrawingStrategy : IIntervalChartDrawi
 
         if (!context.ShowContent) return;
 
-        surface.Text(LocalizationService.Instance["Connection"], rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.ConnectionText));
+        var state = LocalizationService.Instance[connection.Connected ? "Connected" : "Disconnected"];
+        var seconds = context.FullDuration.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
+        surface.Text($"{state} · {seconds} s", rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.ConnectionText));
     }
 }

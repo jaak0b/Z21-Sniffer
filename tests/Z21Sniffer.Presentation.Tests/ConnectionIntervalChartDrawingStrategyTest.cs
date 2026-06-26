@@ -52,11 +52,39 @@ public class ConnectionIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_WithContent_DrawsLocalizedConnectionLabel()
+    public void Draw_WithContent_Connected_ShowsConnectedStateAndDuration()
     {
         Draw(connected: true, new BarContentContext(ShowContent: true, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3)));
 
+        var text = _surface.Texts.Single();
+        Assert.That(text.Text, Is.EqualTo($"{LocalizationService.Instance["Connected"]} · 3 s"));
+        Assert.That(text.Ink.Key, Is.EqualTo(TimelineInkKeys.ConnectionText));
+        Assert.That(text.X, Is.EqualTo(Rect.X + 5));
+        Assert.That(text.Y, Is.EqualTo(Rect.Y + Rect.H / 2));
+    }
+
+    [Test]
+    public void Draw_WithContent_RoundsDurationToThreeDecimals()
+    {
+        Draw(connected: true, new BarContentContext(ShowContent: true, Highlighted: false, FullDuration: TimeSpan.FromSeconds(1.23456)));
+
+        Assert.That(_surface.Texts.Single().Text, Is.EqualTo($"{LocalizationService.Instance["Connected"]} · 1.235 s"));
+    }
+
+    [Test]
+    public void Draw_WithContent_Disconnected_ShowsDisconnectedStateAndDuration()
+    {
+        Draw(connected: false, new BarContentContext(ShowContent: true, Highlighted: false, FullDuration: TimeSpan.FromSeconds(12.5)));
+
         Assert.That(_surface.Texts, Has.Exactly(1).Matches<RecordingTimelineSurface.TextOp>(
-            t => t.Text == LocalizationService.Instance["Connection"] && t.Ink.Key == TimelineInkKeys.ConnectionText));
+            t => t.Text == $"{LocalizationService.Instance["Disconnected"]} · 12.5 s" && t.Ink.Key == TimelineInkKeys.ConnectionText));
+    }
+
+    [Test]
+    public void Draw_WithoutContent_DrawsNoText()
+    {
+        Draw(connected: true, new BarContentContext(ShowContent: false, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3)));
+
+        Assert.That(_surface.Texts, Is.Empty);
     }
 }

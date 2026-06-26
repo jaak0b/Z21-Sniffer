@@ -14,7 +14,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly ISessionStore _sessionStore;
     private readonly ILogTextStore _logTextStore;
     private readonly FeedbackSensorIngest _ingest;
+    private readonly IIntervalSourceRegistry _registry;
     private readonly IClock _clock;
+    private readonly RecordingClock _recordingClock;
     private readonly Action<Action> _post;
     private readonly Func<Task<string?>> _chooseSaveJsonPath;
     private readonly Func<Task<string?>> _chooseOpenJsonPath;
@@ -50,7 +52,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _sessionStore = sessionStore;
         _logTextStore = logTextStore;
         _ingest = ingest;
+        _registry = registry;
         _clock = clock;
+        _recordingClock = new RecordingClock(clock);
         _post = post;
         _chooseSaveJsonPath = chooseSaveJsonPath;
         _chooseOpenJsonPath = chooseOpenJsonPath;
@@ -62,12 +66,13 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _selectedLanguage = loaded.Language == GermanCode ? AppLanguage.German : AppLanguage.English;
 
         Connection = new ConnectionViewModel(factory, settings);
-        Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, clock);
+        Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, _recordingClock);
+        Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected);
         Log = new TrafficLogViewModel(Localization, clock);
         Mcp = new McpServerViewModel(mcpController, loaded.McpPort);
         Theme = new ThemeViewModel(themeController, loaded.DarkTheme);
 
-        _ingest.EdgeDetected += (_, e) => Log.AppendSensorEdge(e.Label, e.Sensor, e.Occupied, e.At);
+        _ingest.EdgeDetected += (_, e) => Log.AppendSensorEdge(e.Label, e.Sensor, e.Occupied, _clock.Now);
         Connection.ConnectionActivated += Wire;
         Theme.Changed += (_, _) =>
             _settings.Save(_settings.Load() with { DarkTheme = Theme.IsDark });
@@ -86,6 +91,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
     public TimelineViewModel Timeline { get; }
 
+    public IClock TimelineClock => _recordingClock;
+
+    public RecordingViewModel Recording { get; }
+
     public TrafficLogViewModel Log { get; }
 
     public McpServerViewModel Mcp { get; }
@@ -96,11 +105,16 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         if (!_wired.Add(connection)) return;
 
-        connection.FeedbackReceived += (_, states) => _post(() => _ingest.Apply(states, _clock.Now));
+        connection.FeedbackReceived += (_, states) => _post(() =>
+        {
+            if (Recording.ShouldRecordFeedback) _ingest.Apply(states, _recordingClock.Now);
+        });
         connection.ConnectionChanged += (_, connected) => _post(() =>
         {
             Connection.IsConnected = connected;
             Log.AppendConnection(connected, Connection.IsSimulated);
+            if (Recording.IsRecording)
+                _registry.GetOrCreate<ConnectionSource>("connection").Set(connected, _recordingClock.Now);
         });
         connection.TrackPowerChanged += (_, on) => _post(() =>
         {

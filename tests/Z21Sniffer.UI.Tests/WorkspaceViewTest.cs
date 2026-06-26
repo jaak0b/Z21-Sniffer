@@ -85,6 +85,27 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void TimelineControl_WithConnectionLaneAndStoppedIntervals_RendersWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        timeline.Ingest.Apply([new SensorState(new SensorKey(1, 1), Occupied: true)], clock.Now);
+        var connection = timeline.Registry.GetOrCreate<ConnectionSource>("connection");
+        connection.Set(connected: true, clock.Now);
+        var stoppedAt = clock.Now.AddSeconds(5);
+        foreach (var source in timeline.Registry.Sources)
+            source.CloseOpenIntervals(stoppedAt, IntervalEndReason.Stopped);
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.Sources.OfType<ConnectionSource>(), Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
     public void TimelineControl_EmptyArea_IsHitTestVisibleForPanAndZoom()
     {
         var clock = new StubClock();
