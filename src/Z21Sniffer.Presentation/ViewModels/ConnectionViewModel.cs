@@ -21,7 +21,7 @@ public sealed partial class ConnectionViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSimulated))]
     [NotifyPropertyChangedFor(nameof(ShowZ21Settings))]
-    private ConnectionSource _source = ConnectionSource.Z21;
+    private ConnectionSourceType _source = ConnectionSourceType.Z21;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ToggleLabel))]
@@ -44,9 +44,9 @@ public sealed partial class ConnectionViewModel : ObservableObject
 
     public event Action<ICommandStationConnection>? ConnectionActivated;
 
-    public bool IsSimulated => Source == ConnectionSource.Simulation;
+    public bool IsSimulated => Source == ConnectionSourceType.Simulation;
 
-    public bool ShowZ21Settings => Source == ConnectionSource.Z21;
+    public bool ShowZ21Settings => Source == ConnectionSourceType.Z21;
 
     public string ToggleLabel => LocalizationService.Instance[IsConnected ? "Disconnect" : "Connect"];
 

@@ -17,33 +17,19 @@ public class AvaloniaSnifferApiTest
         public DateTimeOffset Now { get; set; } = DateTimeOffset.UnixEpoch;
     }
 
-    private static WorkspaceViewModel BuildWorkspace()
+    private static WorkspaceContext BuildWorkspace()
     {
         var settings = A.Fake<ISettingsStore>();
-        A.CallTo(() => settings.Load()).Returns(new AppSettings("192.168.0.111", 21105, "en", []));
-        return new WorkspaceViewModel(
-            A.Fake<ICommandStationConnectionFactory>(),
-            settings,
-            A.Fake<ISessionStore>(),
-            new StubClock(),
-            new SensorLabeler(),
-            A.Fake<IMcpServerController>(),
-            A.Fake<IThemeController>(),
-            A.Fake<ILogTextStore>(),
-            post: action => action(),
-            chooseSaveJsonPath: () => Task.FromResult<string?>(null),
-            chooseOpenJsonPath: () => Task.FromResult<string?>(null),
-            chooseExportLogPath: () => Task.FromResult<string?>(null),
-            confirmRemove: _ => Task.FromResult(false),
-            openSettings: () => Task.CompletedTask);
+        A.CallTo(() => settings.Load()).Returns(new AppSettings("192.168.0.111", 21105, "en"));
+        return WorkspaceFactory.BuildContext(settings, new StubClock());
     }
 
     [AvaloniaTest]
-    public async Task ListSensorsAsync_ReflectsRowsAndOccupancy()
+    public async Task ListSensorsAsync_ReflectsSourcesAndOccupancy()
     {
-        var vm = BuildWorkspace();
-        vm.Timeline.OnFeedback([new SensorState(new SensorKey(1, 1), Occupied: true)]);
-        var api = new AvaloniaSnifferApi(vm, new StubClock(), new SensorSummaryCalculator());
+        var workspace = BuildWorkspace();
+        workspace.Ingest.Apply([new SensorState(new SensorKey(1, 1), Occupied: true)], DateTimeOffset.UnixEpoch);
+        var api = new AvaloniaSnifferApi(workspace.Vm, new StubClock(), new SensorSummaryCalculator());
 
         var sensors = await api.ListSensorsAsync();
 
@@ -55,9 +41,9 @@ public class AvaloniaSnifferApiTest
     [AvaloniaTest]
     public async Task GetSummariesAsync_CountsRecordedIntervals()
     {
-        var vm = BuildWorkspace();
-        vm.Timeline.OnFeedback([new SensorState(new SensorKey(2, 3), Occupied: true)]);
-        var api = new AvaloniaSnifferApi(vm, new StubClock { Now = DateTimeOffset.UnixEpoch.AddSeconds(5) },
+        var workspace = BuildWorkspace();
+        workspace.Ingest.Apply([new SensorState(new SensorKey(2, 3), Occupied: true)], DateTimeOffset.UnixEpoch);
+        var api = new AvaloniaSnifferApi(workspace.Vm, new StubClock { Now = DateTimeOffset.UnixEpoch.AddSeconds(5) },
             new SensorSummaryCalculator());
 
         var summaries = await api.GetSummariesAsync();

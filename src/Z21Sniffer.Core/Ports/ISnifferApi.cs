@@ -8,7 +8,7 @@ public interface ISnifferApi
 
     Task<IReadOnlyList<SensorInfo>> ListSensorsAsync();
 
-    Task<IReadOnlyList<SensorInterval>> GetIntervalsAsync(SensorKey? sensor, double? sinceSeconds);
+    Task<IReadOnlyList<FeedbackSensorInterval>> GetIntervalsAsync(SensorKey? sensor, double? sinceSeconds);
 
     Task<IReadOnlyList<SensorSummary>> GetSummariesAsync();
 

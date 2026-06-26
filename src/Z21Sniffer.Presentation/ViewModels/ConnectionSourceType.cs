@@ -1,6 +1,6 @@
 namespace Z21Sniffer.Presentation.ViewModels;
 
-public enum ConnectionSource
+public enum ConnectionSourceType
 {
     Z21,
     Simulation,

@@ -32,6 +32,8 @@ public sealed class InfrastructureModule : Module
         builder.RegisterType<FileLogTextStore>().As<ILogTextStore>().SingleInstance();
         builder.Register(c => new JsonSettingsStore(c.Resolve<IAppPaths>().SettingsFile))
             .As<ISettingsStore>().SingleInstance();
+        builder.Register(c => new JsonKeyValueStore(c.Resolve<IAppPaths>().KeyValueFile))
+            .As<IKeyValueStore>().SingleInstance();
 
         builder.RegisterType<Z21CommandStationConnection>().AsSelf().SingleInstance();
         builder.RegisterType<SimulatedCommandStationConnection>().AsSelf().SingleInstance();

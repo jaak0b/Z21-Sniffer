@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -12,13 +11,24 @@ namespace Z21Sniffer.UI.Desktop.Controls;
 public sealed class FeedbackTimelineControl : Control
 {
     public const double RowHeight = 26;
+    private const double MinContentWidth = 52;
 
     private readonly TimelineLayout _layout = new();
-    private readonly SensorBarText _barText = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
-    private readonly Typeface _typeface = Typeface.Default;
-    private readonly List<(Rect Rect, string Text)> _hitBars = new();
 
+    private readonly IReadOnlyDictionary<string, string> _inkResources = new Dictionary<string, string>
+    {
+        [TimelineInkKeys.Bar] = "PrimaryBrush",
+        [TimelineInkKeys.HighlightedBar] = "WarningBrush",
+        [TimelineInkKeys.HighlightOutline] = "DangerBrush",
+        [TimelineInkKeys.BarText] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.ConnectionText] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.Connected] = "PrimaryBrush",
+        [TimelineInkKeys.Disconnected] = "DangerBrush",
+        [TimelineInkKeys.StoppedFlag] = "DangerBrush",
+    };
+
+    private List<(Rect Rect, string Text)> _hitAreas = new();
     private TimelineViewModel? _viewModel;
     private double _verticalOffset;
     private bool _dragging;
@@ -89,7 +99,7 @@ public sealed class FeedbackTimelineControl : Control
         }
 
         var absolute = new Point(point.X, point.Y + _verticalOffset);
-        var hit = _hitBars.FirstOrDefault(b => b.Rect.Contains(absolute));
+        var hit = _hitAreas.FirstOrDefault(area => area.Rect.Contains(absolute));
         ToolTip.SetTip(this, hit.Text);
     }
 
@@ -103,53 +113,38 @@ public sealed class FeedbackTimelineControl : Control
     {
         base.Render(context);
         context.FillRectangle(Brushes.Transparent, new Rect(Bounds.Size));
-        _hitBars.Clear();
         if (_viewModel is null) return;
 
         _viewModel.Tick();
-        var rowKeys = _viewModel.Rows.Select(r => r.Sensor).ToList();
-        var viewport = new TimelineViewport(_viewModel.ViewportStart, _viewModel.ViewportEnd, Bounds.Width, Bounds.Height, RowHeight);
-        var now = _viewModel.ViewportEnd;
+        var start = _viewModel.ViewportStart;
+        var end = _viewModel.ViewportEnd;
 
-        var gridStep = TimeSpan.FromSeconds(Math.Max(1, (viewport.End - viewport.Start).TotalSeconds / 6));
+        var gridStep = TimeSpan.FromSeconds(Math.Max(1, (end - start).TotalSeconds / 6));
         var gridPen = new Pen(Brush("BorderBrush", Color.FromArgb(0x33, 0x88, 0x88, 0x88)));
-        foreach (var tick in _layout.Ticks(viewport, gridStep))
+        var axisViewport = new TimelineViewport(start, end, Bounds.Width, Bounds.Height, RowHeight);
+        foreach (var tick in _layout.Ticks(axisViewport, gridStep))
         {
             context.DrawLine(gridPen, new Point(tick.X, 0), new Point(tick.X, Bounds.Height));
         }
 
-        var barBrush = Brush("PrimaryBrush", Color.FromRgb(0x2E, 0x9E, 0x5B));
-        var warnBrush = Brush("WarningBrush", Color.FromRgb(0xE0, 0xA4, 0x58));
-        var textBrush = Brush("PrimaryForegroundBrush", Colors.White);
-        var outlinePen = new Pen(Brush("DangerBrush", Colors.OrangeRed), 2);
-
-        var highlight = _viewModel.HighlightUnderSeconds;
-        foreach (var bar in _layout.Bars(viewport, rowKeys, _viewModel.Intervals, now, highlight, _verticalOffset, Bounds.Height))
-        {
-            var width = Math.Max(1, bar.Width);
-            var rect = new Rect(bar.X, bar.Y - _verticalOffset + 3, width, bar.Height - 6);
-            context.DrawRectangle(bar.Highlighted ? warnBrush : barBrush, bar.Highlighted ? outlinePen : null, rect, 3, 3);
-
-            var label = _viewModel.Rows.FirstOrDefault(r => r.Sensor == bar.Sensor)?.Label ?? string.Empty;
-            var text = _barText.Describe(label, bar.Sensor, TimeSpan.FromSeconds(bar.FullDurationSeconds));
-            _hitBars.Add((new Rect(bar.X, bar.Y + 3, width, bar.Height - 6), text));
-
-            DrawInBarLabel(context, rect, text, textBrush);
-        }
+        var surface = new DrawingContextSurface(context, Brush, _verticalOffset);
+        _viewModel.Renderer.Render(
+            surface,
+            _viewModel.Sources,
+            new ChartViewport(start, end, Bounds.Width),
+            end,
+            _viewModel.HighlightUnderSeconds,
+            _verticalOffset,
+            Bounds.Height,
+            MinContentWidth);
+        _hitAreas = surface.HitAreas;
     }
 
-    private void DrawInBarLabel(DrawingContext context, Rect rect, string text, IBrush brush)
-    {
-        var formatted = new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, _typeface, 11, brush);
-        if (formatted.Width + 10 > rect.Width) return;
-        using (context.PushClip(rect))
-        {
-            context.DrawText(formatted, new Point(rect.X + 5, rect.Y + (rect.Height - formatted.Height) / 2));
-        }
-    }
+    private IBrush Brush(string inkKey, Color fallback) =>
+        Resolve(_inkResources.TryGetValue(inkKey, out var resource) ? resource : inkKey, fallback);
 
-    private IBrush Brush(string key, Color fallback) =>
-        this.TryFindResource(key, ActualThemeVariant, out var value) && value is IBrush brush
+    private IBrush Resolve(string resourceKey, Color fallback) =>
+        this.TryFindResource(resourceKey, ActualThemeVariant, out var value) && value is IBrush brush
             ? brush
             : new SolidColorBrush(fallback);
 }

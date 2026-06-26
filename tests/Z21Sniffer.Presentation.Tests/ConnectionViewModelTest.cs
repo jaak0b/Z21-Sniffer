@@ -21,7 +21,7 @@ public class ConnectionViewModelTest
         _factory = A.Fake<ICommandStationConnectionFactory>();
         _settings = A.Fake<ISettingsStore>();
         _connection = A.Fake<ICommandStationConnection>();
-        A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en", []));
+        A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
         A.CallTo(() => _factory.Create(A<bool>._)).Returns(_connection);
         _vm = new ConnectionViewModel(_factory, _settings);
     }
@@ -39,7 +39,7 @@ public class ConnectionViewModelTest
     [Test]
     public void Source_DefaultsToZ21()
     {
-        Assert.That(_vm.Source, Is.EqualTo(ConnectionSource.Z21));
+        Assert.That(_vm.Source, Is.EqualTo(ConnectionSourceType.Z21));
         Assert.That(_vm.IsSimulated, Is.False);
         Assert.That(_vm.ShowZ21Settings, Is.True);
     }
@@ -47,7 +47,7 @@ public class ConnectionViewModelTest
     [Test]
     public void Source_Simulation_SetsIsSimulatedAndHidesZ21Settings()
     {
-        _vm.Source = ConnectionSource.Simulation;
+        _vm.Source = ConnectionSourceType.Simulation;
 
         Assert.That(_vm.IsSimulated, Is.True);
         Assert.That(_vm.ShowZ21Settings, Is.False);
@@ -56,8 +56,8 @@ public class ConnectionViewModelTest
     [Test]
     public void Source_Z21_ClearsIsSimulatedAndShowsZ21Settings()
     {
-        _vm.Source = ConnectionSource.Simulation;
-        _vm.Source = ConnectionSource.Z21;
+        _vm.Source = ConnectionSourceType.Simulation;
+        _vm.Source = ConnectionSourceType.Z21;
 
         Assert.That(_vm.IsSimulated, Is.False);
         Assert.That(_vm.ShowZ21Settings, Is.True);
@@ -66,7 +66,7 @@ public class ConnectionViewModelTest
     [Test]
     public async Task ToggleConnection_WhenDisconnectedAndSimulated_CreatesSimulatedConnectionAndConnects()
     {
-        _vm.Source = ConnectionSource.Simulation;
+        _vm.Source = ConnectionSourceType.Simulation;
         _vm.Host = "10.0.0.9";
         _vm.Port = 21106;
 

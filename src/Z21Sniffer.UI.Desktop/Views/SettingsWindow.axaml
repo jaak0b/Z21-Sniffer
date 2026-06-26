@@ -1,6 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Z21Sniffer.Presentation.ViewModels;assembly=Z21Sniffer.Presentation"
+        xmlns:loc="clr-namespace:Z21Sniffer.Presentation.Localization;assembly=Z21Sniffer.Presentation"
+        xmlns:conv="clr-namespace:Z21Sniffer.UI.Desktop.Converters"
         x:Class="Z21Sniffer.UI.Desktop.Views.SettingsWindow"
         x:DataType="vm:WorkspaceViewModel"
         Title="{Binding Localization[Settings]}"
@@ -8,6 +10,10 @@
         CanResize="False" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource BackgroundBrush}">
+
+  <Window.Resources>
+    <conv:EnumDisplayConverter x:Key="EnumDisplay" />
+  </Window.Resources>
 
   <StackPanel Margin="18" Spacing="16">
 
@@ -29,11 +35,42 @@
     </Grid>
 
     <TextBlock Text="{Binding Localization[Appearance]}" FontWeight="SemiBold" />
-    <StackPanel Orientation="Horizontal" Spacing="10" Margin="8,0,0,0">
-      <CheckBox Content="{Binding Localization[DarkTheme]}" IsChecked="{Binding Theme.IsDark}" VerticalAlignment="Center" />
-      <Button Content="EN" Command="{Binding SetLanguageCommand}" CommandParameter="en" />
-      <Button Content="DE" Command="{Binding SetLanguageCommand}" CommandParameter="de" />
-    </StackPanel>
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="8,0,0,0">
+      <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Localization[Theme]}" VerticalAlignment="Center" Margin="0,0,10,6" />
+      <ComboBox Grid.Row="0" Grid.Column="1" x:Name="ThemeCombo" HorizontalAlignment="Stretch" Margin="0,0,0,6"
+                ItemsSource="{Binding Theme.Themes}"
+                SelectedItem="{Binding Theme.SelectedTheme, Mode=TwoWay}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:AppTheme">
+            <TextBlock>
+              <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource EnumDisplay}">
+                  <Binding />
+                  <Binding Source="{x:Static loc:LocalizationService.Instance}" Path="CurrentCode" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Localization[Language]}" VerticalAlignment="Center" Margin="0,0,10,0" />
+      <ComboBox Grid.Row="1" Grid.Column="1" x:Name="LanguageCombo" HorizontalAlignment="Stretch"
+                ItemsSource="{Binding Languages}"
+                SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:AppLanguage">
+            <TextBlock>
+              <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource EnumDisplay}">
+                  <Binding />
+                  <Binding Source="{x:Static loc:LocalizationService.Instance}" Path="CurrentCode" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </Grid>
 
     <TextBlock Text="{Binding Localization[McpServer]}" FontWeight="SemiBold" />
     <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">

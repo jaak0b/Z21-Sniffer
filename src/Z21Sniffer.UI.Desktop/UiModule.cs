@@ -1,6 +1,9 @@
 using Autofac;
+using Z21Sniffer.Core.Model;
+using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Infrastructure;
+using Z21Sniffer.Presentation.Timeline;
 
 namespace Z21Sniffer.UI.Desktop;
 
@@ -13,6 +16,14 @@ public sealed class UiModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterModule(new InfrastructureModule(_dataDirectory));
-        builder.RegisterType<SensorLabeler>().AsSelf().SingleInstance();
+
+        builder.RegisterType<IntervalSourceRegistry>().As<IIntervalSourceRegistry>().SingleInstance();
+        builder.RegisterType<FeedbackSensorIngest>().AsSelf().SingleInstance();
+        builder.RegisterType<RemovalConfirmation>().As<IRemovalConfirmation>().SingleInstance();
+
+        builder.RegisterType<SensorIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(FeedbackSensorInterval));
+        builder.RegisterType<ConnectionIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(ConnectionInterval));
+        builder.RegisterType<SensorIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(FeedbackSensorInterval));
+        builder.RegisterType<ConnectionIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(ConnectionInterval));
     }
 }

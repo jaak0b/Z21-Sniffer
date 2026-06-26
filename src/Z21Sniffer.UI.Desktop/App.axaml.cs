@@ -1,4 +1,5 @@
 using Autofac;
+using Autofac.Features.Indexed;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -6,7 +7,7 @@ using Avalonia.Threading;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Mcp;
-using Z21Sniffer.Presentation.Localization;
+using Z21Sniffer.Presentation.Timeline;
 using Z21Sniffer.Presentation.ViewModels;
 using Z21Sniffer.UI.Desktop.Views;
 
@@ -36,7 +37,10 @@ public partial class App : Application
                 container.Resolve<ISettingsStore>(),
                 container.Resolve<ISessionStore>(),
                 container.Resolve<IClock>(),
-                container.Resolve<SensorLabeler>(),
+                container.Resolve<IIntervalSourceRegistry>(),
+                container.Resolve<FeedbackSensorIngest>(),
+                container.Resolve<IIndex<Type, IIntervalChartDrawingStrategy>>(),
+                container.Resolve<IIndex<Type, IIntervalLegendDrawingStrategy>>(),
                 mcpController,
                 new AvaloniaThemeController(),
                 container.Resolve<ILogTextStore>(),
@@ -44,7 +48,6 @@ public partial class App : Application
                 picker.SaveJsonAsync,
                 picker.OpenJsonAsync,
                 picker.ExportLogAsync,
-                row => ConfirmRemoveAsync(window, row),
                 () => new SettingsWindow { DataContext = workspace }.ShowDialog(window));
 
             api = new AvaloniaSnifferApi(workspace, container.Resolve<IClock>(), new SensorSummaryCalculator());
@@ -55,13 +58,6 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private Task<bool> ConfirmRemoveAsync(MainWindow owner, SensorRowViewModel row)
-    {
-        var loc = LocalizationService.Instance;
-        var message = $"{loc["ConfirmRemove"]} {row.Label}?";
-        return new ConfirmDialog(message, loc["Yes"], loc["No"]).ShowDialog<bool>(owner);
     }
 
     private string ResolveDataDirectory() =>

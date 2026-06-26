@@ -22,25 +22,11 @@ public class WorkspaceViewTest
         public DateTimeOffset Now { get; set; } = DateTimeOffset.UnixEpoch;
     }
 
-    private static WorkspaceViewModel BuildWorkspace()
+    private static WorkspaceContext BuildWorkspace()
     {
         var settings = A.Fake<ISettingsStore>();
-        A.CallTo(() => settings.Load()).Returns(new AppSettings("192.168.0.111", 21105, "en", []));
-        return new WorkspaceViewModel(
-            A.Fake<ICommandStationConnectionFactory>(),
-            settings,
-            A.Fake<ISessionStore>(),
-            new StubClock(),
-            new SensorLabeler(),
-            A.Fake<IMcpServerController>(),
-            A.Fake<IThemeController>(),
-            A.Fake<ILogTextStore>(),
-            post: action => action(),
-            chooseSaveJsonPath: () => Task.FromResult<string?>(null),
-            chooseOpenJsonPath: () => Task.FromResult<string?>(null),
-            chooseExportLogPath: () => Task.FromResult<string?>(null),
-            confirmRemove: _ => Task.FromResult(false),
-            openSettings: () => Task.CompletedTask);
+        A.CallTo(() => settings.Load()).Returns(new AppSettings("192.168.0.111", 21105, "en"));
+        return WorkspaceFactory.BuildContext(settings, new StubClock());
     }
 
     [AvaloniaTest]
@@ -48,7 +34,7 @@ public class WorkspaceViewTest
     {
         var window = new Window
         {
-            Content = new WorkspaceView { DataContext = BuildWorkspace() },
+            Content = new WorkspaceView { DataContext = BuildWorkspace().Vm },
             Width = 1000,
             Height = 600
         };
@@ -66,30 +52,30 @@ public class WorkspaceViewTest
         var workspace = BuildWorkspace();
         var window = new Window
         {
-            Content = new WorkspaceView { DataContext = workspace },
+            Content = new WorkspaceView { DataContext = workspace.Vm },
             Width = 1000,
             Height = 600
         };
         window.Show();
         Dispatcher.UIThread.RunJobs();
 
-        workspace.Timeline.OnFeedback([new SensorState(new SensorKey(1, 1), Occupied: true)]);
+        workspace.Ingest.Apply([new SensorState(new SensorKey(1, 1), Occupied: true)], DateTimeOffset.UnixEpoch);
         var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
         tabs.SelectedIndex = 1;
         Dispatcher.UIThread.RunJobs();
 
         var logList = window.GetVisualDescendants().OfType<ListBox>().FirstOrDefault(l => l.Name == "LogList");
         Assert.That(logList, Is.Not.Null);
-        Assert.That(workspace.Log.Filtered, Is.Not.Empty);
+        Assert.That(workspace.Vm.Log.Filtered, Is.Not.Empty);
     }
 
     [AvaloniaTest]
     public void TimelineControl_WithFeedback_RendersWithoutThrowing()
     {
         var clock = new StubClock();
-        var vm = new TimelineViewModel(new FeedbackRecorder(clock), new SensorLabeler(), clock, [], []);
-        vm.OnFeedback([new SensorState(new SensorKey(1, 1), Occupied: true)]);
-        var control = new FeedbackTimelineControl { DataContext = vm };
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        timeline.Ingest.Apply([new SensorState(new SensorKey(1, 1), Occupied: true)], clock.Now);
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
         var window = new Window { Content = control, Width = 800, Height = 300 };
 
         window.Show();
@@ -102,7 +88,7 @@ public class WorkspaceViewTest
     public void TimelineControl_EmptyArea_IsHitTestVisibleForPanAndZoom()
     {
         var clock = new StubClock();
-        var vm = new TimelineViewModel(new FeedbackRecorder(clock), new SensorLabeler(), clock, [], []);
+        var vm = WorkspaceFactory.BuildTimeline(clock);
         var control = new FeedbackTimelineControl { DataContext = vm };
         var window = new Window { Content = control, Width = 800, Height = 300 };
 

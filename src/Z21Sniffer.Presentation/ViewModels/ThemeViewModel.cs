@@ -20,9 +20,18 @@ public sealed partial class ThemeViewModel : ObservableObject
 
     public event EventHandler? Changed;
 
+    public IReadOnlyList<AppTheme> Themes { get; } = [AppTheme.Light, AppTheme.Dark];
+
+    public AppTheme SelectedTheme
+    {
+        get => IsDark ? AppTheme.Dark : AppTheme.Light;
+        set => IsDark = value == AppTheme.Dark;
+    }
+
     partial void OnIsDarkChanged(bool value)
     {
         _controller.Apply(value);
+        OnPropertyChanged(nameof(SelectedTheme));
         Changed?.Invoke(this, EventArgs.Empty);
     }
 

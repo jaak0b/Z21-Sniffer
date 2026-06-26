@@ -4,5 +4,6 @@
              RequestedThemeVariant="Default">
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Z21Sniffer.UI.Desktop/Themes/Skins/Skin.Classic.axaml"/>
   </Application.Styles>
 </Application>

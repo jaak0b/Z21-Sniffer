@@ -6,6 +6,8 @@ public interface IAppPaths
 
     string SettingsFile { get; }
 
+    string KeyValueFile { get; }
+
     string LogsDirectory { get; }
 
     string SessionsDirectory { get; }

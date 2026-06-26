@@ -18,4 +18,6 @@ Open **Settings**, and under **Connection** set the **Source** to **Simulation**
 
 ## Other settings
 
-The Settings window also holds the things you set once and forget: the **dark/light theme**, the **language** (English or German), and the **MCP server** toggle and port covered in *Reading the feedback with Claude*.
+The Settings window also holds the things you set once and forget. Under **Appearance** there are two dropdowns: one picks the **theme** (Light or Dark) and the other the **language** (English or German). Below that sit the **MCP server** toggle and port covered in *Reading the feedback with Claude*.
+
+The whole app wears a compact "Classic" look — tight, lightly-rounded controls, flat cards, and tabs that mark the active page with a thin accent underline. It's designed to stay out of the way so the timeline and the traffic log are what your eye lands on. The dark/light toggle simply repaints that same look, so everything stays consistent whichever theme you run.

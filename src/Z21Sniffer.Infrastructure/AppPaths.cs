@@ -10,6 +10,8 @@ public sealed class AppPaths : IAppPaths
 
     public string SettingsFile => Path.Combine(DataDirectory, "settings.json");
 
+    public string KeyValueFile => Path.Combine(DataDirectory, "kv.json");
+
     public string LogsDirectory => Path.Combine(DataDirectory, "logs");
 
     public string SessionsDirectory => Path.Combine(DataDirectory, "sessions");

@@ -4,24 +4,19 @@ namespace Z21Sniffer.Core.Recording;
 
 public sealed class SensorSummaryCalculator
 {
-    private readonly SensorLabeler _labeler = new();
-
-    public IReadOnlyList<SensorSummary> Summarize(
-        IReadOnlyList<SensorInterval> intervals,
-        IReadOnlyList<SensorAlias> aliases,
-        DateTimeOffset now)
+    public IReadOnlyList<SensorSummary> Summarize(IReadOnlyList<FeedbackSensorSource> sources, DateTimeOffset now)
     {
-        return intervals
-            .GroupBy(interval => interval.Sensor)
-            .Select(group =>
+        return sources
+            .Where(source => source.Intervals.Count > 0)
+            .Select(source =>
             {
-                var durations = group
+                var durations = source.Intervals
                     .Select(interval => ((interval.End ?? now) - interval.Start).TotalSeconds)
                     .ToList();
                 return new SensorSummary(
-                    group.Key.Module,
-                    group.Key.Contact,
-                    _labeler.Label(group.Key, aliases),
+                    source.Sensor.Module,
+                    source.Sensor.Contact,
+                    source.Label,
                     durations.Count,
                     durations.Sum(),
                     durations.Min(),

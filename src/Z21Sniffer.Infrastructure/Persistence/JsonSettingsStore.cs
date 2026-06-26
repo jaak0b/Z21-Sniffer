@@ -26,5 +26,5 @@ public sealed class JsonSettingsStore : ISettingsStore
     }
 
     private AppSettings Defaults() =>
-        new(UdpTransportOptions.DefaultAddress, UdpTransportOptions.DefaultPort, "en", [], SensorOrder: []);
+        new(UdpTransportOptions.DefaultAddress, UdpTransportOptions.DefaultPort, "en");
 }

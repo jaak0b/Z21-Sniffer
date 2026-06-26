@@ -76,7 +76,11 @@
   <data name="Language" xml:space="preserve"><value>Sprache</value></data>
   <data name="McpServer" xml:space="preserve"><value>MCP-Server</value></data>
   <data name="Live" xml:space="preserve"><value>Live</value></data>
-  <data name="DarkTheme" xml:space="preserve"><value>Dunkel</value></data>
+  <data name="Dark" xml:space="preserve"><value>Dunkel</value></data>
+  <data name="Light" xml:space="preserve"><value>Hell</value></data>
+  <data name="Theme" xml:space="preserve"><value>Design</value></data>
+  <data name="English" xml:space="preserve"><value>Englisch</value></data>
+  <data name="German" xml:space="preserve"><value>Deutsch</value></data>
   <data name="Settings" xml:space="preserve"><value>Einstellungen</value></data>
   <data name="Connection" xml:space="preserve"><value>Verbindung</value></data>
   <data name="Appearance" xml:space="preserve"><value>Darstellung</value></data>

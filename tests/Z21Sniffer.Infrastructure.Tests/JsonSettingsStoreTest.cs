@@ -19,7 +19,6 @@ public class JsonSettingsStoreTest : TempDirectoryTest
         Assert.That(settings.Host, Is.EqualTo("192.168.0.111"));
         Assert.That(settings.Port, Is.EqualTo(21105));
         Assert.That(settings.Language, Is.EqualTo("en"));
-        Assert.That(settings.Aliases, Is.Empty);
     }
 
     [Test]
@@ -27,7 +26,7 @@ public class JsonSettingsStoreTest : TempDirectoryTest
     {
         var path = Path.Combine(TempDir, "nested", "deep", "settings.json");
 
-        new JsonSettingsStore(path).Save(new AppSettings("h", 1, "en", []));
+        new JsonSettingsStore(path).Save(new AppSettings("h", 1, "en"));
 
         Assert.That(File.Exists(path), Is.True);
     }
@@ -36,8 +35,7 @@ public class JsonSettingsStoreTest : TempDirectoryTest
     public void Save_ThenLoad_RoundTripsSettings()
     {
         var store = new JsonSettingsStore(SettingsPath);
-        var settings = new AppSettings("10.0.0.42", 21106, "de",
-            [new SensorAlias(new SensorKey(3, 5), "Station track 2")]);
+        var settings = new AppSettings("10.0.0.42", 21106, "de", McpPort: 9000, DarkTheme: true);
 
         store.Save(settings);
         var loaded = new JsonSettingsStore(SettingsPath).Load();
@@ -45,6 +43,7 @@ public class JsonSettingsStoreTest : TempDirectoryTest
         Assert.That(loaded.Host, Is.EqualTo("10.0.0.42"));
         Assert.That(loaded.Port, Is.EqualTo(21106));
         Assert.That(loaded.Language, Is.EqualTo("de"));
-        Assert.That(loaded.Aliases, Is.EqualTo(settings.Aliases));
+        Assert.That(loaded.McpPort, Is.EqualTo(9000));
+        Assert.That(loaded.DarkTheme, Is.True);
     }
 }

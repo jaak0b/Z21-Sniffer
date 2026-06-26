@@ -28,19 +28,15 @@ public sealed class AvaloniaSnifferApi : ISnifferApi
             _vm.Connection.IsSimulated));
 
     public Task<IReadOnlyList<SensorInfo>> ListSensorsAsync() =>
-        OnUi(() =>
-        {
-            var occupied = _vm.Timeline.Intervals.Where(i => i.IsOpen).Select(i => i.Sensor).ToHashSet();
-            return (IReadOnlyList<SensorInfo>)_vm.Timeline.Rows
-                .Select(r => new SensorInfo(r.Sensor.Module, r.Sensor.Contact, r.Label, occupied.Contains(r.Sensor)))
-                .ToList();
-        });
+        OnUi(() => (IReadOnlyList<SensorInfo>)SensorSources()
+            .Select(s => new SensorInfo(s.Sensor.Module, s.Sensor.Contact, s.Label, s.CurrentInterval is not null))
+            .ToList());
 
-    public Task<IReadOnlyList<SensorInterval>> GetIntervalsAsync(SensorKey? sensor, double? sinceSeconds) =>
+    public Task<IReadOnlyList<FeedbackSensorInterval>> GetIntervalsAsync(SensorKey? sensor, double? sinceSeconds) =>
         OnUi(() =>
         {
             var now = _clock.Now;
-            IEnumerable<SensorInterval> query = _vm.Timeline.Intervals;
+            IEnumerable<FeedbackSensorInterval> query = SensorSources().SelectMany(s => s.Intervals);
             if (sensor is { } key) query = query.Where(i => i.Sensor == key);
             if (sinceSeconds is { } seconds)
             {
@@ -48,11 +44,11 @@ public sealed class AvaloniaSnifferApi : ISnifferApi
                 query = query.Where(i => (i.End ?? now) >= cutoff);
             }
 
-            return (IReadOnlyList<SensorInterval>)query.ToList();
+            return (IReadOnlyList<FeedbackSensorInterval>)query.ToList();
         });
 
     public Task<IReadOnlyList<SensorSummary>> GetSummariesAsync() =>
-        OnUi(() => _calculator.Summarize(_vm.Timeline.Intervals.ToList(), _vm.Timeline.Aliases, _clock.Now));
+        OnUi(() => _calculator.Summarize(SensorSources().ToList(), _clock.Now));
 
     public Task<IReadOnlyList<LogLine>> GetRecentEventsAsync(int max) =>
         OnUi(() => _vm.Log.RecentLines(max));
@@ -62,7 +58,7 @@ public sealed class AvaloniaSnifferApi : ISnifferApi
         {
             _vm.Connection.Host = host;
             _vm.Connection.Port = port;
-            _vm.Connection.Source = simulated ? ConnectionSource.Simulation : ConnectionSource.Z21;
+            _vm.Connection.Source = simulated ? ConnectionSourceType.Simulation : ConnectionSourceType.Z21;
             return _vm.Connection.ConnectAsync();
         });
 
@@ -76,11 +72,14 @@ public sealed class AvaloniaSnifferApi : ISnifferApi
 
     public Task RenameSensorAsync(int module, int contact, string name) => OnUi(() =>
     {
-        _vm.Timeline.Rename(new SensorKey(module, contact), name);
+        var sensor = new SensorKey(module, contact);
+        if (SensorSources().FirstOrDefault(s => s.Sensor == sensor) is { } source) source.Label = name;
         return true;
     });
 
     public Task SetTrackPowerAsync(bool on) => OnUiAsync(() => _vm.Connection.SetTrackPowerAsync(on));
+
+    private IEnumerable<FeedbackSensorSource> SensorSources() => _vm.Timeline.Sources.OfType<FeedbackSensorSource>();
 
     private Task<T> OnUi<T>(Func<T> read) => Dispatcher.UIThread.InvokeAsync(read).GetTask();
 

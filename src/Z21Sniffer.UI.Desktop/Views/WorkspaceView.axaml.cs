@@ -25,7 +25,7 @@ public partial class WorkspaceView : UserControl
 
     private Canvas? _ghostLayer;
     private Border? _ghost;
-    private SensorRowViewModel? _dragRow;
+    private LegendRowViewModel? _dragRow;
     private int _dragFrom = -1;
     private DateTime _lastUserScroll = DateTime.MinValue;
     private ScrollViewer? _hookedLegendScroll;
@@ -147,25 +147,12 @@ public partial class WorkspaceView : UserControl
         _ = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(_logFormatter.Format(entries));
     }
 
-    private void OnAliasLostFocus(object? sender, RoutedEventArgs e) => CommitAlias(sender);
-
-    private void OnAliasKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter) CommitAlias(sender);
-    }
-
-    private void CommitAlias(object? sender)
-    {
-        if (sender is Control { DataContext: SensorRowViewModel row })
-            ViewModel?.Timeline.CommitRenameCommand.Execute(row);
-    }
-
     private void OnDragHandlePressed(object? sender, PointerPressedEventArgs e)
     {
-        if (ViewModel is null || sender is not Control { DataContext: SensorRowViewModel row }) return;
+        if (ViewModel is null || sender is not Control { DataContext: LegendRowViewModel row }) return;
 
         _dragRow = row;
-        _dragFrom = ViewModel.Timeline.Rows.IndexOf(row);
+        _dragFrom = ViewModel.Timeline.LegendRows.IndexOf(row);
 
         _ghost = new Border
         {
@@ -174,7 +161,7 @@ public partial class WorkspaceView : UserControl
             BorderThickness = new Thickness(1),
             Opacity = 0.85,
             Padding = new Thickness(8, 4),
-            Child = new TextBlock { Text = row.Label }
+            Child = new TextBlock { Text = "≡" }
         };
         _ghostLayer?.Children.Add(_ghost);
         PositionGhost(e.GetPosition(this));
@@ -199,7 +186,7 @@ public partial class WorkspaceView : UserControl
         if (legend is not null && bars is not null)
         {
             var y = e.GetPosition(legend).Y + bars.VerticalOffset;
-            var target = Math.Clamp((int)(y / RowHeight), 0, ViewModel.Timeline.Rows.Count - 1);
+            var target = Math.Clamp((int)(y / RowHeight), 0, ViewModel.Timeline.LegendRows.Count - 1);
             if (target != _dragFrom && _dragFrom >= 0) ViewModel.Timeline.MoveRow(_dragFrom, target);
         }
 

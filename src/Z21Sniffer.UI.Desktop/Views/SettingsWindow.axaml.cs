@@ -12,7 +12,7 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         var sourceCombo = this.FindControl<ComboBox>("SourceCombo");
         if (sourceCombo is not null)
-            sourceCombo.ItemsSource = new[] { ConnectionSource.Z21, ConnectionSource.Simulation };
+            sourceCombo.ItemsSource = new[] { ConnectionSourceType.Z21, ConnectionSourceType.Simulation };
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);

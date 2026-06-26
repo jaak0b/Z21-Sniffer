@@ -22,7 +22,7 @@ public sealed class FeedbackTools
 
     [McpServerTool(Name = "get_intervals")]
     [Description("Recorded on-periods. Optionally filter to one sensor (module + contact) and/or to the last N seconds.")]
-    public Task<IReadOnlyList<SensorInterval>> GetIntervals(int? module, int? contact, double? sinceSeconds)
+    public Task<IReadOnlyList<FeedbackSensorInterval>> GetIntervals(int? module, int? contact, double? sinceSeconds)
     {
         var sensor = module is { } m && contact is { } c ? new SensorKey(m, c) : (SensorKey?)null;
         return _api.GetIntervalsAsync(sensor, sinceSeconds);

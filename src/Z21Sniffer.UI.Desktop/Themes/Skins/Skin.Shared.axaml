@@ -1,0 +1,313 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="{DynamicResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderForeground" Color="{DynamicResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="{DynamicResource BorderColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlHoverColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderForegroundPointerOver" Color="{DynamicResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="{DynamicResource BorderStrongColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="{DynamicResource SurfaceAltColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderForegroundPressed" Color="{DynamicResource TextPrimaryColor}"/>
+        <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="{DynamicResource BorderColor}"/>
+        <SolidColorBrush x:Key="ExpanderContentBackground" Color="{DynamicResource SurfaceColor}"/>
+        <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="{DynamicResource BorderColor}"/>
+        <SolidColorBrush x:Key="ExpanderChevronForeground" Color="{DynamicResource TextSecondaryColor}"/>
+    </Styles.Resources>
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}"/>
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+
+    <!-- The Fluent Expander header is itself a ToggleButton, so it is excluded to keep its own header chrome. -->
+    <Style Selector="Button, ToggleButton:not(#ExpanderHeader)">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+        <Setter Property="Padding" Value="{DynamicResource ControlPadding}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ControlHeight}"/>
+        <Setter Property="FontSize" Value="{DynamicResource ControlFontSize}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:not(#ExpanderHeader):pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter, ToggleButton:not(#ExpanderHeader):pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
+    </Style>
+    <Style Selector="ToggleButton:not(#ExpanderHeader):checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="ToggleButton:not(#ExpanderHeader):checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+
+    <Style Selector="Button.accent">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource PrimaryHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHoverBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryForegroundBrush}"/>
+    </Style>
+    <Style Selector="Button.accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource PrimaryPressedBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryPressedBrush}"/>
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ControlHeight}"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource FocusRingBrush}"/>
+    </Style>
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}"/>
+    </Style>
+
+    <!-- The inner template TextBox is made transparent so the field and its spinner aren't darker than other controls. -->
+    <Style Selector="NumericUpDown">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ControlHeight}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="NumericUpDown /template/ TextBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Padding" Value="8,0"/>
+    </Style>
+    <Style Selector="NumericUpDown /template/ TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="NumericUpDown /template/ TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="NumericUpDown:disabled">
+        <Setter Property="ShowButtonSpinner" Value="False"/>
+    </Style>
+
+    <!-- One outer border wraps an affix + a borderless numeric, so the embedded TextBox draws no inner border and the whole shell highlights. -->
+    <Style Selector="Border.input-shell">
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+    </Style>
+    <Style Selector="Border.input-shell:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource FocusRingBrush}"/>
+    </Style>
+    <Style Selector="Border.input-shell NumericUpDown">
+        <Setter Property="MinWidth" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Border.input-shell NumericUpDown /template/ TextBox">
+        <Setter Property="MinWidth" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="Border.input-shell NumericUpDown /template/ TextBox /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell NumericUpDown /template/ TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell NumericUpDown /template/ TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell &gt; StackPanel &gt; TextBox">
+        <Setter Property="MinWidth" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell &gt; StackPanel &gt; TextBox /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell &gt; StackPanel &gt; TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.input-shell &gt; StackPanel &gt; TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ControlHeight}"/>
+        <Setter Property="Padding" Value="10,6"/>
+    </Style>
+
+    <Style Selector="ComboBox:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderStrongBrush}"/>
+    </Style>
+    <Style Selector="ComboBox:pressed /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+    </Style>
+    <Style Selector="ComboBox:focus /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource FocusRingBrush}"/>
+    </Style>
+
+    <Style Selector="ListBoxItem">
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+        <Setter Property="Padding" Value="10,7"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}"/>
+    </Style>
+
+    <!-- Match the list-item selection instead of the OS accent (avoids the red highlight). -->
+    <Style Selector="ComboBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/>
+    </Style>
+    <Style Selector="ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}"/>
+    </Style>
+    <Style Selector="ComboBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}"/>
+    </Style>
+
+    <Style Selector="TabControl">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}"/>
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top"
+                                Background="{DynamicResource SurfaceAltBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          AllowAutoHide="False">
+                                <ItemsPresenter Name="PART_ItemsPresenter"
+                                                ItemsPanel="{TemplateBinding ItemsPanel}"/>
+                            </ScrollViewer>
+                        </Border>
+                        <ContentPresenter Name="PART_SelectedContentHost"
+                                          Margin="16"
+                                          Content="{TemplateBinding SelectedContent}"
+                                          ContentTemplate="{TemplateBinding SelectedContentTemplate}"
+                                          HorizontalContentAlignment="Stretch"
+                                          VerticalContentAlignment="Stretch"/>
+                    </DockPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="14,8"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_LayoutRoot"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                    <Panel>
+                        <ContentPresenter Name="PART_ContentPresenter"
+                                          Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"/>
+                        <Border Name="PART_AccentLine"
+                                VerticalAlignment="Bottom"
+                                Height="2"
+                                Margin="0,0,0,-1"
+                                Background="Transparent"/>
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="TabItem:pointerover /template/ Border#PART_LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}"/>
+    </Style>
+    <Style Selector="TabItem:selected">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="TabItem:selected /template/ Border#PART_AccentLine">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}"/>
+        <Setter Property="BoxShadow" Value="{DynamicResource CardShadow}"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+</Styles>

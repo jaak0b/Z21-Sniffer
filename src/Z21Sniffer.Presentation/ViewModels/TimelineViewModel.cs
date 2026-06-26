@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Autofac.Features.Indexed;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Z21Sniffer.Core.Model;
@@ -10,14 +11,14 @@ namespace Z21Sniffer.Presentation.ViewModels;
 
 public sealed partial class TimelineViewModel : ObservableObject
 {
-    private readonly FeedbackRecorder _recorder;
-    private readonly SensorLabeler _labeler;
+    private readonly IIntervalSourceRegistry _registry;
+    private readonly IIndex<Type, IIntervalLegendDrawingStrategy> _legendStrategies;
     private readonly IClock _clock;
-    private readonly List<SensorAlias> _aliases;
-    private readonly List<SensorKey> _savedOrder;
-    private readonly HashSet<SensorKey> _knownSensors = new();
     private readonly TimelineViewportCalculator _viewport = new();
+    private readonly List<string> _rowOrder = new();
+    private bool _reconciling;
     private TimelineWindow _window;
+    private DateTimeOffset _startedAt;
 
     [ObservableProperty]
     private bool _following = true;
@@ -35,36 +36,31 @@ public sealed partial class TimelineViewModel : ObservableObject
     private double _windowSeconds = 60;
 
     public TimelineViewModel(
-        FeedbackRecorder recorder,
-        SensorLabeler labeler,
-        IClock clock,
-        IReadOnlyList<SensorAlias> aliases,
-        IReadOnlyList<SensorKey> savedOrder)
+        IIntervalSourceRegistry registry,
+        IIndex<Type, IIntervalChartDrawingStrategy> chartStrategies,
+        IIndex<Type, IIntervalLegendDrawingStrategy> legendStrategies,
+        IClock clock)
     {
-        _recorder = recorder;
-        _labeler = labeler;
+        _registry = registry;
+        _legendStrategies = legendStrategies;
+        Renderer = new BarChartRenderer(chartStrategies);
         _clock = clock;
-        _aliases = aliases.ToList();
-        _savedOrder = savedOrder.ToList();
+        _startedAt = clock.Now;
         _window = new TimelineWindow(clock.Now, TimeSpan.FromSeconds(60));
-        _recorder.EdgeDetected += OnEdgeDetected;
+        _registry.Changed += (_, _) => Reconcile();
     }
 
     public event EventHandler? Changed;
 
-    public event EventHandler<SensorEdgeLabeled>? SensorEdgeDetected;
-
-    public event EventHandler? AliasesChanged;
-
     public event EventHandler? RowsReordered;
 
-    public ObservableCollection<SensorRowViewModel> Rows { get; } = new();
+    public ObservableCollection<LegendRowViewModel> LegendRows { get; } = new();
 
-    public IReadOnlyList<SensorInterval> Intervals => _recorder.Intervals;
+    public BarChartRenderer Renderer { get; }
 
-    public IReadOnlyList<SensorAlias> Aliases => _aliases;
+    public IReadOnlyList<IIntervalSource> Sources => _registry.Sources;
 
-    public IReadOnlyList<SensorKey> Order => Rows.Select(r => r.Sensor).ToList();
+    public DateTimeOffset StartedAt => _startedAt;
 
     public DateTimeOffset ViewportStart { get; private set; }
 
@@ -72,65 +68,21 @@ public sealed partial class TimelineViewModel : ObservableObject
 
     public double? HighlightUnderSeconds => HighlightThresholdSeconds > 0 ? HighlightThresholdSeconds : null;
 
-    public RecordingSession ToSession() => _recorder.ToSession();
+    public RecordingSession ToSession() => new(_startedAt, _registry.Sources.ToList());
 
     public void LoadSession(RecordingSession session)
     {
-        _recorder.Restore(session);
-        _knownSensors.Clear();
-        Rows.Clear();
-
-        foreach (var interval in session.Intervals)
-        {
-            if (_knownSensors.Add(interval.Sensor)) InsertRowOrdered(interval.Sensor);
-        }
-
-        RowsReordered?.Invoke(this, EventArgs.Empty);
-        Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void OnFeedback(IReadOnlyList<SensorState> states)
-    {
-        _recorder.Apply(states);
-        foreach (var state in states)
-        {
-            if (state.Occupied && _knownSensors.Add(state.Sensor))
-            {
-                InsertRowOrdered(state.Sensor);
-                RowsReordered?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void Rename(SensorKey sensor, string name)
-    {
-        _aliases.RemoveAll(a => a.Sensor == sensor);
-        _aliases.Add(new SensorAlias(sensor, name));
-
-        var row = Rows.FirstOrDefault(r => r.Sensor == sensor);
-        if (row is not null) row.Label = _labeler.Label(sensor, _aliases);
-
-        AliasesChanged?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void RemoveSensor(SensorKey sensor)
-    {
-        _recorder.Remove(sensor);
-        _knownSensors.Remove(sensor);
-        _aliases.RemoveAll(a => a.Sensor == sensor);
-        var row = Rows.FirstOrDefault(r => r.Sensor == sensor);
-        if (row is not null) Rows.Remove(row);
-
-        RowsReordered?.Invoke(this, EventArgs.Empty);
-        AliasesChanged?.Invoke(this, EventArgs.Empty);
+        _startedAt = session.StartedAt;
+        _registry.Load(session.Sources);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
     public void MoveRow(int fromIndex, int toIndex)
     {
-        Rows.Move(fromIndex, toIndex);
+        LegendRows.Move(fromIndex, toIndex);
+        for (var index = 0; index < LegendRows.Count; index++) LegendRows[index].Source.Order = index;
+        _rowOrder.Clear();
+        _rowOrder.AddRange(LegendRows.Select(row => row.Source.Id));
         RowsReordered?.Invoke(this, EventArgs.Empty);
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -140,7 +92,7 @@ public sealed partial class TimelineViewModel : ObservableObject
     public void PanBySeconds(double seconds)
     {
         Following = false;
-        _window = _viewport.Pan(_window, TimeSpan.FromSeconds(seconds), _recorder.StartedAt, _clock.Now);
+        _window = _viewport.Pan(_window, TimeSpan.FromSeconds(seconds), _startedAt, _clock.Now);
         Refresh();
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -148,7 +100,7 @@ public sealed partial class TimelineViewModel : ObservableObject
     public void ZoomByFactor(double factor, double anchorFraction)
     {
         Following = false;
-        _window = _viewport.Zoom(_window, factor, anchorFraction, _recorder.StartedAt, _clock.Now);
+        _window = _viewport.Zoom(_window, factor, anchorFraction, _startedAt, _clock.Now);
         Refresh();
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -156,15 +108,14 @@ public sealed partial class TimelineViewModel : ObservableObject
     public void SetScrollSeconds(double offsetSeconds)
     {
         var now = _clock.Now;
-        var earliest = _recorder.StartedAt;
-        if (offsetSeconds >= _viewport.MaxScrollSeconds(_window, earliest, now) - 0.5)
+        if (offsetSeconds >= _viewport.MaxScrollSeconds(_window, _startedAt, now) - 0.5)
         {
             Following = true;
         }
         else
         {
             Following = false;
-            _window = _viewport.WithStartOffset(_window, offsetSeconds, earliest, now);
+            _window = _viewport.WithStartOffset(_window, offsetSeconds, _startedAt, now);
         }
 
         Refresh();
@@ -190,56 +141,54 @@ public sealed partial class TimelineViewModel : ObservableObject
     [RelayCommand]
     private void Clear()
     {
-        _recorder.Clear();
-        _knownSensors.Clear();
-        Rows.Clear();
+        _startedAt = _clock.Now;
+        _registry.Clear();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Reconcile()
+    {
+        if (_reconciling) return;
+        _reconciling = true;
+        try
+        {
+            ReconcileCore();
+        }
+        finally
+        {
+            _reconciling = false;
+        }
+    }
+
+    private void ReconcileCore()
+    {
+        var ordered = _registry.Sources;
+        var ids = ordered.Select(source => source.Id).ToList();
+        if (ids.SequenceEqual(_rowOrder)) return;
+
+        LegendRows.Clear();
+        foreach (var source in ordered)
+        {
+            LegendRows.Add(new LegendRowViewModel(source, _legendStrategies[source.IntervalType].CreateContent(source)));
+        }
+
+        _rowOrder.Clear();
+        _rowOrder.AddRange(ids);
         RowsReordered?.Invoke(this, EventArgs.Empty);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
-    [RelayCommand]
-    private void CommitRename(SensorRowViewModel row) => Rename(row.Sensor, row.Label);
-
     private void Refresh()
     {
         var now = _clock.Now;
-        var earliest = _recorder.StartedAt;
         _window = Following
-            ? _viewport.Clamp(_window with { End = now }, earliest, now)
-            : _viewport.Clamp(_window, earliest, now);
+            ? _viewport.Clamp(_window with { End = now }, _startedAt, now)
+            : _viewport.Clamp(_window, _startedAt, now);
 
         ViewportStart = _window.Start;
         ViewportEnd = _window.End;
-        ScrollMaxSeconds = _viewport.MaxScrollSeconds(_window, earliest, now);
-        ScrollValueSeconds = _viewport.ScrollSeconds(_window, earliest, now);
+        ScrollMaxSeconds = _viewport.MaxScrollSeconds(_window, _startedAt, now);
+        ScrollValueSeconds = _viewport.ScrollSeconds(_window, _startedAt, now);
         WindowSeconds = _window.Duration.TotalSeconds;
-    }
-
-    private void OnEdgeDetected(object? sender, SensorEdge edge) =>
-        SensorEdgeDetected?.Invoke(this, new SensorEdgeLabeled(
-            _labeler.Label(edge.Sensor, _aliases), edge.Sensor, edge.Occupied, edge.At));
-
-    private void InsertRowOrdered(SensorKey sensor)
-    {
-        var row = new SensorRowViewModel(sensor, _labeler.Label(sensor, _aliases));
-        var desired = _savedOrder.IndexOf(sensor);
-        if (desired < 0)
-        {
-            Rows.Add(row);
-            return;
-        }
-
-        var insertAt = Rows.Count;
-        for (var i = 0; i < Rows.Count; i++)
-        {
-            var existing = _savedOrder.IndexOf(Rows[i].Sensor);
-            if (existing < 0 || existing > desired)
-            {
-                insertAt = i;
-                break;
-            }
-        }
-
-        Rows.Insert(insertAt, row);
     }
 }
