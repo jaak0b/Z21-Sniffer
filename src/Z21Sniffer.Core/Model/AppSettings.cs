@@ -5,4 +5,5 @@ public sealed record AppSettings(
     int Port,
     string Language,
     int McpPort = 8731,
-    bool DarkTheme = false);
+    bool DarkTheme = false,
+    bool CaptureTrainData = false);

@@ -11,7 +11,7 @@ Every line has a timestamp (to the millisecond), a colour-coded **type badge**, 
 - **Sensor** — a decoded feedback edge, e.g. `Yard 3 (M1.1) → occupied` then later `→ clear`. This is the textual twin of a bar starting and ending on the timeline; if you gave the sensor a name, it shows the name and the address.
 - **System** — the station's telemetry: track current, supply voltage and temperature, e.g. `320 mA · 15.0 V · 32 °C`. If the station reports a fault — **short circuit**, **emergency stop**, **track voltage off**, **power lost** or **over-temperature** — it is appended to the line and the whole row turns red. A short circuit at the same instant a section flickers is a strong hint about what's really going on.
 - **Track power** — power switched on or off.
-- **Loco** / **Turnout** — locomotive speed/direction changes and turnout switching, when the station broadcasts them.
+- **Loco** / **Turnout** — locomotive speed/direction changes and turnout switching, when the station broadcasts them. Loco lines only appear when **Capture train data** is switched on in Settings (off by default — see *Connecting to the Z21*); with it off, locos are skipped here just as they are on the timeline.
 - **Connection** — connect and disconnect (marked *(simulated)* in demo mode).
 
 ## Making it useful

@@ -77,6 +77,9 @@
   <data name="Rename" xml:space="preserve"><value>Rename</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
   <data name="McpServer" xml:space="preserve"><value>MCP server</value></data>
+  <data name="TrainData" xml:space="preserve"><value>Train data</value></data>
+  <data name="CaptureTrainData" xml:space="preserve"><value>Capture train data</value></data>
+  <data name="CaptureTrainDataWarning" xml:space="preserve"><value>Loco speed and direction are only captured when this app is the only software talking to the Z21 on this PC. If another program is connected at the same time, the Z21 stops sending loco updates.</value></data>
   <data name="Live" xml:space="preserve"><value>Live</value></data>
   <data name="Dark" xml:space="preserve"><value>Dark</value></data>
   <data name="Light" xml:space="preserve"><value>Light</value></data>

@@ -77,6 +77,9 @@
   <data name="Rename" xml:space="preserve"><value>Umbenennen</value></data>
   <data name="Language" xml:space="preserve"><value>Sprache</value></data>
   <data name="McpServer" xml:space="preserve"><value>MCP-Server</value></data>
+  <data name="TrainData" xml:space="preserve"><value>Zugdaten</value></data>
+  <data name="CaptureTrainData" xml:space="preserve"><value>Zugdaten erfassen</value></data>
+  <data name="CaptureTrainDataWarning" xml:space="preserve"><value>Geschwindigkeit und Fahrtrichtung der Loks werden nur erfasst, wenn diese App das einzige Programm ist, das auf diesem PC mit der Z21 kommuniziert. Ist gleichzeitig ein anderes Programm verbunden, sendet die Z21 keine Lok-Updates mehr.</value></data>
   <data name="Live" xml:space="preserve"><value>Live</value></data>
   <data name="Dark" xml:space="preserve"><value>Dunkel</value></data>
   <data name="Light" xml:space="preserve"><value>Hell</value></data>

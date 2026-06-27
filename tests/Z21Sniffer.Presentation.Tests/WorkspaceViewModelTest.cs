@@ -110,6 +110,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task LocoInfo_WhileRecording_FeedsTimeline()
     {
+        _vm.CaptureTrainData = true;
         await StartRecording();
 
         _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(482, 40, Forward: true, MaxSpeed: 126));
@@ -120,6 +121,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task LocoInfo_WhenNotRecording_IsIgnoredButStillLogged()
     {
+        _vm.CaptureTrainData = true;
         await ActivateConnection();
         _connection.ConnectionChanged += Raise.With(_connection, true);
 
@@ -127,6 +129,36 @@ public class WorkspaceViewModelTest
 
         Assert.That(_vm.Timeline.Sources.OfType<LocoIntervalSource>(), Is.Empty);
         Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Loco), Is.True);
+    }
+
+    [Test]
+    public async Task LocoInfo_WhenCaptureTrainDataOff_FeedsNeitherTimelineNorLog()
+    {
+        await StartRecording();
+
+        _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(482, 40, Forward: true, MaxSpeed: 126));
+
+        Assert.That(_vm.Timeline.Sources.OfType<LocoIntervalSource>(), Is.Empty);
+        Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Loco), Is.False);
+    }
+
+    [Test]
+    public void Constructor_AppliesLoadedCaptureTrainData()
+    {
+        A.CallTo(() => _settings.Load()).Returns(
+            new AppSettings("192.168.0.5", 21105, "en") with { CaptureTrainData = true });
+
+        var vm = Build();
+
+        Assert.That(vm.CaptureTrainData, Is.True);
+    }
+
+    [Test]
+    public void SettingCaptureTrainData_PersistsIt()
+    {
+        _vm.CaptureTrainData = true;
+
+        A.CallTo(() => _settings.Save(A<AppSettings>.That.Matches(s => s.CaptureTrainData))).MustHaveHappened();
     }
 
     [Test]
@@ -313,6 +345,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ActivatedConnectionLoco_AppendsLocoLog()
     {
+        _vm.CaptureTrainData = true;
         await ActivateConnection();
 
         _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(3, 42, true));

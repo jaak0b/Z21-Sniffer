@@ -81,6 +81,15 @@
                  IsVisible="{Binding Mcp.IsRunning, FallbackValue=False}" />
     </StackPanel>
 
+    <TextBlock Text="{Binding Localization[TrainData]}" FontWeight="SemiBold" />
+    <StackPanel Spacing="4" Margin="8,0,0,0">
+      <CheckBox x:Name="CaptureTrainDataCheck" Content="{Binding Localization[CaptureTrainData]}"
+                IsChecked="{Binding CaptureTrainData}" />
+      <TextBlock x:Name="CaptureTrainDataWarning" Text="{Binding Localization[CaptureTrainDataWarning]}"
+                 Foreground="{DynamicResource WarningBrush}" FontSize="11" TextWrapping="Wrap" Margin="24,0,0,0"
+                 IsVisible="{Binding CaptureTrainData, FallbackValue=False}" />
+    </StackPanel>
+
     <Button Content="{Binding Localization[Close]}" HorizontalAlignment="Right" Click="OnClose" />
   </StackPanel>
 </Window>

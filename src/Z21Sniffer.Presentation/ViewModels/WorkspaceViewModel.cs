@@ -33,6 +33,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private AppLanguage _selectedLanguage;
 
+    [ObservableProperty]
+    private bool _captureTrainData;
+
     public WorkspaceViewModel(
         ICommandStationConnectionFactory factory,
         ISettingsStore settings,
@@ -68,6 +71,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         var loaded = settings.Load();
         Localization.Apply(loaded.Language);
         _selectedLanguage = loaded.Language == GermanCode ? AppLanguage.German : AppLanguage.English;
+        _captureTrainData = loaded.CaptureTrainData;
 
         Connection = new ConnectionViewModel(factory, settings);
         Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, _recordingClock);
@@ -139,6 +143,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         });
         connection.LocoInfoReceived += (_, loco) => _post(() =>
         {
+            if (!CaptureTrainData) return;
             if (Recording.ShouldRecordFeedback) _locoIngest.Apply(loco, _recordingClock.Now);
             Log.AppendLoco(loco);
         });
@@ -171,6 +176,9 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         if (string.IsNullOrEmpty(path)) return;
         _logTextStore.Save(Log.BuildExportText(), path);
     }
+
+    partial void OnCaptureTrainDataChanged(bool value) =>
+        _settings.Save(_settings.Load() with { CaptureTrainData = value });
 
     partial void OnSelectedLanguageChanged(AppLanguage value) =>
         SetLanguage(value == AppLanguage.German ? GermanCode : EnglishCode);

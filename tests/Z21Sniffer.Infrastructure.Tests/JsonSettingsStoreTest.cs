@@ -35,7 +35,8 @@ public class JsonSettingsStoreTest : TempDirectoryTest
     public void Save_ThenLoad_RoundTripsSettings()
     {
         var store = new JsonSettingsStore(SettingsPath);
-        var settings = new AppSettings("10.0.0.42", 21106, "de", McpPort: 9000, DarkTheme: true);
+        var settings = new AppSettings("10.0.0.42", 21106, "de", McpPort: 9000, DarkTheme: true)
+            with { CaptureTrainData = true };
 
         store.Save(settings);
         var loaded = new JsonSettingsStore(SettingsPath).Load();
@@ -45,5 +46,6 @@ public class JsonSettingsStoreTest : TempDirectoryTest
         Assert.That(loaded.Language, Is.EqualTo("de"));
         Assert.That(loaded.McpPort, Is.EqualTo(9000));
         Assert.That(loaded.DarkTheme, Is.True);
+        Assert.That(loaded.CaptureTrainData, Is.True);
     }
 }

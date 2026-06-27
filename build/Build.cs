@@ -224,5 +224,6 @@ class Build : NukeBuild
         || path.Contains("/Ports/", StringComparison.OrdinalIgnoreCase)
         || path.EndsWith("Module.cs", StringComparison.OrdinalIgnoreCase)
         || path.EndsWith("KestrelMcpServerController.cs", StringComparison.OrdinalIgnoreCase)
-        || path.EndsWith("SimulatedCommandStationConnection.cs", StringComparison.OrdinalIgnoreCase);
+        || path.EndsWith("SimulatedCommandStationConnection.cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith("AppSettings.cs", StringComparison.OrdinalIgnoreCase);
 }

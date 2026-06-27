@@ -59,6 +59,32 @@ public class SettingsWindowTest
     }
 
     [AvaloniaTest]
+    public void CaptureTrainDataWarning_IsHiddenUntilCheckboxIsChecked()
+    {
+        var workspace = BuildWorkspace();
+        var window = new SettingsWindow { DataContext = workspace };
+
+        var warning = window.FindControl<TextBlock>("CaptureTrainDataWarning");
+        Assert.That(warning!.IsVisible, Is.False);
+
+        workspace.CaptureTrainData = true;
+
+        Assert.That(warning.IsVisible, Is.True);
+    }
+
+    [AvaloniaTest]
+    public void CaptureTrainDataCheckbox_TogglesViewModelFlag()
+    {
+        var workspace = BuildWorkspace();
+        var window = new SettingsWindow { DataContext = workspace };
+
+        var checkbox = window.FindControl<CheckBox>("CaptureTrainDataCheck");
+        checkbox!.IsChecked = true;
+
+        Assert.That(workspace.CaptureTrainData, Is.True);
+    }
+
+    [AvaloniaTest]
     public void LanguageCombo_SelectingGerman_SwitchesLanguage()
     {
         var workspace = BuildWorkspace();
