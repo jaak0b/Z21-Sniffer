@@ -19,4 +19,10 @@ public static class TimelineInkKeys
     public const string Disconnected = "Disconnected";
 
     public const string ConnectionText = "ConnectionText";
+
+    public const string LocoBar = "LocoBar";
+
+    public const string LocoSpeedLine = "LocoSpeedLine";
+
+    public const string LocoText = "LocoText";
 }

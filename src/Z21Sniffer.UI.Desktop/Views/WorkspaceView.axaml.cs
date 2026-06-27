@@ -18,8 +18,6 @@ namespace Z21Sniffer.UI.Desktop.Views;
 
 public partial class WorkspaceView : UserControl
 {
-    private const double RowHeight = 26;
-
     private readonly LogTextFormatter _logFormatter = new();
     private readonly DispatcherTimer _scrollSync = new() { Interval = TimeSpan.FromMilliseconds(100) };
 
@@ -186,7 +184,7 @@ public partial class WorkspaceView : UserControl
         if (legend is not null && bars is not null)
         {
             var y = e.GetPosition(legend).Y + bars.VerticalOffset;
-            var target = Math.Clamp((int)(y / RowHeight), 0, ViewModel.Timeline.LegendRows.Count - 1);
+            var target = RowIndexAt(y);
             if (target != _dragFrom && _dragFrom >= 0) ViewModel.Timeline.MoveRow(_dragFrom, target);
         }
 
@@ -195,6 +193,19 @@ public partial class WorkspaceView : UserControl
         _dragRow = null;
         _dragFrom = -1;
         e.Pointer.Capture(null);
+    }
+
+    private int RowIndexAt(double y)
+    {
+        var rows = ViewModel!.Timeline.LegendRows;
+        var bottom = 0.0;
+        for (var index = 0; index < rows.Count; index++)
+        {
+            bottom += rows[index].Height;
+            if (y < bottom) return index;
+        }
+
+        return Math.Max(0, rows.Count - 1);
     }
 
     private void PositionGhost(Point position)

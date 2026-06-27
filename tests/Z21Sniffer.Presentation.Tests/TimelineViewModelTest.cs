@@ -44,11 +44,13 @@ public class TimelineViewModelTest
         {
             [typeof(FeedbackSensorInterval)] = new SensorIntervalChartDrawingStrategy(),
             [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
+            [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
         });
         var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
         {
             [typeof(FeedbackSensorInterval)] = new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()),
             [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
+            [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()),
         });
         return new TimelineViewModel(_registry, chart, legend, _clock);
     }
@@ -124,6 +126,204 @@ public class TimelineViewModelTest
         Assert.That(Lane(_vm), Is.EqualTo(new[] { SensorB, SensorA }));
         Assert.That(_vm.Sources.Select(s => s.Order), Is.Ordered);
         Assert.That(reordered, Is.True);
+    }
+
+    [Test]
+    public void LocoRow_IsTallerThanSensorRow()
+    {
+        Feed(SensorA, occupied: true);
+        _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
+        _vm.Tick();
+
+        var sensorRow = _vm.LegendRows.Single(row => row.Source is FeedbackSensorSource);
+        var locoRow = _vm.LegendRows.Single(row => row.Source is LocoIntervalSource);
+        Assert.That(locoRow.Height, Is.GreaterThan(sensorRow.Height));
+    }
+
+    [Test]
+    public void ZoomingOut_ShrinksLocoRowTowardBaseHeight()
+    {
+        var vm = ViewportVm();
+        _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
+        vm.Tick();
+        var tall = vm.LegendRows.Single().Height;
+
+        vm.ZoomByFactor(50, 0.5);
+
+        Assert.That(vm.LegendRows.Single().Height, Is.LessThan(tall));
+    }
+
+    [Test]
+    public void LocoIntervalWithSamples_RendersAsAMultiPointSpeedLine()
+    {
+        _clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(600);
+        var loco = _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3);
+        loco.Apply(40, forward: true, maxSpeed: 126, _clock.Now.AddSeconds(-5));
+        loco.Apply(80, forward: true, maxSpeed: 126, _clock.Now.AddSeconds(-3));
+        loco.Apply(120, forward: true, maxSpeed: 126, _clock.Now.AddSeconds(-1));
+        _vm.Tick();
+
+        var surface = new RecordingTimelineSurface();
+        _vm.Renderer.Render(surface, _vm.Sources,
+            new ChartViewport(_vm.ViewportStart, _vm.ViewportEnd, 1000), _vm.ViewportEnd,
+            _vm.HighlightUnderSeconds, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 52, _vm.ZoomFraction);
+
+        Assert.That(surface.Polylines, Has.Some.Matches<RecordingTimelineSurface.PolylineOp>(p => p.Points.Count >= 2));
+    }
+
+    [Test]
+    public void NewSourceRow_GetsZoomScaledHeightImmediatelyOnReconcile()
+    {
+        _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
+
+        Assert.That(_vm.LegendRows.Single().Height, Is.GreaterThan(26));
+    }
+
+    [Test]
+    public void DefaultWindow_ScalesLocoRowByLogZoomFraction()
+    {
+        _clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(600);
+        _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
+        _vm.Tick();
+
+        Assert.That(_vm.LegendRows.Single().Height, Is.EqualTo(42.63).Within(0.05));
+    }
+
+    [Test]
+    public void ReconcileWithUnchangedSources_DoesNotRebuildRowsAgain()
+    {
+        Feed(SensorA, occupied: true);
+        Feed(SensorB, occupied: true);
+        var reorderedCount = 0;
+        _vm.RowsReordered += (_, _) => reorderedCount++;
+
+        _clock.Now = _clock.Now.AddSeconds(1);
+        Feed(SensorB, occupied: false);
+
+        Assert.That(reorderedCount, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ReconcileAfterMoveRow_DoesNotRebuildRows()
+    {
+        Feed(SensorA, occupied: true);
+        Feed(SensorB, occupied: true);
+        _vm.MoveRow(0, 1);
+        var reorderedCount = 0;
+        _vm.RowsReordered += (_, _) => reorderedCount++;
+
+        _clock.Now = _clock.Now.AddSeconds(1);
+        Feed(SensorB, occupied: false);
+
+        Assert.That(reorderedCount, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ClearCommand_WithNoRows_StillRaisesChanged()
+    {
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.ClearCommand.Execute(null);
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void LoadSession_WithSameSourceIds_StillRaisesChanged()
+    {
+        Feed(SensorA, occupied: true);
+        var reloaded = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = SensorA };
+        reloaded.Apply(occupied: true, _clock.Now);
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.LoadSession(new RecordingSession(_clock.Now, new IIntervalSource[] { reloaded }));
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void MoveRow_RaisesChanged()
+    {
+        Feed(SensorA, occupied: true);
+        Feed(SensorB, occupied: true);
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.MoveRow(0, 1);
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void ZoomByFactor_StopsFollowingAndRaisesChanged()
+    {
+        var vm = ViewportVm();
+        var changed = false;
+        vm.Changed += (_, _) => changed = true;
+
+        vm.ZoomByFactor(0.5, 0.5);
+
+        Assert.That(vm.Following, Is.False);
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void SetScrollSeconds_RaisesChanged()
+    {
+        var vm = ViewportVm();
+        var changed = false;
+        vm.Changed += (_, _) => changed = true;
+
+        vm.SetScrollSeconds(100);
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void JumpToLiveCommand_RaisesChanged()
+    {
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.JumpToLiveCommand.Execute(null);
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void TogglePauseCommand_RaisesChanged()
+    {
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.TogglePauseCommand.Execute(null);
+
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void JumpToLive_AfterPanningBack_RefreshesViewportEndToNow()
+    {
+        var vm = ViewportVm();
+        vm.PanBySeconds(-100);
+
+        vm.JumpToLiveCommand.Execute(null);
+
+        Assert.That(vm.ViewportEnd, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
+    public void TogglePause_ResumingFollow_RefreshesViewportEndToNow()
+    {
+        var vm = ViewportVm();
+        vm.PanBySeconds(-100);
+
+        vm.TogglePauseCommand.Execute(null);
+
+        Assert.That(vm.Following, Is.True);
+        Assert.That(vm.ViewportEnd, Is.EqualTo(_clock.Now));
     }
 
     [Test]

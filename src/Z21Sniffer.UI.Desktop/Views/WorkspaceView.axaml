@@ -21,6 +21,9 @@
     <DataTemplate DataType="vm:ConnectionLegendContentViewModel">
       <views:ConnectionLegendContentView />
     </DataTemplate>
+    <DataTemplate DataType="vm:LocoLegendContentViewModel">
+      <views:LocoLegendContentView />
+    </DataTemplate>
   </UserControl.DataTemplates>
 
   <UserControl.Styles>
@@ -61,13 +64,8 @@
 
     <TabControl>
       <TabItem Header="{Binding Localization[TimelineTab]}">
-        <DockPanel>
-          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="8,6">
-            <Button Content="{Binding Localization[Pause]}" Command="{Binding Timeline.TogglePauseCommand}" />
-            <Button Content="{Binding Localization[Live]}" Command="{Binding Timeline.JumpToLiveCommand}" />
-            <Button Content="{Binding Localization[Clear]}" Command="{Binding Timeline.ClearCommand}" />
-          </StackPanel>
-
+        <!-- Negative margin cancels the TabControl template's 16px content inset so the timeline fills the tab edge-to-edge. -->
+        <DockPanel Margin="-16">
           <ScrollBar x:Name="TimeScrollBar" DockPanel.Dock="Bottom" Orientation="Horizontal" Height="16"
                      Minimum="0" Scroll="OnTimeScroll" AllowAutoHide="False" />
 
@@ -82,7 +80,7 @@
                 </ListBox.Styles>
                 <ListBox.ItemTemplate>
                   <DataTemplate x:DataType="vm:LegendRowViewModel">
-                    <DockPanel Height="26" LastChildFill="True">
+                    <DockPanel Height="{Binding Height}" LastChildFill="True">
                       <TextBlock DockPanel.Dock="Left" Text="≡" VerticalAlignment="Center" Margin="2,0,6,0"
                                  Cursor="SizeAll" Foreground="{DynamicResource TextSecondaryBrush}"
                                  PointerPressed="OnDragHandlePressed" />

@@ -1,6 +1,7 @@
 using Autofac;
 using Serilog.Extensions.Autofac.DependencyInjection;
 using Z21.Autofac;
+using Z21.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Infrastructure.Logging;
 using Z21Sniffer.Infrastructure.Persistence;
@@ -17,7 +18,13 @@ public sealed class InfrastructureModule : Module
 
     protected override void Load(ContainerBuilder builder)
     {
-        builder.AddZ21();
+        builder.AddZ21(optionsConfiguration: o => o.BroadcastFlags =
+                                                  [
+                                                      Z21BroadcastFlags.RmBusDataChangedMessages,
+                                                      Z21BroadcastFlags.SystemStateDataChangedMessages,
+                                                      Z21BroadcastFlags.DriveAndSwitchingMessages,
+                                                      Z21BroadcastFlags.LocoInfoChangedMessages,
+                                                  ]);
 
         var paths = new AppPaths(_dataDirectory);
         builder.RegisterInstance(paths).As<IAppPaths>().SingleInstance();

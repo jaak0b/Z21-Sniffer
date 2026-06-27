@@ -14,6 +14,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly ISessionStore _sessionStore;
     private readonly ILogTextStore _logTextStore;
     private readonly FeedbackSensorIngest _ingest;
+    private readonly LocoIngest _locoIngest;
     private readonly IIntervalSourceRegistry _registry;
     private readonly IClock _clock;
     private readonly RecordingClock _recordingClock;
@@ -52,6 +53,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _sessionStore = sessionStore;
         _logTextStore = logTextStore;
         _ingest = ingest;
+        _locoIngest = new LocoIngest(registry);
         _registry = registry;
         _clock = clock;
         _recordingClock = new RecordingClock(clock);
@@ -122,7 +124,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             Log.AppendTrackPower(on);
         });
         connection.SystemStateReceived += (_, snapshot) => _post(() => Log.AppendSystem(snapshot));
-        connection.LocoInfoReceived += (_, loco) => _post(() => Log.AppendLoco(loco));
+        connection.LocoInfoReceived += (_, loco) => _post(() =>
+        {
+            if (Recording.ShouldRecordFeedback) _locoIngest.Apply(loco, _recordingClock.Now);
+            Log.AppendLoco(loco);
+        });
         connection.TurnoutInfoReceived += (_, turnout) => _post(() => Log.AppendTurnout(turnout));
     }
 

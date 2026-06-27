@@ -26,6 +26,9 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.Connected] = "SuccessBrush",
         [TimelineInkKeys.Disconnected] = "DangerBrush",
         [TimelineInkKeys.StoppedFlag] = "DangerBrush",
+        [TimelineInkKeys.LocoBar] = "SurfaceAltBrush",
+        [TimelineInkKeys.LocoSpeedLine] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.LocoText] = "TextSecondaryBrush",
     };
 
     private List<(Rect Rect, string Text)> _hitAreas = new();
@@ -136,7 +139,8 @@ public sealed class FeedbackTimelineControl : Control
             _viewModel.HighlightUnderSeconds,
             _verticalOffset,
             Bounds.Height,
-            MinContentWidth);
+            MinContentWidth,
+            _viewModel.ZoomFraction);
         _hitAreas = surface.HitAreas;
     }
 

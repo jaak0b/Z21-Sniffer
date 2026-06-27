@@ -18,7 +18,15 @@ public sealed class Z21SnapshotMapper
     public LocoSnapshot ToLoco(LocoInfoData loco) => new(
         loco.LocoAddress,
         loco.LocoSpeed,
-        loco.DrivingDirection == DrivingDirection.Forward);
+        loco.DrivingDirection == DrivingDirection.Forward,
+        MaxSpeedFor(loco.DccSpeedMode));
+
+    private int MaxSpeedFor(DccSpeedMode mode) => mode switch
+    {
+        DccSpeedMode.Steps14 => 14,
+        DccSpeedMode.Steps28 => 28,
+        _ => 126
+    };
 
     public TurnoutSnapshot ToTurnout(TurnoutInfo turnout) => new(
         turnout.AccessoryAddress,

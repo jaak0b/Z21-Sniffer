@@ -106,6 +106,24 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void TimelineControl_WithLocoLane_RendersSpeedLineWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var loco = timeline.Registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3);
+        loco.Apply(40, forward: true, maxSpeed: 126, clock.Now);
+        loco.Apply(90, forward: true, maxSpeed: 126, clock.Now.AddSeconds(2));
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.Sources.OfType<LocoIntervalSource>(), Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
     public void TimelineControl_EmptyArea_IsHitTestVisibleForPanAndZoom()
     {
         var clock = new StubClock();

@@ -41,6 +41,31 @@ public class LegendStrategyTest
     }
 
     [Test]
+    public void LocoStrategy_CreatesLocoContentForSource()
+    {
+        var source = _registry.GetOrCreate<LocoIntervalSource>("loco:482");
+        source.Address = 482;
+        var strategy = new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation());
+
+        var content = strategy.CreateContent(source);
+
+        Assert.That(content, Is.TypeOf<LocoLegendContentViewModel>());
+        Assert.That(((LocoLegendContentViewModel)content).Label, Is.EqualTo("482"));
+    }
+
+    [Test]
+    public async Task LocoStrategy_WiresRegistryAndConfirmationIntoContent()
+    {
+        var source = _registry.GetOrCreate<LocoIntervalSource>("loco:482");
+        var strategy = new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation());
+
+        var content = (LocoLegendContentViewModel)strategy.CreateContent(source);
+        await content.RemoveCommand.ExecuteAsync(null);
+
+        Assert.That(_registry.Sources, Does.Not.Contain(source));
+    }
+
+    [Test]
     public void ConnectionStrategy_CreatesConnectionContentForSource()
     {
         var source = _registry.GetOrCreate<ConnectionSource>("connection");

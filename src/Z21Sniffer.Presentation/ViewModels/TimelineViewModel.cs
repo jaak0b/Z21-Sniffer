@@ -12,6 +12,7 @@ namespace Z21Sniffer.Presentation.ViewModels;
 public sealed partial class TimelineViewModel : ObservableObject
 {
     private readonly IIntervalSourceRegistry _registry;
+    private readonly IIndex<Type, IIntervalChartDrawingStrategy> _chartStrategies;
     private readonly IIndex<Type, IIntervalLegendDrawingStrategy> _legendStrategies;
     private readonly IClock _clock;
     private readonly TimelineViewportCalculator _viewport = new();
@@ -42,11 +43,13 @@ public sealed partial class TimelineViewModel : ObservableObject
         IClock clock)
     {
         _registry = registry;
+        _chartStrategies = chartStrategies;
         _legendStrategies = legendStrategies;
         Renderer = new BarChartRenderer(chartStrategies);
         _clock = clock;
         _startedAt = clock.Now;
         _window = new TimelineWindow(clock.Now, TimeSpan.FromSeconds(60));
+        ZoomFraction = ZoomFractionFor(_window.Duration);
         _registry.Changed += (_, _) => Reconcile();
     }
 
@@ -65,6 +68,8 @@ public sealed partial class TimelineViewModel : ObservableObject
     public DateTimeOffset ViewportStart { get; private set; }
 
     public DateTimeOffset ViewportEnd { get; private set; }
+
+    public double ZoomFraction { get; private set; }
 
     public double? HighlightUnderSeconds => HighlightThresholdSeconds > 0 ? HighlightThresholdSeconds : null;
 
@@ -169,7 +174,10 @@ public sealed partial class TimelineViewModel : ObservableObject
         LegendRows.Clear();
         foreach (var source in ordered)
         {
-            LegendRows.Add(new LegendRowViewModel(source, _legendStrategies[source.IntervalType].CreateContent(source)));
+            LegendRows.Add(new LegendRowViewModel(source, _legendStrategies[source.IntervalType].CreateContent(source))
+            {
+                Height = _chartStrategies[source.IntervalType].LaneHeight(ZoomFraction)
+            });
         }
 
         _rowOrder.Clear();
@@ -190,5 +198,25 @@ public sealed partial class TimelineViewModel : ObservableObject
         ScrollMaxSeconds = _viewport.MaxScrollSeconds(_window, _startedAt, now);
         ScrollValueSeconds = _viewport.ScrollSeconds(_window, _startedAt, now);
         WindowSeconds = _window.Duration.TotalSeconds;
+        ZoomFraction = ZoomFractionFor(_window.Duration);
+        UpdateRowHeights();
+    }
+
+    private double ZoomFractionFor(TimeSpan window)
+    {
+        var minSeconds = _viewport.MinDuration.TotalSeconds;
+        var maxSeconds = _viewport.MaxDuration.TotalSeconds;
+        var min = Math.Log(minSeconds);
+        var max = Math.Log(maxSeconds);
+        var current = Math.Log(Math.Clamp(window.TotalSeconds, minSeconds, maxSeconds));
+        return (max - current) / (max - min);
+    }
+
+    private void UpdateRowHeights()
+    {
+        foreach (var row in LegendRows)
+        {
+            row.Height = _chartStrategies[row.Source.IntervalType].LaneHeight(ZoomFraction);
+        }
     }
 }

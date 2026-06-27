@@ -33,7 +33,7 @@ public class BarChartRendererTest
 
     private void Render(IReadOnlyList<IIntervalSource> sources, double verticalOffset = 0, double visibleHeight = 1000) =>
         _renderer.Render(_surface, sources, Viewport(), T0.AddSeconds(10),
-            highlightUnderSeconds: null, verticalOffset, visibleHeight, minContentWidth: 50);
+            highlightUnderSeconds: null, verticalOffset, visibleHeight, minContentWidth: 50, zoomFraction: 1);
 
     private static FeedbackSensorSource Sensor(SensorKey key, int order, params (double Start, double? End)[] intervals)
     {
@@ -110,7 +110,7 @@ public class BarChartRendererTest
         var sensor = Sensor(SensorA, order: 0, (2, 6));
 
         _renderer.Render(_surface, new IIntervalSource[] { sensor }, Viewport(), T0.AddSeconds(10),
-            highlightUnderSeconds: 10, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50);
+            highlightUnderSeconds: 10, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50, zoomFraction: 1);
 
         Assert.That(_surface.Fills, Has.Some.Matches<RecordingTimelineSurface.FillOp>(f => f.Ink.Key == TimelineInkKeys.HighlightedBar));
     }
@@ -133,6 +133,6 @@ public class BarChartRendererTest
         var sensor = Sensor(SensorA, order: 0, (2, 4));
 
         Assert.That(() => renderer.Render(_surface, new IIntervalSource[] { sensor }, Viewport(), T0.AddSeconds(10),
-            null, 0, 1000, 50), Throws.Exception);
+            null, 0, 1000, 50, 1), Throws.Exception);
     }
 }

@@ -20,6 +20,16 @@ Hover any bar for a tooltip showing the sensor's name, its address, and how long
 
 While you record, the app also tracks whether it was talking to the command station. A dedicated **Connection** row shows this as a coloured bar: green while connected, red across any stretch where the link was lost. Each segment is labelled with its state and how long it lasted (e.g. `Connected · 142 s`), just like a sensor bar. If a ghost lines up with a red patch, you know the station — not the layout — was the culprit. The row appears the moment you start recording and follows the connection for the rest of the run.
 
+## Watching locomotive speed
+
+Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar carries a **line graph of the speed** over time, drawn right inside it. While a loco is moving you get one bar; the moment its speed drops to zero the bar ends (a falling edge) and the next time it pulls away a fresh bar begins.
+
+- **Direction** is shown by which way the graph is oriented. Driving forward, the line sits low at a standstill and climbs toward the top as the loco speeds up. In reverse the whole graph flips — zero is at the top and full speed is at the bottom — so a glance tells you which way the loco was heading.
+- **Hover the line** to read the exact speed at that instant, along with the direction and the time, in a tooltip.
+- The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.
+- Loco bars are **taller** than sensor bars to give the graph room, and they grow as you zoom in and shrink back to the normal bar height as you zoom out.
+- Like sensors, each loco is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry); the name is remembered between runs.
+
 ## Scrolling and zooming through history
 
 The whole recording is kept, so you can look as far back as the session goes:
@@ -27,7 +37,8 @@ The whole recording is kept, so you can look as far back as the session goes:
 - **Scrollbar** under the timeline — drag it to move back and forth through history.
 - **Mouse wheel** over the timeline — zoom in and out around the cursor.
 - **Drag** the timeline left/right to pan.
-- **Live** button — snap back to following the present moment (scrolling or zooming pauses the live follow; **Live** resumes it). **Pause** freezes the view without losing any recording.
+
+Scrolling or zooming pauses the live follow so the view holds still while you study it; drag the scrollbar back to the right-hand edge to snap back to following the present moment. Nothing is lost while you look around — the recording keeps running underneath.
 
 ## The legend
 

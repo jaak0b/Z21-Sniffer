@@ -63,11 +63,13 @@ public class WorkspaceViewModelTest
         {
             [typeof(FeedbackSensorInterval)] = new SensorIntervalChartDrawingStrategy(),
             [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
+            [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
         });
         var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
         {
             [typeof(FeedbackSensorInterval)] = new SensorIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
             [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
+            [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
         });
 
         return new WorkspaceViewModel(
@@ -100,6 +102,28 @@ public class WorkspaceViewModelTest
             [new SensorState(SensorA, true)]);
 
         Assert.That(_vm.Timeline.Sources.OfType<FeedbackSensorSource>().Select(s => s.Sensor), Does.Contain(SensorA));
+    }
+
+    [Test]
+    public async Task LocoInfo_WhileRecording_FeedsTimeline()
+    {
+        await StartRecording();
+
+        _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(482, 40, Forward: true, MaxSpeed: 126));
+
+        Assert.That(_vm.Timeline.Sources.OfType<LocoIntervalSource>().Select(s => s.Address), Does.Contain(482));
+    }
+
+    [Test]
+    public async Task LocoInfo_WhenNotRecording_IsIgnoredButStillLogged()
+    {
+        await ActivateConnection();
+        _connection.ConnectionChanged += Raise.With(_connection, true);
+
+        _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(482, 40, Forward: true, MaxSpeed: 126));
+
+        Assert.That(_vm.Timeline.Sources.OfType<LocoIntervalSource>(), Is.Empty);
+        Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Loco), Is.True);
     }
 
     [Test]

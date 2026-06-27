@@ -1,3 +1,3 @@
 namespace Z21Sniffer.Core.Model;
 
-public sealed record LocoSnapshot(int Address, int Speed, bool Forward);
+public sealed record LocoSnapshot(int Address, int Speed, bool Forward, int MaxSpeed = 126);

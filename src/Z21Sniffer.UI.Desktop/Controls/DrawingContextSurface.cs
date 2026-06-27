@@ -43,6 +43,22 @@ public sealed class DrawingContextSurface : ITimelineSurface
         }
     }
 
+    public void Polyline(IReadOnlyList<PlotPoint> points, TimelineInk ink, double thickness)
+    {
+        if (points.Count < 2) return;
+
+        var pen = new Pen(BrushFor(ink), thickness);
+        for (var index = 1; index < points.Count; index++)
+        {
+            _context.DrawLine(pen,
+                new Point(points[index - 1].X, points[index - 1].Y),
+                new Point(points[index].X, points[index].Y));
+        }
+    }
+
+    public void Hit(BarRect rect, string text) =>
+        HitAreas.Add((new Rect(rect.X, rect.Y + _verticalOffset, rect.W, rect.H), text));
+
     private Rect Shape(BarRect rect) => new(rect.X, rect.Y + 3, Math.Max(1, rect.W), Math.Max(1, rect.H - 6));
 
     private IBrush BrushFor(TimelineInk ink) => _resolveBrush(ink.Key, Colors.Gray);

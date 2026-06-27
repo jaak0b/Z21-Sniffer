@@ -7,9 +7,9 @@ namespace Z21Sniffer.Presentation.Timeline;
 
 public sealed class ConnectionIntervalChartDrawingStrategy : IIntervalChartDrawingStrategy
 {
-    public double PreferredLaneHeight => 26;
+    public double LaneHeight(double zoomFraction) => 26;
 
-    public void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context)
+    public void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context, ChartViewport viewport)
     {
         var connection = (ConnectionInterval)interval;
 

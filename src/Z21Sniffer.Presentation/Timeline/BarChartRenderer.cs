@@ -18,13 +18,14 @@ public sealed class BarChartRenderer
         double? highlightUnderSeconds,
         double verticalOffset,
         double visibleHeight,
-        double minContentWidth)
+        double minContentWidth,
+        double zoomFraction)
     {
         var laneTop = 0.0;
         foreach (var source in sources.OrderBy(source => source.Order))
         {
             var strategy = _strategies[source.IntervalType];
-            var laneHeight = strategy.PreferredLaneHeight;
+            var laneHeight = strategy.LaneHeight(zoomFraction);
 
             if (laneTop + laneHeight > verticalOffset && laneTop < verticalOffset + visibleHeight)
             {
@@ -35,7 +36,7 @@ public sealed class BarChartRenderer
                     var rect = new BarRect(span.X, laneTop - verticalOffset, span.Width, laneHeight);
                     var highlighted = highlightUnderSeconds is { } threshold && span.FullDurationSeconds < threshold;
                     var context = new BarContentContext(span.Width >= minContentWidth, highlighted, TimeSpan.FromSeconds(span.FullDurationSeconds));
-                    strategy.Draw(source, interval, surface, rect, context);
+                    strategy.Draw(source, interval, surface, rect, context, viewport);
                 }
             }
 

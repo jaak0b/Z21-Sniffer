@@ -27,10 +27,12 @@ public class ConnectionIntervalChartDrawingStrategyTest
     [TearDown]
     public void TearDown() => LocalizationService.Instance.Apply("en");
 
+    private static readonly ChartViewport Viewport = new(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddSeconds(10), 1000);
+
     private void Draw(bool connected, BarContentContext ctx)
     {
         var interval = new ConnectionInterval { Connected = connected, Start = DateTimeOffset.UnixEpoch };
-        _strategy.Draw(_source, interval, _surface, Rect, ctx);
+        _strategy.Draw(_source, interval, _surface, Rect, ctx, Viewport);
     }
 
     [Test]

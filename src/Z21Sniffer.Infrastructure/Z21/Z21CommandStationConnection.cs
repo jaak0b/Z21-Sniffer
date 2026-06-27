@@ -3,8 +3,6 @@ using CommandStation.Model;
 using CommandStation.Transport;
 using CommandStation.Transport.Udp;
 using Z21.Core;
-using Z21.Core.Command.SystemState;
-using Z21.Core.Model;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 
@@ -12,11 +10,6 @@ namespace Z21Sniffer.Infrastructure.Z21;
 
 public sealed class Z21CommandStationConnection : ICommandStationConnection
 {
-    private const uint BroadcastFlags =
-        Z21BroadcastFlags.RmBusDataChangedMessages
-        | Z21BroadcastFlags.SystemStateDataChangedMessages
-        | Z21BroadcastFlags.DriveAndSwitchingMessages;
-
     private readonly IZ21CommandStation _station;
     private readonly UdpTransportOptions _options;
     private readonly FeedbackDecoder _decoder;
@@ -59,9 +52,6 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
     {
         _options.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
         await _station.ConnectAsync();
-
-        var command = _station.Commands.Create<SetBroadcastFlagsCommand>(new[] { BroadcastFlags });
-        await _station.SendCommandsAsync(command);
 
         await _station.RequestFeedbackAsync(0);
         await _station.RequestFeedbackAsync(1);

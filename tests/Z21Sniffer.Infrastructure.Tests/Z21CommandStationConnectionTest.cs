@@ -6,6 +6,8 @@ using FakeItEasy;
 using NUnit.Framework;
 using Z21.Core;
 using Z21.Core.Command;
+using Z21.Core.Command.SystemState;
+using Z21.Core.Model;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Infrastructure.Z21;
@@ -136,6 +138,20 @@ public class Z21CommandStationConnectionTest
         Assert.That(_options.RemoteEndPoint.Port, Is.EqualTo(21106));
         A.CallTo(() => _station.ConnectAsync()).MustHaveHappened();
         A.CallTo(() => _station.SendCommandsAsync(A<IZ21Command[]>._)).MustHaveHappened();
+    }
+
+    [Test]
+    public async Task ConnectAsync_SubscribesToAllLocoInfoBroadcasts()
+    {
+        await _connection.ConnectAsync("10.0.0.5", 21106);
+
+        A.CallTo(() => _station.Commands.Create<SetBroadcastFlagsCommand>(
+                A<uint[]>.That.Matches(flags => flags[0] == (
+                    Z21BroadcastFlags.RmBusDataChangedMessages
+                    | Z21BroadcastFlags.SystemStateDataChangedMessages
+                    | Z21BroadcastFlags.DriveAndSwitchingMessages
+                    | Z21BroadcastFlags.LocoInfoChangedMessages))))
+            .MustHaveHappened();
     }
 
     [Test]

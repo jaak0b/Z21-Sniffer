@@ -5,7 +5,7 @@ namespace Z21Sniffer.Presentation.Timeline;
 
 public interface IIntervalChartDrawingStrategy
 {
-    double PreferredLaneHeight { get; }
+    double LaneHeight(double zoomFraction);
 
-    void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context);
+    void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context, ChartViewport viewport);
 }

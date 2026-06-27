@@ -69,11 +69,13 @@ internal static class WorkspaceFactory
     {
         [typeof(FeedbackSensorInterval)] = new SensorIntervalChartDrawingStrategy(),
         [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
+        [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
     });
 
     private static FakeIndex<Type, IIntervalLegendDrawingStrategy> LegendStrategies(IIntervalSourceRegistry registry) => new(new()
     {
         [typeof(FeedbackSensorInterval)] = new SensorIntervalLegendDrawingStrategy(registry, new AlwaysConfirm()),
         [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
+        [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new AlwaysConfirm()),
     });
 }

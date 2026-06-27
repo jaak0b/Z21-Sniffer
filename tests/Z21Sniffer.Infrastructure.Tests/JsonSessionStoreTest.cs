@@ -22,8 +22,16 @@ public class JsonSessionStoreTest : TempDirectoryTest
         connection.Set(connected: true, Start);
         connection.Set(connected: false, Start.AddSeconds(5));
 
-        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection });
+        var loco = new LocoIntervalSource { Id = "loco:482", Address = 482 };
+        loco.Apply(40, forward: true, maxSpeed: 28, Start);
+        loco.Apply(80, forward: true, maxSpeed: 28, Start.AddSeconds(2));
+        loco.Apply(0, forward: true, maxSpeed: 28, Start.AddSeconds(6));
+
+        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco });
     }
+
+    private static LocoIntervalSource Loco(RecordingSession session) =>
+        session.Sources.OfType<LocoIntervalSource>().Single();
 
     private static FeedbackSensorSource Sensor(RecordingSession session) =>
         session.Sources.OfType<FeedbackSensorSource>().Single();
@@ -40,9 +48,27 @@ public class JsonSessionStoreTest : TempDirectoryTest
         var loaded = _store.LoadJson(path);
 
         Assert.That(loaded.StartedAt, Is.EqualTo(Start));
-        Assert.That(loaded.Sources, Has.Count.EqualTo(2));
+        Assert.That(loaded.Sources, Has.Count.EqualTo(3));
         Assert.That(loaded.Sources.OfType<FeedbackSensorSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<ConnectionSource>().Count(), Is.EqualTo(1));
+        Assert.That(loaded.Sources.OfType<LocoIntervalSource>().Count(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SaveJson_ThenLoadJson_RoundTripsLocoSource()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        _store.SaveJson(SampleSession(), path);
+        var loco = Loco(_store.LoadJson(path));
+
+        Assert.That(loco.Address, Is.EqualTo(482));
+        Assert.That(loco.Intervals, Has.Count.EqualTo(1));
+        var interval = loco.Intervals.Single();
+        Assert.That(interval.Forward, Is.True);
+        Assert.That(interval.MaxSpeed, Is.EqualTo(28));
+        Assert.That(interval.End, Is.EqualTo(Start.AddSeconds(6)));
+        Assert.That(interval.Samples.Select(s => s.Speed), Is.EqualTo(new[] { 40, 80 }));
     }
 
     [Test]
@@ -75,6 +101,20 @@ public class JsonSessionStoreTest : TempDirectoryTest
         Assert.That(connection.Intervals[0].End, Is.EqualTo(Start.AddSeconds(5)));
         Assert.That(connection.Intervals[1].Connected, Is.False);
         Assert.That(connection.Intervals[1].IsOpen, Is.True);
+    }
+
+    [Test]
+    public void SaveJson_ExcludesLocalLabelAndOrderPreferences()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+        var sensor = new FeedbackSensorSource { Id = "sensor:3.5", Sensor = new SensorKey(3, 5), Label = "Renamed yard", Order = 7 };
+        sensor.Apply(occupied: true, Start);
+
+        _store.SaveJson(new RecordingSession(Start, new IIntervalSource[] { sensor }), path);
+        var loaded = Sensor(_store.LoadJson(path));
+
+        Assert.That(loaded.Label, Is.EqualTo("M3.5"), "Label is a local preference, reconstructed from the key-value store, not the portable session");
+        Assert.That(loaded.Order, Is.EqualTo(0), "Order is a local preference, reseeded on load, not the portable session");
     }
 
     [Test]

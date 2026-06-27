@@ -9,9 +9,9 @@ public sealed class SensorIntervalChartDrawingStrategy : IIntervalChartDrawingSt
 
     private readonly SensorBarText _barText = new();
 
-    public double PreferredLaneHeight => 26;
+    public double LaneHeight(double zoomFraction) => 26;
 
-    public void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context)
+    public void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context, ChartViewport viewport)
     {
         var sensorSource = (FeedbackSensorSource)source;
         var sensorInterval = (FeedbackSensorInterval)interval;

@@ -25,7 +25,9 @@ public class SensorIntervalChartDrawingStrategyTest
         _surface = new RecordingTimelineSurface();
     }
 
-    private void Draw(BarContentContext ctx) => _strategy.Draw(_source, _interval, _surface, Rect, ctx);
+    private static readonly ChartViewport Viewport = new(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddSeconds(10), 1000);
+
+    private void Draw(BarContentContext ctx) => _strategy.Draw(_source, _interval, _surface, Rect, ctx, Viewport);
 
     [Test]
     public void Draw_NotHighlighted_FillsBarInk()
@@ -55,8 +57,11 @@ public class SensorIntervalChartDrawingStrategyTest
 
         Draw(new BarContentContext(ShowContent: true, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3)));
 
-        Assert.That(_surface.Texts, Has.Exactly(1).Matches<RecordingTimelineSurface.TextOp>(
-            t => t.Text == "Yard 3 (M1.1) · on 3 s" && t.Ink.Key == TimelineInkKeys.BarText));
+        var text = _surface.Texts.Single();
+        Assert.That(text.Text, Is.EqualTo("Yard 3 (M1.1) · on 3 s"));
+        Assert.That(text.Ink.Key, Is.EqualTo(TimelineInkKeys.BarText));
+        Assert.That(text.X, Is.EqualTo(Rect.X + 5));
+        Assert.That(text.Y, Is.EqualTo(Rect.Y + Rect.H / 2));
     }
 
     [Test]
@@ -75,8 +80,9 @@ public class SensorIntervalChartDrawingStrategyTest
 
         Draw(new BarContentContext(ShowContent: false, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3)));
 
-        Assert.That(_surface.Fills, Has.Some.Matches<RecordingTimelineSurface.FillOp>(
-            f => f.Ink.Key == TimelineInkKeys.StoppedFlag));
+        var flag = _surface.Fills.Single(f => f.Ink.Key == TimelineInkKeys.StoppedFlag);
+        Assert.That(flag.Rect.W, Is.EqualTo(4));
+        Assert.That(flag.Rect.X, Is.EqualTo(Rect.X + Rect.W - 4));
     }
 
     [Test]

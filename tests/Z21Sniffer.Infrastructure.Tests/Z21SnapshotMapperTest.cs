@@ -80,6 +80,30 @@ public class Z21SnapshotMapperTest
         Assert.That(snapshot.Address, Is.EqualTo(3));
         Assert.That(snapshot.Speed, Is.EqualTo(42));
         Assert.That(snapshot.Forward, Is.True);
+        Assert.That(snapshot.MaxSpeed, Is.EqualTo(126));
+    }
+
+    [Test]
+    [TestCase(DccSpeedMode.Steps14, 14)]
+    [TestCase(DccSpeedMode.Steps28, 28)]
+    [TestCase(DccSpeedMode.Steps128, 126)]
+    public void ToLoco_DerivesMaxSpeedFromSpeedMode(DccSpeedMode mode, int expectedMax)
+    {
+        var snapshot = _mapper.ToLoco(new LocoInfoData
+        {
+            LocoAddress = 3,
+            LocoFunctionsData = [],
+            DccSpeedMode = mode,
+            DecoderMode = DecoderMode.DCC,
+            DrivingDirection = DrivingDirection.Backward,
+            LocoSpeed = 5,
+            LocoIsBusy = false,
+            LocoContainedInDoubleTraction = false,
+            SmartSearch = false
+        });
+
+        Assert.That(snapshot.MaxSpeed, Is.EqualTo(expectedMax));
+        Assert.That(snapshot.Forward, Is.False);
     }
 
     [Test]

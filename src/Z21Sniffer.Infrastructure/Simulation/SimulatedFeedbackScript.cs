@@ -25,7 +25,12 @@ public sealed class SimulatedFeedbackScript
         PowerLost: false,
         HighTemperature: false);
 
-    public LocoSnapshot Loco(int tick) => new(Address: 3, Speed: tick % 128, Forward: tick % 24 < 12);
+    public LocoSnapshot Loco(int tick)
+    {
+        var step = tick / 12 % 8;
+        var speed = (step <= 4 ? step : 8 - step) * 30;
+        return new LocoSnapshot(Address: 3, Speed: speed, Forward: tick / 96 % 2 == 0, MaxSpeed: 126);
+    }
 
     public TurnoutSnapshot Turnout(int tick) => new(
         Address: 5,
