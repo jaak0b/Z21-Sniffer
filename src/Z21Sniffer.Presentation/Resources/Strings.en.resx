@@ -87,6 +87,12 @@
   <data name="Connection" xml:space="preserve"><value>Connection</value></data>
   <data name="Connected" xml:space="preserve"><value>Connected</value></data>
   <data name="Disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="TrackPower" xml:space="preserve"><value>Track power</value></data>
+  <data name="TrackPowerDetails" xml:space="preserve"><value>Command station track power</value></data>
+  <data name="TrackPowerOnState" xml:space="preserve"><value>Power on</value></data>
+  <data name="TrackPowerOffState" xml:space="preserve"><value>Power off</value></data>
+  <data name="TrackPowerShortState" xml:space="preserve"><value>Short circuit</value></data>
+  <data name="TrackPowerProgrammingState" xml:space="preserve"><value>Programming track</value></data>
   <data name="Appearance" xml:space="preserve"><value>Appearance</value></data>
   <data name="Source" xml:space="preserve"><value>Source</value></data>
   <data name="Enabled" xml:space="preserve"><value>Enabled</value></data>

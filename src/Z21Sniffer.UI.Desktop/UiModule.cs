@@ -24,8 +24,10 @@ public sealed class UiModule : Module
         builder.RegisterType<SensorIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(FeedbackSensorInterval));
         builder.RegisterType<ConnectionIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(ConnectionInterval));
         builder.RegisterType<LocoIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(LocoInterval));
+        builder.RegisterType<TrackPowerIntervalChartDrawingStrategy>().Keyed<IIntervalChartDrawingStrategy>(typeof(TrackPowerInterval));
         builder.RegisterType<SensorIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(FeedbackSensorInterval));
         builder.RegisterType<ConnectionIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(ConnectionInterval));
         builder.RegisterType<LocoIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(LocoInterval));
+        builder.RegisterType<TrackPowerIntervalLegendDrawingStrategy>().Keyed<IIntervalLegendDrawingStrategy>(typeof(TrackPowerInterval));
     }
 }

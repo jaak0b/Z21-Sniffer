@@ -87,6 +87,12 @@
   <data name="Connection" xml:space="preserve"><value>Verbindung</value></data>
   <data name="Connected" xml:space="preserve"><value>Verbunden</value></data>
   <data name="Disconnected" xml:space="preserve"><value>Getrennt</value></data>
+  <data name="TrackPower" xml:space="preserve"><value>Gleisspannung</value></data>
+  <data name="TrackPowerDetails" xml:space="preserve"><value>Gleisspannung der Zentrale</value></data>
+  <data name="TrackPowerOnState" xml:space="preserve"><value>Strom ein</value></data>
+  <data name="TrackPowerOffState" xml:space="preserve"><value>Strom aus</value></data>
+  <data name="TrackPowerShortState" xml:space="preserve"><value>Kurzschluss</value></data>
+  <data name="TrackPowerProgrammingState" xml:space="preserve"><value>Programmiergleis</value></data>
   <data name="Appearance" xml:space="preserve"><value>Darstellung</value></data>
   <data name="Source" xml:space="preserve"><value>Quelle</value></data>
   <data name="Enabled" xml:space="preserve"><value>Aktiviert</value></data>

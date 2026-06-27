@@ -22,6 +22,7 @@ public class RecordingViewModelTest
     private RecordingClock _clock = null!;
     private IntervalSourceRegistry _registry = null!;
     private bool _connected;
+    private SystemSnapshot? _system;
     private RecordingViewModel _vm = null!;
 
     [SetUp]
@@ -31,10 +32,32 @@ public class RecordingViewModelTest
         _clock = new RecordingClock(_inner);
         _registry = new IntervalSourceRegistry();
         _connected = true;
-        _vm = new RecordingViewModel(_registry, _clock, () => _connected);
+        _system = null;
+        _vm = new RecordingViewModel(_registry, _clock, () => _connected, () => _system);
     }
 
     private ConnectionSource Connection() => (ConnectionSource)_registry.Find("connection")!;
+
+    private TrackPowerSource TrackPower() => (TrackPowerSource)_registry.Find("trackpower")!;
+
+    [Test]
+    public void Start_NoSnapshot_SeedsTrackPowerOff()
+    {
+        _vm.ToggleCommand.Execute(null);
+
+        Assert.That(TrackPower().Intervals.Single().Status, Is.EqualTo(TrackPowerStatus.Off));
+    }
+
+    [Test]
+    public void Start_WithSnapshot_SeedsDerivedTrackPowerStatus()
+    {
+        _system = new SystemSnapshot(0, 0, 0, ShortCircuit: true, EmergencyStop: false, TrackVoltageOff: false,
+            ProgrammingMode: false, PowerLost: false, HighTemperature: false);
+
+        _vm.ToggleCommand.Execute(null);
+
+        Assert.That(TrackPower().Intervals.Single().Status, Is.EqualTo(TrackPowerStatus.Short));
+    }
 
     [Test]
     public void Start_StartsClockOpensConnectionSourceAndSetsRecording()

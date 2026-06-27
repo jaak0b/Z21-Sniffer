@@ -21,7 +21,8 @@ public sealed class SimulatedFeedbackScript
         TemperatureCelsius: 30 + tick % 5,
         ShortCircuit: tick % 60 == 0 && tick > 0,
         EmergencyStop: false,
-        TrackVoltageOff: false,
+        TrackVoltageOff: tick % 80 is >= 40 and < 55,
+        ProgrammingMode: tick % 80 is >= 20 and < 30,
         PowerLost: false,
         HighTemperature: false);
 

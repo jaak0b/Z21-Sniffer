@@ -59,6 +59,31 @@ public class LegendContentViewTest
     }
 
     [AvaloniaTest]
+    public void TrackPowerLegend_RendersIconLabelAndDetailTooltip()
+    {
+        LocalizationService.Instance.Apply("en");
+        var vm = new TrackPowerLegendContentViewModel(new TrackPowerSource());
+        var view = new TrackPowerLegendContentView();
+
+        Render(view, vm);
+
+        Assert.That(view.GetLogicalDescendants().OfType<Path>(), Is.Not.Empty);
+        Assert.That(ToolTip.GetTip(view), Is.EqualTo("Command station track power"));
+    }
+
+    [AvaloniaTest]
+    public void TrackPowerLegend_IsNotEditableOrDeletable()
+    {
+        var vm = new TrackPowerLegendContentViewModel(new TrackPowerSource());
+        var view = new TrackPowerLegendContentView();
+
+        Render(view, vm);
+
+        Assert.That(view.GetLogicalDescendants().OfType<TextBox>(), Is.Empty);
+        Assert.That(view.GetLogicalDescendants().OfType<Button>(), Is.Empty);
+    }
+
+    [AvaloniaTest]
     public void ConnectionLegend_RendersIconAndDetailTooltip()
     {
         LocalizationService.Instance.Apply("en");

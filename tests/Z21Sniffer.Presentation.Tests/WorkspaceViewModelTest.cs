@@ -64,12 +64,14 @@ public class WorkspaceViewModelTest
             [typeof(FeedbackSensorInterval)] = new SensorIntervalChartDrawingStrategy(),
             [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
             [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
+            [typeof(TrackPowerInterval)] = new TrackPowerIntervalChartDrawingStrategy(),
         });
         var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
         {
             [typeof(FeedbackSensorInterval)] = new SensorIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
             [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
             [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
+            [typeof(TrackPowerInterval)] = new TrackPowerIntervalLegendDrawingStrategy(),
         });
 
         return new WorkspaceViewModel(
@@ -161,6 +163,38 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
+    public async Task StartRecording_SeedsTrackPowerRow()
+    {
+        await StartRecording();
+
+        Assert.That(_vm.Timeline.Sources.OfType<TrackPowerSource>().Single(), Is.Not.Null);
+    }
+
+    [Test]
+    public async Task SystemStateWhileRecording_RecordsTrackPowerStatus()
+    {
+        await StartRecording();
+
+        _connection.SystemStateReceived += Raise.With(_connection,
+            new SystemSnapshot(0, 0, 0, ShortCircuit: true, EmergencyStop: false, TrackVoltageOff: false,
+                ProgrammingMode: false, PowerLost: false, HighTemperature: false));
+
+        var trackPower = _vm.Timeline.Sources.OfType<TrackPowerSource>().Single();
+        Assert.That(trackPower.Intervals.Last().Status, Is.EqualTo(TrackPowerStatus.Short));
+    }
+
+    [Test]
+    public async Task SystemState_WhenNotRecording_DoesNotCreateTrackPowerSource()
+    {
+        await ActivateConnection();
+
+        _connection.SystemStateReceived += Raise.With(_connection,
+            new SystemSnapshot(0, 0, 0, false, false, false, false, false, false));
+
+        Assert.That(_vm.Timeline.Sources.OfType<TrackPowerSource>(), Is.Empty);
+    }
+
+    [Test]
     public async Task SensorEdgeLog_UsesWallClock()
     {
         await StartRecording();
@@ -242,7 +276,7 @@ public class WorkspaceViewModelTest
         await ActivateConnection();
 
         _connection.SystemStateReceived += Raise.With(_connection,
-            new SystemSnapshot(320, 15000, 30, false, false, false, false, false));
+            new SystemSnapshot(320, 15000, 30, false, false, false, false, false, false));
 
         Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.System), Is.True);
     }
@@ -326,7 +360,7 @@ public class WorkspaceViewModelTest
         await ActivateConnection();
 
         _connection.SystemStateReceived += Raise.With(_connection,
-            new SystemSnapshot(1, 1, 1, false, false, false, false, false));
+            new SystemSnapshot(1, 1, 1, false, false, false, false, false, false));
 
         Assert.That(_vm.Log.Filtered.Count(e => e.Kind == LogEntryKind.System), Is.EqualTo(1));
     }

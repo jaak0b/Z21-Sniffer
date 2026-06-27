@@ -20,6 +20,17 @@ Hover any bar for a tooltip showing the sensor's name, its address, and how long
 
 While you record, the app also tracks whether it was talking to the command station. A dedicated **Connection** row shows this as a coloured bar: green while connected, red across any stretch where the link was lost. Each segment is labelled with its state and how long it lasted (e.g. `Connected · 142 s`), just like a sensor bar. If a ghost lines up with a red patch, you know the station — not the layout — was the culprit. The row appears the moment you start recording and follows the connection for the rest of the run.
 
+## The track power row
+
+Right alongside the connection, a dedicated **Track power** row records what the command station was doing with the rails. It works just like the connection row — one continuous bar that changes colour whenever the state changes — but it has four states instead of two, each with its own colour:
+
+- **blue — power on**: the track is live and trains can run.
+- **grey — power off**: track voltage is switched off.
+- **red — short circuit**: the station reported a short; pair this with a sensor blip and you can see exactly when a derailment or wiring fault cut in.
+- **green — programming track**: the station is in CV programming mode.
+
+Each segment is labelled with its state and how long it held (e.g. `Power on · 134 s`, `Short circuit · 0.4 s`). The row appears the moment you start recording and, like the connection row, its legend entry is fixed — you can't rename or remove it.
+
 ## Watching locomotive speed
 
 Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar carries a **line graph of the speed** over time, drawn right inside it. While a loco is moving you get one bar; the moment its speed drops to zero the bar ends (a falling edge) and the next time it pulls away a fresh bar begins.

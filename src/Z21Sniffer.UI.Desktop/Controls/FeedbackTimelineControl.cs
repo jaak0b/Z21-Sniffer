@@ -29,6 +29,12 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.LocoBar] = "SurfaceAltBrush",
         [TimelineInkKeys.LocoSpeedLine] = "PrimaryForegroundBrush",
         [TimelineInkKeys.LocoText] = "TextSecondaryBrush",
+        [TimelineInkKeys.TrackPowerProgramming] = "SuccessBrush",
+        [TimelineInkKeys.TrackPowerOn] = "PrimaryBrush",
+        [TimelineInkKeys.TrackPowerShort] = "DangerBrush",
+        [TimelineInkKeys.TrackPowerOff] = "SurfaceAltBrush",
+        [TimelineInkKeys.TrackPowerText] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.TrackPowerOffText] = "TextPrimaryBrush",
     };
 
     private List<(Rect Rect, string Text)> _hitAreas = new();

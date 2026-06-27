@@ -7,5 +7,6 @@ public sealed record SystemSnapshot(
     bool ShortCircuit,
     bool EmergencyStop,
     bool TrackVoltageOff,
+    bool ProgrammingMode,
     bool PowerLost,
     bool HighTemperature);

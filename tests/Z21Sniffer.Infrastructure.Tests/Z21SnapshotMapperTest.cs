@@ -52,6 +52,19 @@ public class Z21SnapshotMapperTest
     }
 
     [Test]
+    public void ToSystem_MapsProgrammingMode()
+    {
+        var active = _mapper.ToSystem(new SystemState
+        {
+            CentralState = new CentralState { ProgrammingModeActive = true },
+            CentralStateEx = new CentralStateEx()
+        });
+
+        Assert.That(active.ProgrammingMode, Is.True);
+        Assert.That(_mapper.ToSystem(SystemStateWith(new CentralStateEx())).ProgrammingMode, Is.False);
+    }
+
+    [Test]
     public void ToSystem_NoFaults_AllFlagsFalse()
     {
         var snapshot = _mapper.ToSystem(SystemStateWith(new CentralStateEx()));

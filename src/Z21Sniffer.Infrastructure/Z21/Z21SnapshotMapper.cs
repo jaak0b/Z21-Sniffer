@@ -12,6 +12,7 @@ public sealed class Z21SnapshotMapper
         state.CentralState.ShortCircuit || state.CentralStateEx.ShortCircuitInternal || state.CentralStateEx.ShortCircuitExternal,
         state.CentralState.EmergencyStop,
         state.CentralState.TrackVoltageOff,
+        state.CentralState.ProgrammingModeActive,
         state.CentralStateEx.PowerLost,
         state.CentralStateEx.HighTemperature);
 

@@ -32,7 +32,7 @@ public class TrafficLogViewModelTest
     [Test]
     public void AppendSystem_AddsExactTelemetryEntry()
     {
-        _vm.AppendSystem(new SystemSnapshot(320, 15000, 32, false, false, false, false, false));
+        _vm.AppendSystem(new SystemSnapshot(320, 15000, 32, false, false, false, false, false, false));
 
         Assert.That(_vm.Filtered, Has.Count.EqualTo(1));
         Assert.That(_vm.Filtered[0].Kind, Is.EqualTo(LogEntryKind.System));
@@ -43,7 +43,7 @@ public class TrafficLogViewModelTest
     [Test]
     public void AppendSystem_ShortCircuit_AppendsFaultAfterSeparator()
     {
-        _vm.AppendSystem(new SystemSnapshot(0, 0, 0, ShortCircuit: true, false, false, false, false));
+        _vm.AppendSystem(new SystemSnapshot(0, 0, 0, ShortCircuit: true, false, false, false, false, false));
 
         Assert.That(_vm.Filtered[0].Fault, Is.True);
         Assert.That(_vm.Filtered[0].Message, Is.EqualTo("0 mA · 0.0 V · 0 °C · Short circuit"));
@@ -52,7 +52,7 @@ public class TrafficLogViewModelTest
     [Test]
     public void AppendSystem_MultipleFaults_JoinedBySeparator()
     {
-        _vm.AppendSystem(new SystemSnapshot(0, 0, 0, ShortCircuit: true, EmergencyStop: true, false, false, false));
+        _vm.AppendSystem(new SystemSnapshot(0, 0, 0, ShortCircuit: true, EmergencyStop: true, false, false, false, false));
 
         Assert.That(_vm.Filtered[0].Message, Does.Contain("Short circuit · Emergency stop"));
     }
@@ -61,7 +61,7 @@ public class TrafficLogViewModelTest
     public void AppendSystem_RemainingFaults_AllNamed()
     {
         _vm.AppendSystem(new SystemSnapshot(0, 0, 0, false, false,
-            TrackVoltageOff: true, PowerLost: true, HighTemperature: true));
+            TrackVoltageOff: true, ProgrammingMode: false, PowerLost: true, HighTemperature: true));
 
         var message = _vm.Filtered[0].Message;
         Assert.That(message, Does.Contain("Track voltage off"));
@@ -287,7 +287,7 @@ public class TrafficLogViewModelTest
     [Test]
     public void DisablingKind_HidesThoseEntries()
     {
-        _vm.AppendSystem(new SystemSnapshot(1, 1, 1, false, false, false, false, false));
+        _vm.AppendSystem(new SystemSnapshot(1, 1, 1, false, false, false, false, false, false));
         _vm.AppendTrackPower(true);
 
         _vm.KindToggles.Single(t => t.Kind == LogEntryKind.System).IsSelected = false;

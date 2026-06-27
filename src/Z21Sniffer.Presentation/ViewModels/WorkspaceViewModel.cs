@@ -1,6 +1,7 @@
 using Autofac.Features.Indexed;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Presentation.Localization;
@@ -24,6 +25,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly Func<Task<string?>> _chooseExportLogPath;
     private readonly Func<Task> _openSettings;
     private readonly HashSet<ICommandStationConnection> _wired = new();
+    private SystemSnapshot? _lastSnapshot;
 
     private const string EnglishCode = "en";
     private const string GermanCode = "de";
@@ -69,7 +71,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Connection = new ConnectionViewModel(factory, settings);
         Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, _recordingClock);
-        Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected);
+        Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected, () => _lastSnapshot);
         Log = new TrafficLogViewModel(Localization, clock);
         Mcp = new McpServerViewModel(mcpController, loaded.McpPort);
         Theme = new ThemeViewModel(themeController, loaded.DarkTheme);
@@ -123,7 +125,13 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             Connection.TrackPowerOn = on;
             Log.AppendTrackPower(on);
         });
-        connection.SystemStateReceived += (_, snapshot) => _post(() => Log.AppendSystem(snapshot));
+        connection.SystemStateReceived += (_, snapshot) => _post(() =>
+        {
+            _lastSnapshot = snapshot;
+            Log.AppendSystem(snapshot);
+            if (Recording.IsRecording)
+                _registry.GetOrCreate<TrackPowerSource>("trackpower").Apply(snapshot, _recordingClock.Now);
+        });
         connection.LocoInfoReceived += (_, loco) => _post(() =>
         {
             if (Recording.ShouldRecordFeedback) _locoIngest.Apply(loco, _recordingClock.Now);

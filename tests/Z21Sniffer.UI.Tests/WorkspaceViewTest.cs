@@ -124,6 +124,26 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void TimelineControl_WithTrackPowerLane_RendersAllStatesWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var power = timeline.Registry.GetOrCreate<TrackPowerSource>("trackpower");
+        power.Set(TrackPowerStatus.On, clock.Now);
+        power.Set(TrackPowerStatus.Off, clock.Now.AddSeconds(2));
+        power.Set(TrackPowerStatus.Short, clock.Now.AddSeconds(4));
+        power.Set(TrackPowerStatus.Programming, clock.Now.AddSeconds(6));
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.Sources.OfType<TrackPowerSource>(), Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
     public void TimelineControl_WithLocoLaneStartingBeforeViewport_RendersWithoutThrowing()
     {
         var clock = new StubClock();

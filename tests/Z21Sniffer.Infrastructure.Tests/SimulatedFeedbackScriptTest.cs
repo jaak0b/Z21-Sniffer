@@ -108,6 +108,20 @@ public class SimulatedFeedbackScriptTest
     }
 
     [Test]
+    public void System_ProgrammingMode_ActiveInItsWindow()
+    {
+        Assert.That(_script.System(0).ProgrammingMode, Is.False);
+        Assert.That(_script.System(20).ProgrammingMode, Is.True);
+    }
+
+    [Test]
+    public void System_TrackVoltageOff_ActiveInItsWindow()
+    {
+        Assert.That(_script.System(0).TrackVoltageOff, Is.False);
+        Assert.That(_script.System(40).TrackVoltageOff, Is.True);
+    }
+
+    [Test]
     public void Loco_OverACycle_BuildsAMultiSampleInterval()
     {
         var registry = new IntervalSourceRegistry();
