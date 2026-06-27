@@ -28,19 +28,28 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
             surface.Fill(rect with { X = rect.X + rect.W - flagWidth, W = flagWidth }, new TimelineInk(TimelineInkKeys.StoppedFlag));
         }
 
-        var points = loco.Samples.Select(sample => Plot(sample, loco, rect, viewport)).ToList();
-        if (points.Count > 0) points.Add(points[^1] with { X = rect.X + rect.W });
+        var left = rect.X;
+        var right = rect.X + rect.W;
+        var plotted = loco.Samples
+            .Select(sample => new PlottedSample(sample, _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At), SpeedY(sample.Speed, loco, rect)))
+            .ToList();
+
+        var onScreen = plotted.Where(sample => sample.X >= left && sample.X <= right).ToList();
+        var entry = plotted.LastOrDefault(sample => sample.X < left);
+
+        var points = new List<PlotPoint>();
+        if (entry is { } enter) points.Add(new PlotPoint(left, enter.Y));
+        points.AddRange(onScreen.Select(sample => new PlotPoint(sample.X, sample.Y)));
+        if (points.Count > 0) points.Add(points[^1] with { X = right });
         surface.Polyline(points, new TimelineInk(TimelineInkKeys.LocoSpeedLine), 2);
 
         if (!context.ShowContent) return;
 
         var direction = LocalizationService.Instance[loco.Forward ? "LogForward" : "LogBackward"];
-        for (var index = 0; index < loco.Samples.Count; index++)
+        foreach (var sample in onScreen)
         {
-            var sample = loco.Samples[index];
-            var point = points[index];
-            var tooltip = string.Create(CultureInfo.CurrentCulture, $"{sample.Speed} · {direction} · {sample.At:HH:mm:ss}");
-            surface.Hit(new BarRect(point.X - 4, point.Y - 4, 8, 8), tooltip);
+            var tooltip = string.Create(CultureInfo.CurrentCulture, $"{sample.Sample.Speed} · {direction} · {sample.Sample.At:HH:mm:ss}");
+            surface.Hit(new BarRect(sample.X - 4, sample.Y - 4, 8, 8), tooltip);
         }
 
         var latest = loco.Samples.Select(sample => sample.Speed).LastOrDefault();
@@ -48,17 +57,14 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
         surface.Text(label, rect.X + 5, rect.Y + Inset + 6, new TimelineInk(TimelineInkKeys.LocoText));
     }
 
-    private PlotPoint Plot(LocoSpeedSample sample, LocoInterval loco, BarRect rect, ChartViewport viewport)
+    private double SpeedY(int speed, LocoInterval loco, BarRect rect)
     {
-        var rawX = _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At);
-        var x = Math.Clamp(rawX, rect.X, rect.X + rect.W);
-
         var top = rect.Y + Inset;
         var bottom = rect.Y + rect.H - Inset;
         var usable = bottom - top;
-        var fraction = loco.MaxSpeed > 0 ? Math.Clamp((double)sample.Speed / loco.MaxSpeed, 0, 1) : 0;
-        var y = loco.Forward ? bottom - fraction * usable : top + fraction * usable;
-
-        return new PlotPoint(x, y);
+        var fraction = loco.MaxSpeed > 0 ? Math.Clamp((double)speed / loco.MaxSpeed, 0, 1) : 0;
+        return loco.Forward ? bottom - fraction * usable : top + fraction * usable;
     }
+
+    private sealed record PlottedSample(LocoSpeedSample Sample, double X, double Y);
 }

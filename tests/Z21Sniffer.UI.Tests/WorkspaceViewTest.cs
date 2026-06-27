@@ -124,6 +124,28 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void TimelineControl_WithLocoLaneStartingBeforeViewport_RendersWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var loco = timeline.Registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3);
+        loco.Apply(83, forward: true, maxSpeed: 126, clock.Now);
+        loco.Apply(10, forward: true, maxSpeed: 126, clock.Now.AddSeconds(1));
+        loco.Apply(91, forward: true, maxSpeed: 126, clock.Now.AddSeconds(2));
+        loco.Apply(34, forward: true, maxSpeed: 126, clock.Now.AddSeconds(3));
+        clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(200);
+        timeline.Vm.Tick();
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.ViewportStart, Is.GreaterThan(loco.Intervals[0].Start));
+    }
+
+    [AvaloniaTest]
     public void TimelineControl_EmptyArea_IsHitTestVisibleForPanAndZoom()
     {
         var clock = new StubClock();

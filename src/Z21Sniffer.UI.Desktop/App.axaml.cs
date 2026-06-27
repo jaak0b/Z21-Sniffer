@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Microsoft.Extensions.Logging;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Mcp;
@@ -25,6 +26,16 @@ public partial class App : Application
             builder.RegisterModule(new UiModule(ResolveDataDirectory()));
             var container = builder.Build();
 
+            var log = container.Resolve<ILoggerFactory>().CreateLogger("Z21Sniffer");
+            log.LogInformation("Z21Sniffer starting.");
+            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+                log.LogCritical(e.ExceptionObject as Exception, "Unhandled AppDomain exception.");
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+            {
+                log.LogError(e.Exception, "Unobserved task exception.");
+                e.SetObserved();
+            };
+
             var window = new MainWindow();
             var picker = new DesktopFilePicker(window);
 
@@ -44,7 +55,17 @@ public partial class App : Application
                 mcpController,
                 new AvaloniaThemeController(),
                 container.Resolve<ILogTextStore>(),
-                action => Dispatcher.UIThread.Post(action),
+                action => Dispatcher.UIThread.Post(() =>
+                {
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        log.LogError(ex, "Unhandled exception in a UI-dispatched handler.");
+                    }
+                }),
                 picker.SaveJsonAsync,
                 picker.OpenJsonAsync,
                 picker.ExportLogAsync,
@@ -53,7 +74,27 @@ public partial class App : Application
             api = new AvaloniaSnifferApi(workspace, workspace.TimelineClock, new SensorSummaryCalculator());
             window.DataContext = workspace;
 
-            desktop.ShutdownRequested += async (_, _) => await mcpController.StopAsync();
+            var shutdownCleanupDone = false;
+            desktop.ShutdownRequested += async (_, e) =>
+            {
+                if (shutdownCleanupDone)
+                    return;
+
+                e.Cancel = true;
+                try
+                {
+                    if (workspace.Connection.IsConnected)
+                        await workspace.Connection.DisconnectAsync();
+                }
+                catch (Exception ex)
+                {
+                    log.LogError(ex, "Error disconnecting from the command station during shutdown.");
+                }
+
+                await mcpController.StopAsync();
+                shutdownCleanupDone = true;
+                desktop.Shutdown();
+            };
             desktop.MainWindow = window;
         }
 

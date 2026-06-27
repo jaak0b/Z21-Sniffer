@@ -191,6 +191,56 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_IntervalStartsBeforeViewport_EntersAtLastOffScreenReadingWithoutBunching()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (-3, 20), (-2, 90), (-1, 30), (3, 80)));
+
+        var atLeftEdge = _surface.Polylines.Single().Points.Where(point => point.X == Rect.X).ToList();
+        Assert.That(atLeftEdge, Has.Count.EqualTo(1));
+        Assert.That(atLeftEdge[0].Y, Is.EqualTo(35.2).Within(1e-6));
+    }
+
+    [Test]
+    public void Draw_ReadingExactlyAtLeftEdge_CountsOnceAndStaysOnScreen()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (0, 50), (3, 80)));
+
+        var atLeftEdge = _surface.Polylines.Single().Points.Where(point => point.X == Rect.X).ToList();
+        Assert.That(atLeftEdge, Has.Count.EqualTo(1));
+        Assert.That(_surface.Hits, Has.Count.EqualTo(2));
+    }
+
+    [Test]
+    public void Draw_ReadingExactlyAtRightEdge_StaysOnScreen()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (10, 50)));
+
+        Assert.That(_surface.Hits, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void Draw_OffScreenReadings_RegisterNoHitAreas()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (-3, 20), (-2, 90), (-1, 30), (3, 80)));
+
+        Assert.That(_surface.Hits, Has.Count.EqualTo(1));
+        Assert.That(_surface.Hits[0].Text, Does.Contain("80"));
+    }
+
+    [Test]
+    public void Draw_IntervalSpansEntireViewport_DrawsFlatLineAtHeldSpeed()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (-2, 40), (20, 80)));
+
+        var points = _surface.Polylines.Single().Points;
+        Assert.That(points, Has.Count.EqualTo(2));
+        Assert.That(points[0].X, Is.EqualTo(Rect.X));
+        Assert.That(points[1].X, Is.EqualTo(Rect.X + Rect.W));
+        Assert.That(points[0].Y, Is.EqualTo(30.6).Within(1e-6));
+        Assert.That(points[1].Y, Is.EqualTo(30.6).Within(1e-6));
+    }
+
+    [Test]
     public void Draw_Label_DrawnAtTopLeftWithLatestSpeed()
     {
         _source.Label = "Express";

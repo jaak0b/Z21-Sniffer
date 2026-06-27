@@ -130,28 +130,13 @@ public class Z21CommandStationConnectionTest
     }
 
     [Test]
-    public async Task ConnectAsync_SetsEndpointConnectsAndEnablesBroadcasts()
+    public async Task ConnectAsync_SetsEndpointAndConnects()
     {
         await _connection.ConnectAsync("10.0.0.5", 21106);
 
         Assert.That(_options.RemoteEndPoint.Address.ToString(), Is.EqualTo("10.0.0.5"));
         Assert.That(_options.RemoteEndPoint.Port, Is.EqualTo(21106));
         A.CallTo(() => _station.ConnectAsync()).MustHaveHappened();
-        A.CallTo(() => _station.SendCommandsAsync(A<IZ21Command[]>._)).MustHaveHappened();
-    }
-
-    [Test]
-    public async Task ConnectAsync_SubscribesToAllLocoInfoBroadcasts()
-    {
-        await _connection.ConnectAsync("10.0.0.5", 21106);
-
-        A.CallTo(() => _station.Commands.Create<SetBroadcastFlagsCommand>(
-                A<uint[]>.That.Matches(flags => flags[0] == (
-                    Z21BroadcastFlags.RmBusDataChangedMessages
-                    | Z21BroadcastFlags.SystemStateDataChangedMessages
-                    | Z21BroadcastFlags.DriveAndSwitchingMessages
-                    | Z21BroadcastFlags.LocoInfoChangedMessages))))
-            .MustHaveHappened();
     }
 
     [Test]

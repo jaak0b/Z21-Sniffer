@@ -29,6 +29,7 @@ Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar
 - The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.
 - Loco bars are **taller** than sensor bars to give the graph room, and they grow as you zoom in and shrink back to the normal bar height as you zoom out.
 - Like sensors, each loco is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry); the name is remembered between runs.
+- When a loco bar runs off the **left edge** of the view — because you've scrolled or zoomed into the middle of a long run — the graph doesn't crowd every earlier reading against the edge. Instead the line simply enters at the speed that was in effect at that moment (the last reading before the edge) and carries on, so the start of an off-screen run stays clean rather than smearing into a vertical streak.
 
 ## Scrolling and zooming through history
 

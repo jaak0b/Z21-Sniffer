@@ -21,14 +21,15 @@ public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
             return;
         }
 
-        if (CurrentInterval is null || CurrentInterval.Forward != forward)
+        var interval = CurrentInterval;
+        if (interval is null || interval.Forward != forward)
         {
             CloseInterval(at, IntervalEndReason.FallingEdge);
-            var opened = CreateInterval(at);
-            opened.Forward = forward;
-            opened.MaxSpeed = maxSpeed;
+            interval = CreateInterval(at);
+            interval.Forward = forward;
+            interval.MaxSpeed = maxSpeed;
         }
 
-        CurrentInterval!.Samples.Add(new LocoSpeedSample(at, speed));
+        interval.Samples.Add(new LocoSpeedSample(at, speed));
     }
 }
