@@ -47,6 +47,24 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void Toolbar_Separators_AreVerticallyCenteredWithFixedHeight()
+    {
+        var window = new Window
+        {
+            Content = new WorkspaceView { DataContext = BuildWorkspace().Vm },
+            Width = 1000,
+            Height = 600
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var separators = window.GetVisualDescendants().OfType<Border>().Where(b => b.Width == 1).ToList();
+        Assert.That(separators, Has.Count.EqualTo(2));
+        Assert.That(separators, Has.All.Matches<Border>(
+            b => b.VerticalAlignment == Avalonia.Layout.VerticalAlignment.Center && b.Height > 0));
+    }
+
+    [AvaloniaTest]
     public void WorkspaceView_LogTab_RendersAppendedEntries()
     {
         var workspace = BuildWorkspace();

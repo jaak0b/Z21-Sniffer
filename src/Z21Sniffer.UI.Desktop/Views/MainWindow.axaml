@@ -3,6 +3,9 @@
         xmlns:views="clr-namespace:Z21Sniffer.UI.Desktop.Views"
         x:Class="Z21Sniffer.UI.Desktop.Views.MainWindow"
         Width="1180" Height="720"
-        Title="Z21 Feedback Sniffer">
+        Title="Z21 Feedback Sniffer"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1">
   <views:WorkspaceView />
 </Window>

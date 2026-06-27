@@ -100,6 +100,9 @@
   <data name="Source" xml:space="preserve"><value>Quelle</value></data>
   <data name="Enabled" xml:space="preserve"><value>Aktiviert</value></data>
   <data name="Close" xml:space="preserve"><value>Schließen</value></data>
+  <data name="Minimize" xml:space="preserve"><value>Minimieren</value></data>
+  <data name="Maximize" xml:space="preserve"><value>Maximieren</value></data>
+  <data name="Restore" xml:space="preserve"><value>Wiederherstellen</value></data>
   <data name="Off" xml:space="preserve"><value>aus</value></data>
   <data name="UnitSeconds" xml:space="preserve"><value>s</value></data>
   <data name="ThresholdTooltip" xml:space="preserve"><value>Hebt Kontakte hervor, deren EIN-Dauer kürzer als diese Sekundenzahl ist. 0 deaktiviert die Hervorhebung.</value></data>

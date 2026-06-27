@@ -22,3 +22,7 @@ If you have ever had a track section that reports "occupied" when nothing is sit
 - **Reading the feedback with Claude** — switching on the built-in MCP server so an AI assistant can query your live recording.
 
 There is also a built-in simulator, so you can try the whole thing out without any hardware connected.
+
+## The window
+
+The app wears its own title bar rather than the standard Windows one: the toolbar row at the very top — with the ⚙ settings, Connect, recording and Session controls — doubles as the title bar. Drag any empty part of it to move the window, and double-click it to maximize or restore. The minimize, maximize/restore and close buttons sit at the far right of that same row.

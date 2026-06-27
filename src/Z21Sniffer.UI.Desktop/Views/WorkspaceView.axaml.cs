@@ -13,6 +13,7 @@ using Z21Sniffer.Presentation.Localization;
 using Z21Sniffer.Presentation.Logging;
 using Z21Sniffer.Presentation.ViewModels;
 using Z21Sniffer.UI.Desktop.Controls;
+using Path = Avalonia.Controls.Shapes.Path;
 
 namespace Z21Sniffer.UI.Desktop.Views;
 
@@ -29,23 +30,81 @@ public partial class WorkspaceView : UserControl
     private ScrollViewer? _hookedLegendScroll;
     private ScrollViewer? _hookedLogScroll;
     private TrafficLogViewModel? _hookedLog;
+    private Window? _hookedWindow;
 
     public WorkspaceView()
     {
         InitializeComponent();
         _scrollSync.Tick += (_, _) => SyncScrollBar();
         AttachedToVisualTree += OnAttached;
+        DetachedFromVisualTree += OnDetached;
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
     private WorkspaceViewModel? ViewModel => DataContext as WorkspaceViewModel;
 
+    private Window? HostWindow => TopLevel.GetTopLevel(this) as Window;
+
     private void OnAttached(object? sender, VisualTreeAttachmentEventArgs e)
     {
         _ghostLayer = this.FindControl<Canvas>("GhostLayer");
         _scrollSync.Start();
         HookLog();
+        HookWindowState();
+    }
+
+    private void OnDetached(object? sender, VisualTreeAttachmentEventArgs e)
+    {
+        if (_hookedWindow is not null) _hookedWindow.PropertyChanged -= OnHostWindowPropertyChanged;
+        _hookedWindow = null;
+    }
+
+    private void OnTitleBarPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed || HostWindow is not { } window) return;
+        if (e.ClickCount == 2) ToggleMaximize();
+        else window.BeginMoveDrag(e);
+    }
+
+    private void OnMinimize(object? sender, RoutedEventArgs e)
+    {
+        if (HostWindow is { } window) window.WindowState = WindowState.Minimized;
+    }
+
+    private void OnMaximizeRestore(object? sender, RoutedEventArgs e) => ToggleMaximize();
+
+    private void OnCloseWindow(object? sender, RoutedEventArgs e) => HostWindow?.Close();
+
+    private void ToggleMaximize()
+    {
+        if (HostWindow is not { } window) return;
+        window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void HookWindowState()
+    {
+        if (HostWindow is not { } window || ReferenceEquals(_hookedWindow, window)) return;
+        _hookedWindow = window;
+        window.PropertyChanged += OnHostWindowPropertyChanged;
+        UpdateMaximizeGlyph();
+    }
+
+    private void OnHostWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == Window.WindowStateProperty) UpdateMaximizeGlyph();
+    }
+
+    private void UpdateMaximizeGlyph()
+    {
+        var maximized = HostWindow?.WindowState == WindowState.Maximized;
+        var maximize = this.FindControl<Path>("MaximizeGlyph");
+        var restore = this.FindControl<Path>("RestoreGlyph");
+        if (maximize is not null) maximize.IsVisible = !maximized;
+        if (restore is not null) restore.IsVisible = maximized;
+
+        var button = this.FindControl<Button>("MaximizeButton");
+        if (button is not null) ToolTip.SetTip(button, LocalizationService.Instance[maximized ? "Restore" : "Maximize"]);
     }
 
     private void OnSessionMenu(object? sender, RoutedEventArgs e)

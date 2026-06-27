@@ -40,29 +40,75 @@
     <Style Selector="Ellipse.statusDot.connected">
       <Setter Property="Fill" Value="{DynamicResource PrimaryBrush}" />
     </Style>
+    <Style Selector="Button.caption">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Width" Value="46" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.caption /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="Button.caption:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+    </Style>
+    <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+    </Style>
+    <Style Selector="Button.caption Path">
+      <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="StrokeThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.caption.close:pointerover Path">
+      <Setter Property="Stroke" Value="{DynamicResource PrimaryForegroundBrush}" />
+    </Style>
   </UserControl.Styles>
 
   <Panel>
   <DockPanel>
 
-    <Border DockPanel.Dock="Top" Padding="8" Background="{DynamicResource SurfaceBrush}">
-      <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-        <Button Content="⚙" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{Binding Localization[Settings]}" Margin="0,0,12,0" />
-        <Button Command="{Binding Connection.ToggleConnectionCommand}" MinWidth="92" Margin="0,0,12,0">
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <Ellipse Classes="statusDot" Classes.connected="{Binding Connection.IsConnected}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <TextBlock Text="{Binding Connection.ToggleLabel}" VerticalAlignment="Center" />
-          </StackPanel>
-        </Button>
-        <Button Content="{Binding Recording.ToggleLabel}" Command="{Binding Recording.ToggleCommand}" Margin="0,0,12,0" />
-        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="4,0" />
-        <controls:UnitInputBox Width="96" Value="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
-                               Unit="{Binding Localization[UnitSeconds]}" Watermark="{Binding Localization[Off]}"
-                               ToolTip.Tip="{Binding Localization[ThresholdTooltip]}"
-                               VerticalAlignment="Center" Margin="0,0,12,0" />
-        <Border Width="1" Background="{DynamicResource BorderBrush}" Margin="4,0" />
-        <Button Content="{Binding Localization[Session]}" Click="OnSessionMenu" />
-      </WrapPanel>
+    <Border DockPanel.Dock="Top" Height="40" Background="{DynamicResource SurfaceBrush}"
+            PointerPressed="OnTitleBarPressed">
+      <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Stretch">
+          <Button x:Name="MinimizeButton" Classes="caption" Click="OnMinimize"
+                  ToolTip.Tip="{Binding Localization[Minimize]}">
+            <Path Data="M0,5 L10,5" />
+          </Button>
+          <Button x:Name="MaximizeButton" Classes="caption" Click="OnMaximizeRestore">
+            <Panel>
+              <Path x:Name="MaximizeGlyph" Data="M0.5,0.5 L9.5,0.5 L9.5,9.5 L0.5,9.5 Z" />
+              <Path x:Name="RestoreGlyph" Data="M2.5,0.5 L9.5,0.5 L9.5,7.5 M0.5,2.5 L7.5,2.5 L7.5,9.5 L0.5,9.5 Z"
+                    IsVisible="False" />
+            </Panel>
+          </Button>
+          <Button x:Name="CloseButton" Classes="caption close" Click="OnCloseWindow"
+                  ToolTip.Tip="{Binding Localization[Close]}">
+            <Path Data="M0,0 L10,10 M0,10 L10,0" />
+          </Button>
+        </StackPanel>
+        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+          <Button Content="⚙" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{Binding Localization[Settings]}" Margin="0,0,12,0" />
+          <Button Command="{Binding Connection.ToggleConnectionCommand}" MinWidth="92" Margin="0,0,12,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <Ellipse Classes="statusDot" Classes.connected="{Binding Connection.IsConnected}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <TextBlock Text="{Binding Connection.ToggleLabel}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Content="{Binding Recording.ToggleLabel}" Command="{Binding Recording.ToggleCommand}" />
+          <Border Width="1" Height="20" VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Margin="8,0" />
+          <controls:UnitInputBox Width="96" Value="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
+                                 Unit="{Binding Localization[UnitSeconds]}" Watermark="{Binding Localization[Off]}"
+                                 ToolTip.Tip="{Binding Localization[ThresholdTooltip]}"
+                                 VerticalAlignment="Center" />
+          <Border Width="1" Height="20" VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Margin="8,0" />
+          <Button Content="{Binding Localization[Session]}" Click="OnSessionMenu" />
+        </WrapPanel>
+      </DockPanel>
     </Border>
 
     <TabControl>

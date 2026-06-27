@@ -100,6 +100,9 @@
   <data name="Source" xml:space="preserve"><value>Source</value></data>
   <data name="Enabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Minimize" xml:space="preserve"><value>Minimize</value></data>
+  <data name="Maximize" xml:space="preserve"><value>Maximize</value></data>
+  <data name="Restore" xml:space="preserve"><value>Restore</value></data>
   <data name="Off" xml:space="preserve"><value>off</value></data>
   <data name="UnitSeconds" xml:space="preserve"><value>s</value></data>
   <data name="ThresholdTooltip" xml:space="preserve"><value>Highlight contacts whose ON time is shorter than this many seconds. Set to 0 to turn highlighting off.</value></data>
