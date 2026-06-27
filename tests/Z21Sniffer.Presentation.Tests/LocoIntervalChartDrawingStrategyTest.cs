@@ -101,6 +101,38 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_MarksEachOnScreenSampleWithACircleCenteredOnItsPoint()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 80), (4, 90)));
+
+        var points = _surface.Polylines.Single().Points;
+        Assert.That(_surface.Markers, Has.Count.EqualTo(2));
+        Assert.That(_surface.Markers[0].CenterX, Is.EqualTo(points[0].X).Within(1e-6));
+        Assert.That(_surface.Markers[0].CenterY, Is.EqualTo(points[0].Y).Within(1e-6));
+        Assert.That(_surface.Markers[1].CenterX, Is.EqualTo(40).Within(1e-6));
+    }
+
+    [Test]
+    public void Draw_Markers_UseTheSpeedLineInkAndAreSlightlyThickerThanTheLine()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 80)));
+
+        var line = _surface.Polylines.Single();
+        var marker = _surface.Markers.Single();
+        Assert.That(marker.Ink.Key, Is.EqualTo(TimelineInkKeys.LocoSpeedLine));
+        Assert.That(marker.Radius, Is.GreaterThan(0));
+        Assert.That(marker.Thickness, Is.GreaterThan(line.Thickness));
+    }
+
+    [Test]
+    public void Draw_OffScreenReadings_DrawNoMarkers()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (-3, 20), (-2, 90), (-1, 30), (3, 80)));
+
+        Assert.That(_surface.Markers, Has.Count.EqualTo(1));
+    }
+
+    [Test]
     public void Draw_WithoutContent_RegistersNoHitAreas()
     {
         Draw(Interval(forward: true, maxSpeed: 100, (2, 80)), showContent: false);

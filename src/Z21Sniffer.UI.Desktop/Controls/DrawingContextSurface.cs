@@ -56,6 +56,9 @@ public sealed class DrawingContextSurface : ITimelineSurface
         }
     }
 
+    public void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness) =>
+        _context.DrawEllipse(null, new Pen(BrushFor(ink), thickness), new Point(centerX, centerY), radius, radius);
+
     public void Hit(BarRect rect, string text) =>
         HitAreas.Add((new Rect(rect.X, rect.Y + _verticalOffset, rect.W, rect.H), text));
 

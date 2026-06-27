@@ -10,6 +10,9 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
     private const double BaseHeight = 26;
     private const double Inset = 3;
     private const double FlagWidth = 4;
+    private const double LineThickness = 2;
+    private const double MarkerRadius = 2.5;
+    private const double MarkerThickness = 2.5;
 
     private readonly BarGeometry _geometry = new();
 
@@ -41,7 +44,10 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
         if (entry is { } enter) points.Add(new PlotPoint(left, enter.Y));
         points.AddRange(onScreen.Select(sample => new PlotPoint(sample.X, sample.Y)));
         if (points.Count > 0) points.Add(points[^1] with { X = right });
-        surface.Polyline(points, new TimelineInk(TimelineInkKeys.LocoSpeedLine), 2);
+        surface.Polyline(points, new TimelineInk(TimelineInkKeys.LocoSpeedLine), LineThickness);
+
+        foreach (var sample in onScreen)
+            surface.Marker(sample.X, sample.Y, MarkerRadius, new TimelineInk(TimelineInkKeys.LocoSpeedLine), MarkerThickness);
 
         if (!context.ShowContent) return;
 

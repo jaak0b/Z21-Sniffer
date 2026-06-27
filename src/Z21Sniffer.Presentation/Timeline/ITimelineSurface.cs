@@ -10,5 +10,7 @@ public interface ITimelineSurface
 
     void Polyline(IReadOnlyList<PlotPoint> points, TimelineInk ink, double thickness);
 
+    void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness);
+
     void Hit(BarRect rect, string text);
 }

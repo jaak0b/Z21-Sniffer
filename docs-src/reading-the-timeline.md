@@ -39,6 +39,7 @@ Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar
 
 - Each bar is **labelled with the loco's identity** — its address with a `Loco` tag, e.g. `Loco 27`, or `Express · Loco 27` once you've named it — so you can tell whose trace you're looking at. Speed and direction aren't repeated there as bare numbers; the graph already shows both.
 - **Direction** is shown by which way the graph is oriented. Driving forward, the line sits low at a standstill and climbs toward the top as the loco speeds up. In reverse the whole graph flips — zero is at the top and full speed is at the bottom — so a glance tells you which way the loco was heading.
+- Every recorded reading is marked with a small **circle right on the line** where the data point sits, so you can tell where an actual sample was taken from where the line is just holding a value between readings.
 - **Hover the line** to read the exact speed at that instant — labelled, e.g. `Speed 67` — along with the direction and the time.
 - The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.
 - Loco bars are **taller** than sensor bars to give the graph room, and they grow as you zoom in and shrink back to the normal bar height as you zoom out.
