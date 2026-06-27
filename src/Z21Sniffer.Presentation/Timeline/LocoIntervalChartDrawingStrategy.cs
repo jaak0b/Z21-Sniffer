@@ -46,15 +46,22 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
         if (!context.ShowContent) return;
 
         var direction = LocalizationService.Instance[loco.Forward ? "LogForward" : "LogBackward"];
+        var speedWord = LocalizationService.Instance["SpeedLabel"];
         foreach (var sample in onScreen)
         {
-            var tooltip = string.Create(CultureInfo.CurrentCulture, $"{sample.Sample.Speed} · {direction} · {sample.Sample.At:HH:mm:ss}");
+            var tooltip = string.Create(CultureInfo.CurrentCulture, $"{speedWord} {sample.Sample.Speed} · {direction} · {sample.Sample.At:HH:mm:ss}");
             surface.Hit(new BarRect(sample.X - 4, sample.Y - 4, 8, 8), tooltip);
         }
 
-        var latest = loco.Samples.Select(sample => sample.Speed).LastOrDefault();
-        var label = string.Create(CultureInfo.CurrentCulture, $"{locoSource.Label} · {latest}");
-        surface.Text(label, rect.X + 5, rect.Y + Inset + 6, new TimelineInk(TimelineInkKeys.LocoText));
+        surface.Text(Identity(locoSource), rect.X + 5, rect.Y + Inset + 6, new TimelineInk(TimelineInkKeys.LocoText));
+    }
+
+    private string Identity(LocoIntervalSource source)
+    {
+        var labelled = string.Create(CultureInfo.CurrentCulture, $"{LocalizationService.Instance["LocoPrefix"]} {source.Address}");
+        return source.HasAlias
+            ? string.Create(CultureInfo.CurrentCulture, $"{source.Label} · {labelled}")
+            : labelled;
     }
 
     private double SpeedY(int speed, LocoInterval loco, BarRect rect)

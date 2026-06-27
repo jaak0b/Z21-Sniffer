@@ -24,8 +24,9 @@ While you record, the app also tracks whether it was talking to the command stat
 
 Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar carries a **line graph of the speed** over time, drawn right inside it. While a loco is moving you get one bar; the moment its speed drops to zero the bar ends (a falling edge) and the next time it pulls away a fresh bar begins.
 
+- Each bar is **labelled with the loco's identity** — its address with a `Loco` tag, e.g. `Loco 27`, or `Express · Loco 27` once you've named it — so you can tell whose trace you're looking at. Speed and direction aren't repeated there as bare numbers; the graph already shows both.
 - **Direction** is shown by which way the graph is oriented. Driving forward, the line sits low at a standstill and climbs toward the top as the loco speeds up. In reverse the whole graph flips — zero is at the top and full speed is at the bottom — so a glance tells you which way the loco was heading.
-- **Hover the line** to read the exact speed at that instant, along with the direction and the time, in a tooltip.
+- **Hover the line** to read the exact speed at that instant — labelled, e.g. `Speed 67` — along with the direction and the time.
 - The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.
 - Loco bars are **taller** than sensor bars to give the graph room, and they grow as you zoom in and shrink back to the normal bar height as you zoom out.
 - Like sensors, each loco is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry); the name is remembered between runs.
@@ -43,8 +44,9 @@ Scrolling or zooming pauses the live follow so the view holds still while you st
 
 ## The legend
 
-The panel on the left is the legend — one entry per sensor, lined up with its row:
+The panel on the left is the legend — one entry per row, lined up with its bar:
 
+- Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, and a locomotive for a loco. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
 - **Rename** a sensor by typing a friendly name straight into its entry (press Enter or click away to keep it). The name is remembered between runs.
 - **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs.
 - **Remove** a sensor with the **✕** that appears when you hover its entry; you'll be asked to confirm. It disappears from both the legend and the timeline.

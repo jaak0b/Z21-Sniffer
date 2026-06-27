@@ -89,6 +89,36 @@ public class LocoIntervalSourceTest
     }
 
     [Test]
+    public void HasAlias_ByDefault_IsFalse()
+    {
+        Assert.That(_source.HasAlias, Is.False);
+    }
+
+    [Test]
+    public void HasAlias_WhenSetToACustomName_IsTrue()
+    {
+        _source.Label = "Express";
+
+        Assert.That(_source.HasAlias, Is.True);
+    }
+
+    [Test]
+    public void HasAlias_WhenSetToTheAddressString_IsFalse()
+    {
+        _source.Label = "482";
+
+        Assert.That(_source.HasAlias, Is.False);
+    }
+
+    [Test]
+    public void HasAlias_WhenSetToBlank_IsFalse()
+    {
+        _source.Label = "   ";
+
+        Assert.That(_source.HasAlias, Is.False);
+    }
+
+    [Test]
     public void IntervalType_IsLocoInterval()
     {
         Assert.That(_source.IntervalType, Is.EqualTo(typeof(LocoInterval)));

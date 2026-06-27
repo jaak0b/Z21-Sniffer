@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
+using Z21Sniffer.Presentation.Localization;
 using Z21Sniffer.Presentation.ViewModels;
 
 namespace Z21Sniffer.Presentation.Tests;
@@ -30,10 +31,29 @@ public class LocoLegendContentViewModelTest
         _vm = new LocoLegendContentViewModel(_source, _registry, _confirmation);
     }
 
+    [TearDown]
+    public void TearDown() => LocalizationService.Instance.Apply("en");
+
     [Test]
     public void Label_DefaultsToAddress()
     {
         Assert.That(_vm.Label, Is.EqualTo("482"));
+    }
+
+    [Test]
+    public void Details_DescribesAddress()
+    {
+        LocalizationService.Instance.Apply("en");
+
+        Assert.That(_vm.Details, Is.EqualTo("Locomotive · address 482"));
+    }
+
+    [Test]
+    public void Details_IsLocalized()
+    {
+        LocalizationService.Instance.Apply("de");
+
+        Assert.That(_vm.Details, Is.EqualTo("Lokomotive · Adresse 482"));
     }
 
     [Test]

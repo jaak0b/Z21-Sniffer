@@ -97,7 +97,7 @@ public class LocoIntervalChartDrawingStrategyTest
         Draw(Interval(forward: true, maxSpeed: 100, (2, 80), (4, 90)));
 
         Assert.That(_surface.Hits, Has.Count.EqualTo(2));
-        Assert.That(_surface.Hits[0].Text, Does.Contain("80").And.Contain("forward"));
+        Assert.That(_surface.Hits[0].Text, Does.Contain("Speed 80").And.Contain("forward"));
     }
 
     [Test]
@@ -127,7 +127,7 @@ public class LocoIntervalChartDrawingStrategyTest
     {
         Draw(Interval(forward: false, maxSpeed: 100, (2, 80)));
 
-        Assert.That(_surface.Hits[0].Text, Does.Contain("80").And.Contain("backward"));
+        Assert.That(_surface.Hits[0].Text, Does.Contain("Speed 80").And.Contain("backward"));
     }
 
     [Test]
@@ -241,16 +241,45 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_Label_DrawnAtTopLeftWithLatestSpeed()
+    public void Draw_Label_WithCustomAlias_ShowsAliasAndAddressWithoutSpeed()
     {
         _source.Label = "Express";
 
         Draw(Interval(forward: true, maxSpeed: 100, (2, 40), (4, 90)));
 
         var label = _surface.Texts.Single(t => t.Ink.Key == TimelineInkKeys.LocoText);
-        Assert.That(label.Text, Is.EqualTo("Express · 90"));
+        Assert.That(label.Text, Is.EqualTo("Express · Loco 3"));
         Assert.That(label.X, Is.EqualTo(Rect.X + 5));
         Assert.That(label.Y, Is.EqualTo(Rect.Y + 3 + 6));
+    }
+
+    [Test]
+    public void Draw_Label_WithoutCustomAlias_ShowsLabelledAddressOnly()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 40), (4, 90)));
+
+        var label = _surface.Texts.Single(t => t.Ink.Key == TimelineInkKeys.LocoText);
+        Assert.That(label.Text, Is.EqualTo("Loco 3"));
+    }
+
+    [Test]
+    public void Draw_Label_WithBlankAlias_FallsBackToLabelledAddressWithoutDanglingSeparator()
+    {
+        _source.Label = "   ";
+
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 40)));
+
+        var label = _surface.Texts.Single(t => t.Ink.Key == TimelineInkKeys.LocoText);
+        Assert.That(label.Text, Is.EqualTo("Loco 3"));
+    }
+
+    [Test]
+    public void Draw_Label_NeverContainsTheSpeed()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 40), (4, 90)));
+
+        var label = _surface.Texts.Single(t => t.Ink.Key == TimelineInkKeys.LocoText);
+        Assert.That(label.Text, Does.Not.Contain("90"));
     }
 
 }

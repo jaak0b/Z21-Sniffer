@@ -13,6 +13,11 @@ public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
         set => Persistence.SetValue($"{Id}/label", value);
     }
 
+    public bool HasAlias =>
+        Persistence.GetValue<string>($"{Id}/label") is { } stored
+        && !string.IsNullOrWhiteSpace(stored)
+        && stored != Address.ToString(CultureInfo.InvariantCulture);
+
     public void Apply(int speed, bool forward, int maxSpeed, DateTimeOffset at)
     {
         if (speed == 0)

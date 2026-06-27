@@ -1,7 +1,9 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
+using Z21Sniffer.Presentation.Localization;
 
 namespace Z21Sniffer.Presentation.ViewModels;
 
@@ -21,6 +23,8 @@ public sealed partial class SensorLegendContentViewModel : ObservableObject
         _confirmation = confirmation;
         _label = source.Label;
     }
+
+    public string Details => string.Format(CultureInfo.CurrentCulture, LocalizationService.Instance["SensorDetails"], _source.Sensor.Module, _source.Sensor.Contact);
 
     [RelayCommand]
     private void CommitRename() => _source.Label = Label;

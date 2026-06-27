@@ -128,6 +128,11 @@
   <data name="LogLoco" xml:space="preserve"><value>Lok {0}: {1}, Fahrstufe {2}</value></data>
   <data name="LogForward" xml:space="preserve"><value>vorwärts</value></data>
   <data name="LogBackward" xml:space="preserve"><value>rückwärts</value></data>
+  <data name="LocoPrefix" xml:space="preserve"><value>Lok</value></data>
+  <data name="SpeedLabel" xml:space="preserve"><value>Geschwindigkeit</value></data>
+  <data name="ConnectionDetails" xml:space="preserve"><value>Verbindung zur Zentrale</value></data>
+  <data name="SensorDetails" xml:space="preserve"><value>R-Bus-Rückmeldung · Modul {0}, Kontakt {1}</value></data>
+  <data name="LocoDetails" xml:space="preserve"><value>Lokomotive · Adresse {0}</value></data>
   <data name="LogTurnout" xml:space="preserve"><value>Weiche {0} → {1}</value></data>
   <data name="LogTurnoutOutput1" xml:space="preserve"><value>Ausgang 1</value></data>
   <data name="LogTurnoutOutput2" xml:space="preserve"><value>Ausgang 2</value></data>

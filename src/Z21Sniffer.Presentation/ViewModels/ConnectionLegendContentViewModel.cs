@@ -10,4 +10,6 @@ public sealed class ConnectionLegendContentViewModel
     public ConnectionSource Source { get; }
 
     public string Label => LocalizationService.Instance["Connection"];
+
+    public string Details => LocalizationService.Instance["ConnectionDetails"];
 }

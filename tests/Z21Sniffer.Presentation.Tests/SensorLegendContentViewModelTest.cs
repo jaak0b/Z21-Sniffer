@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
+using Z21Sniffer.Presentation.Localization;
 using Z21Sniffer.Presentation.ViewModels;
 
 namespace Z21Sniffer.Presentation.Tests;
@@ -32,10 +33,29 @@ public class SensorLegendContentViewModelTest
         _vm = new SensorLegendContentViewModel(_source, _registry, _confirmation);
     }
 
+    [TearDown]
+    public void TearDown() => LocalizationService.Instance.Apply("en");
+
     [Test]
     public void Label_ReflectsSourceLabel()
     {
         Assert.That(_vm.Label, Is.EqualTo("M1.1"));
+    }
+
+    [Test]
+    public void Details_DescribesModuleAndContact()
+    {
+        LocalizationService.Instance.Apply("en");
+
+        Assert.That(_vm.Details, Is.EqualTo("R-Bus feedback · module 1, contact 1"));
+    }
+
+    [Test]
+    public void Details_IsLocalized()
+    {
+        LocalizationService.Instance.Apply("de");
+
+        Assert.That(_vm.Details, Is.EqualTo("R-Bus-Rückmeldung · Modul 1, Kontakt 1"));
     }
 
     [Test]
