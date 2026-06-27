@@ -46,6 +46,14 @@ public class MainWindowTest
     }
 
     [AvaloniaTest]
+    public void Window_HasApplicationIcon()
+    {
+        var window = ShownWindow();
+
+        Assert.That(window.Icon, Is.Not.Null);
+    }
+
+    [AvaloniaTest]
     public void TitleBar_HasMinimizeMaximizeAndCloseButtons()
     {
         var window = ShownWindow();
