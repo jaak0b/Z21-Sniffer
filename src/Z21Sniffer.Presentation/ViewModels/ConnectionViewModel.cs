@@ -77,4 +77,7 @@ public sealed partial class ConnectionViewModel : ObservableObject
         _active is { } connection
             ? connection.SetTrackPowerAsync(on)
             : throw new InvalidOperationException("Not connected to a command station.");
+
+    public Task RequestCurrentStateAsync() =>
+        _active is { IsConnected: true } connection ? connection.RequestCurrentStateAsync() : Task.CompletedTask;
 }

@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageVersion Include="Z21" Version="7.1.7" />
-    <PackageVersion Include="Z21.Autofac" Version="7.1.7" />
+    <PackageVersion Include="Z21" Version="7.1.9" />
+    <PackageVersion Include="Z21.Autofac" Version="7.1.9" />
   </ItemGroup>
 
   <ItemGroup>

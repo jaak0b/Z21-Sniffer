@@ -129,6 +129,35 @@ public class ConnectionViewModelTest
     }
 
     [Test]
+    public async Task RequestCurrentStateAsync_WhenConnected_DelegatesToActiveConnection()
+    {
+        A.CallTo(() => _connection.IsConnected).Returns(true);
+        await _vm.ToggleConnectionCommand.ExecuteAsync(null);
+
+        await _vm.RequestCurrentStateAsync();
+
+        A.CallTo(() => _connection.RequestCurrentStateAsync()).MustHaveHappened();
+    }
+
+    [Test]
+    public async Task RequestCurrentStateAsync_BeforeConnect_DoesNothing()
+    {
+        await _vm.RequestCurrentStateAsync();
+
+        A.CallTo(() => _connection.RequestCurrentStateAsync()).MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task RequestCurrentStateAsync_WhenActiveButNotConnected_DoesNothing()
+    {
+        await _vm.ToggleConnectionCommand.ExecuteAsync(null);
+
+        await _vm.RequestCurrentStateAsync();
+
+        A.CallTo(() => _connection.RequestCurrentStateAsync()).MustNotHaveHappened();
+    }
+
+    [Test]
     public void ToggleLabel_WhenDisconnected_IsLocalizedConnect()
     {
         Assert.That(_vm.ToggleLabel, Is.EqualTo(LocalizationService.Instance["Connect"]));

@@ -67,6 +67,32 @@ public class SimulatedCommandStationConnectionTest
     }
 
     [Test]
+    public async Task ConnectAsync_SeedsInitialFeedbackFrame()
+    {
+        IReadOnlyList<SensorState>? received = null;
+        _connection.FeedbackReceived += (_, states) => received = states;
+
+        await _connection.ConnectAsync("ignored", 0);
+
+        Assert.That(received, Is.Not.Null);
+        Assert.That(received, Is.Not.Empty);
+    }
+
+    [Test]
+    public async Task RequestCurrentStateAsync_RaisesFeedbackAndSystemState()
+    {
+        IReadOnlyList<SensorState>? received = null;
+        SystemSnapshot? snapshot = null;
+        _connection.FeedbackReceived += (_, states) => received = states;
+        _connection.SystemStateReceived += (_, s) => snapshot = s;
+
+        await _connection.RequestCurrentStateAsync();
+
+        Assert.That(received, Is.Not.Empty);
+        Assert.That(snapshot, Is.Not.Null);
+    }
+
+    [Test]
     public async Task ConnectAsync_CalledTwice_StaysConnectedAndDisconnectsCleanly()
     {
         await _connection.ConnectAsync("ignored", 0);

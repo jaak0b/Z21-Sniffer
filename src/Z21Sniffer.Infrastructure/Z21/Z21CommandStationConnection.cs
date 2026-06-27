@@ -52,7 +52,11 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
     {
         _options.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
         await _station.ConnectAsync();
+        await RequestCurrentStateAsync();
+    }
 
+    public async Task RequestCurrentStateAsync()
+    {
         await _station.RequestFeedbackAsync(0);
         await _station.RequestFeedbackAsync(1);
         await _station.RequestSystemStateAsync();

@@ -8,6 +8,8 @@ The timeline only moves while you are recording. The **Start recording** button 
 
 Each **Start** begins a fresh recording — the previous rows and bars are cleared and the clock resets. Before you ever press Start, the axis stays still; it never ticks away on its own while you're just connected and watching.
 
+Both **Connect** and **Start recording** ask the station for its current state — every feedback contact and the system/track-power state — so a section that was *already* occupied (or a power state that was already set) shows from the very first moment of the recording, instead of staying blank until it next changes. That means it doesn't matter whether you connect first and then start, or start first and then connect: whichever you do second seeds the current picture.
+
 Disconnecting does **not** stop a recording. If the link to the station drops mid-run, the timeline keeps going and the gap is captured on the connection row (below) instead.
 
 ## Rows and bars

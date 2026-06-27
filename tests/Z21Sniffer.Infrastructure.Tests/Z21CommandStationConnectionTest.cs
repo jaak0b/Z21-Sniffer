@@ -157,6 +157,16 @@ public class Z21CommandStationConnectionTest
     }
 
     [Test]
+    public async Task RequestCurrentStateAsync_RequestsBothFeedbackGroupsAndSystemState()
+    {
+        await _connection.RequestCurrentStateAsync();
+
+        A.CallTo(() => _station.RequestFeedbackAsync(0)).MustHaveHappened();
+        A.CallTo(() => _station.RequestFeedbackAsync(1)).MustHaveHappened();
+        A.CallTo(() => _station.RequestSystemStateAsync()).MustHaveHappened();
+    }
+
+    [Test]
     public async Task SetTrackPowerAsync_True_TurnsStationPowerOn()
     {
         await _connection.SetTrackPowerAsync(true);

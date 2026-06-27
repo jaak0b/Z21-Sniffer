@@ -20,5 +20,7 @@ public interface ICommandStationConnection : IFeedbackSource
 
     Task DisconnectAsync();
 
+    Task RequestCurrentStateAsync();
+
     Task SetTrackPowerAsync(bool on);
 }

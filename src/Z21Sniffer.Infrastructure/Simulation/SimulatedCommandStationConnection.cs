@@ -26,14 +26,20 @@ public sealed class SimulatedCommandStationConnection : ICommandStationConnectio
 
     public bool IsConnected { get; private set; }
 
-    public Task ConnectAsync(string host, int port)
+    public async Task ConnectAsync(string host, int port)
     {
         _timer?.Dispose();
         IsConnected = true;
         ConnectionChanged?.Invoke(this, true);
         TrackPowerChanged?.Invoke(this, true);
-        SystemStateReceived?.Invoke(this, _script.System(0));
+        await RequestCurrentStateAsync();
         _timer = new Timer(_ => EmitNext(), state: null, _interval, _interval);
+    }
+
+    public Task RequestCurrentStateAsync()
+    {
+        FeedbackReceived?.Invoke(this, _script.Frame(_tick));
+        SystemStateReceived?.Invoke(this, _script.System(_tick));
         return Task.CompletedTask;
     }
 

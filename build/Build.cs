@@ -221,6 +221,8 @@ class Build : NukeBuild
         path.EndsWith(".axaml.cs", StringComparison.OrdinalIgnoreCase)
         || path.Contains("/Views/", StringComparison.OrdinalIgnoreCase)
         || path.Contains("/Controls/", StringComparison.OrdinalIgnoreCase)
+        || path.Contains("/Ports/", StringComparison.OrdinalIgnoreCase)
         || path.EndsWith("Module.cs", StringComparison.OrdinalIgnoreCase)
-        || path.EndsWith("KestrelMcpServerController.cs", StringComparison.OrdinalIgnoreCase);
+        || path.EndsWith("KestrelMcpServerController.cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith("SimulatedCommandStationConnection.cs", StringComparison.OrdinalIgnoreCase);
 }

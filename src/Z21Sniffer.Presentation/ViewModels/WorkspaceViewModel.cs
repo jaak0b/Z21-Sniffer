@@ -85,6 +85,11 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             if (e.PropertyName == nameof(McpServerViewModel.Port))
                 _settings.Save(_settings.Load() with { McpPort = Mcp.Port });
         };
+        Recording.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(RecordingViewModel.IsRecording) && Recording.IsRecording)
+                _ = Connection.RequestCurrentStateAsync();
+        };
     }
 
     public LocalizationService Localization => LocalizationService.Instance;

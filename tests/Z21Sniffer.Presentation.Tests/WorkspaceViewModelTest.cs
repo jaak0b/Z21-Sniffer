@@ -48,6 +48,7 @@ public class WorkspaceViewModelTest
         _clock = new StubClock();
         A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
         A.CallTo(() => _factory.Create(A<bool>._)).Returns(_connection);
+        A.CallTo(() => _connection.IsConnected).Returns(true);
         _savePath = null;
         _importPath = null;
         _exportLogPath = null;
@@ -160,6 +161,23 @@ public class WorkspaceViewModelTest
         _connection.ConnectionChanged += Raise.With(_connection, true);
 
         Assert.That(_vm.Timeline.Sources.OfType<ConnectionSource>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task StartRecording_RequestsCurrentStateFromConnection()
+    {
+        await StartRecording();
+
+        A.CallTo(() => _connection.RequestCurrentStateAsync()).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void StartRecording_WhenDisconnected_DoesNotThrowOrRequestState()
+    {
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        Assert.That(_vm.Recording.IsRecording, Is.True);
+        A.CallTo(() => _connection.RequestCurrentStateAsync()).MustNotHaveHappened();
     }
 
     [Test]
