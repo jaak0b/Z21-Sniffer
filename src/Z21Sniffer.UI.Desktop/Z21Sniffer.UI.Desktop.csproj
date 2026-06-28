@@ -20,6 +20,7 @@
     <PackageReference Include="Avalonia.Fonts.Inter" />
     <PackageReference Include="Autofac" />
     <PackageReference Include="Serilog" />
+    <PackageReference Include="Velopack" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 

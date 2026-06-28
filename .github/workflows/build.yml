@@ -1,0 +1,35 @@
+name: Build & test
+
+# Per-change gate: builds and runs the full test suite on every pull request and on
+# every push (including master, since there is no separate docs gate).
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Nerdbank.GitVersioning needs full history to compute the version
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore local tools
+        run: dotnet tool restore
+
+      - name: Build & run full test suite
+        run: pwsh ./build.ps1 --target Test --configuration Release

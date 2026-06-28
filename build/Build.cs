@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Xml.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -32,6 +34,16 @@ class Build : NukeBuild
     AbsolutePath TestSettings => RootDirectory / "tests.runsettings";
     AbsolutePath Solution => RootDirectory / "Z21Sniffer.slnx";
     AbsolutePath DesktopProject => SourceRoot / "Z21Sniffer.UI.Desktop" / "Z21Sniffer.UI.Desktop.csproj";
+    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    AbsolutePath DesktopPublishDirectory => ArtifactsDirectory / "desktop";
+    AbsolutePath VelopackDirectory => ArtifactsDirectory / "velopack";
+    AbsolutePath AppIcon => SourceRoot / "Z21Sniffer.UI.Desktop" / "Assets" / "app-icon.ico";
+
+    const string GitHubRepoUrl = "https://github.com/jaak0b/Z21-Sniffer";
+
+    [Parameter("GitHub token for publishing releases. Defaults to the GH_TOKEN or GITHUB_TOKEN environment variable.")]
+    readonly string GitHubToken = Environment.GetEnvironmentVariable("GH_TOKEN")
+        ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
 
     string[] TestProjects =>
     [
@@ -215,6 +227,154 @@ class Build : NukeBuild
                 Since, exception.Message);
             return GitEmptyTreeObject;
         }
+    }
+
+    Target PublishDesktop => _ => _
+        .Description("Publishes the Windows desktop head self-contained (win-x64) for packaging.")
+        .Executes(() =>
+        {
+            DesktopPublishDirectory.CreateOrCleanDirectory();
+            DotNetPublish(s => s
+                .SetProject(DesktopProject)
+                .SetConfiguration("Release")
+                .SetRuntime("win-x64")
+                .SetSelfContained(true)
+                .SetOutput(DesktopPublishDirectory));
+        });
+
+    Target Pack => _ => _
+        .Description("Builds the Velopack Windows installer and update feed into artifacts/velopack.")
+        .DependsOn(PublishDesktop)
+        .Executes(() =>
+        {
+            VelopackDirectory.CreateOrCleanDirectory();
+            var notesFile = WriteReleaseNotes();
+
+            Vpk("pack"
+                + " --packId Z21Sniffer"
+                + " --packTitle \"Z21 Feedback Sniffer\""
+                + " --packAuthors Jakob"
+                + $" --packVersion {ReleaseVersion()}"
+                + $" --packDir \"{DesktopPublishDirectory}\""
+                + " --mainExe Z21Sniffer.UI.Desktop.exe"
+                + $" --icon \"{AppIcon}\""
+                + $" --releaseNotes \"{notesFile}\""
+                + $" --outputDir \"{VelopackDirectory}\"");
+
+            Log.Information("Velopack output → {Dir}", VelopackDirectory);
+        });
+
+    Target Release => _ => _
+        .Description("Publishes a GitHub release: the Windows installer + update feed, with notes built from PR labels.")
+        .DependsOn(Pack)
+        .Requires(() => GitHubToken)
+        .Executes(() =>
+        {
+            var version = ReleaseVersion();
+            var tag = $"v{version}";
+            var releaseName = $"Z21 Feedback Sniffer {version}";
+
+            Vpk("upload github"
+                + $" --repoUrl {GitHubRepoUrl}"
+                + $" --token {GitHubToken}"
+                + " --publish"
+                + $" --releaseName \"{releaseName}\""
+                + $" --tag {tag}"
+                + $" --outputDir \"{VelopackDirectory}\"",
+                logInvocation: false);
+
+            Log.Information("Released {Tag}: installer + update feed", tag);
+        });
+
+    void Vpk(string arguments, bool logInvocation = true)
+    {
+        var dotnet = ToolPathResolver.GetPathExecutable("dotnet");
+        ProcessTasks.StartProcess(dotnet, "vpk " + arguments, RootDirectory, logInvocation: logInvocation)
+            .AssertZeroExitCode();
+    }
+
+    string ReleaseVersion()
+    {
+        var dotnet = ToolPathResolver.GetPathExecutable("dotnet");
+        var process = ProcessTasks.StartProcess(dotnet,
+            "nbgv get-version --variable SimpleVersion", RootDirectory, logOutput: false);
+        process.AssertZeroExitCode();
+        return process.Output
+            .Where(o => o.Type == OutputType.Std)
+            .Select(o => o.Text.Trim())
+            .First(t => t.Length > 0);
+    }
+
+    AbsolutePath WriteReleaseNotes()
+    {
+        var body = NotesFromPullRequests() ?? NotesFromCommits();
+        var notesFile = ArtifactsDirectory / "release-notes.md";
+        ArtifactsDirectory.CreateDirectory();
+        notesFile.WriteAllText(body);
+        return notesFile;
+    }
+
+    string? NotesFromPullRequests()
+    {
+        if (string.IsNullOrEmpty(GitHubToken)) return null;
+
+        try
+        {
+            var headSha = GitLines("rev-parse HEAD").FirstOrDefault()?.Trim();
+            var previousTag = GitLines("tag --list v* --sort=-version:refname").FirstOrDefault()?.Trim();
+
+            var arguments = new StringBuilder($"api repos/{GitHubRepoSlug}/releases/generate-notes")
+                .Append($" -f tag_name=v{ReleaseVersion()}");
+            if (!string.IsNullOrEmpty(headSha))
+                arguments.Append($" -f target_commitish={headSha}");
+            if (!string.IsNullOrEmpty(previousTag))
+                arguments.Append($" -f previous_tag_name={previousTag}");
+
+            var gh = ToolPathResolver.GetPathExecutable("gh");
+            var process = ProcessTasks.StartProcess(gh, arguments.ToString(), RootDirectory, GitHubEnvironment(), logOutput: false);
+            process.AssertZeroExitCode();
+
+            var json = string.Join(Environment.NewLine,
+                process.Output.Where(o => o.Type == OutputType.Std).Select(o => o.Text));
+            using var document = JsonDocument.Parse(json);
+            var body = document.RootElement.GetProperty("body").GetString();
+            return string.IsNullOrWhiteSpace(body) ? null : body.Trim();
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, "gh generate-notes failed; falling back to commit-based release notes");
+            return null;
+        }
+    }
+
+    string NotesFromCommits()
+    {
+        var previousTag = GitLines("tag --list v* --sort=-version:refname").FirstOrDefault()?.Trim();
+        var range = string.IsNullOrEmpty(previousTag) ? "HEAD" : $"{previousTag}..HEAD";
+        var commits = GitLines($"log {range} --no-merges --pretty=format:-%x20%s")
+            .Select(l => l.Trim())
+            .Where(l => l.Length > 0)
+            .ToList();
+
+        return commits.Count > 0
+            ? string.Join(Environment.NewLine, commits)
+            : "Maintenance release.";
+    }
+
+    IEnumerable<string> GitLines(string arguments) =>
+        Git(arguments, workingDirectory: RootDirectory, logOutput: false)
+            .Where(o => o.Type == OutputType.Std)
+            .Select(o => o.Text);
+
+    string GitHubRepoSlug => new Uri(GitHubRepoUrl).AbsolutePath.Trim('/');
+
+    IReadOnlyDictionary<string, string> GitHubEnvironment()
+    {
+        var environment = Environment.GetEnvironmentVariables()
+            .Cast<System.Collections.DictionaryEntry>()
+            .ToDictionary(entry => (string)entry.Key, entry => (string)entry.Value);
+        environment["GH_TOKEN"] = GitHubToken;
+        return environment;
     }
 
     static bool IsExcludedFromMutation(string path) =>

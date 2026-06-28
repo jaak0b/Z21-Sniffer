@@ -8,5 +8,17 @@
         WindowDecorations="BorderOnly"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1">
-  <views:WorkspaceView />
+  <Grid>
+    <views:WorkspaceView />
+    <TextBlock x:Name="DebugBadge"
+               Text="DEBUG"
+               IsVisible="False"
+               IsHitTestVisible="False"
+               Foreground="Red"
+               FontWeight="Bold"
+               FontSize="11"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Bottom"
+               Margin="6,0,0,4" />
+  </Grid>
 </Window>

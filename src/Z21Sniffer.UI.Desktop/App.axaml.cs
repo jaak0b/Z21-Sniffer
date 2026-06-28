@@ -9,6 +9,7 @@ using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Mcp;
 using Z21Sniffer.Presentation.Timeline;
+using Z21Sniffer.Presentation.Updates;
 using Z21Sniffer.Presentation.ViewModels;
 using Z21Sniffer.UI.Desktop.Views;
 
@@ -35,6 +36,8 @@ public partial class App : Application
                 log.LogError(e.Exception, "Unobserved task exception.");
                 e.SetObserved();
             };
+
+            _ = new UpdateCheck(new VelopackAppUpdater(), new AppLog(log)).RunAsync();
 
             var window = new MainWindow();
             var picker = new DesktopFilePicker(window);
