@@ -63,7 +63,11 @@ public sealed class SimulatedCommandStationConnection : ICommandStationConnectio
         var tick = Interlocked.Increment(ref _tick);
         FeedbackReceived?.Invoke(this, _script.Frame(tick));
         if (tick % 5 == 0) SystemStateReceived?.Invoke(this, _script.System(tick));
-        if (tick % 12 == 0) LocoInfoReceived?.Invoke(this, _script.Loco(tick));
+        if (tick % 4 == 0)
+        {
+            foreach (var loco in _script.Locos(tick)) LocoInfoReceived?.Invoke(this, loco);
+        }
+
         if (tick % 18 == 0) TurnoutInfoReceived?.Invoke(this, _script.Turnout(tick));
     }
 

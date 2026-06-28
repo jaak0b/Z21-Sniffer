@@ -45,6 +45,17 @@ public class SimulatedCommandStationConnectionTest
     }
 
     [Test]
+    public void EmitNext_OnFourthTick_RaisesLocoInfoForEveryTrain()
+    {
+        var addresses = new List<int>();
+        _connection.LocoInfoReceived += (_, loco) => addresses.Add(loco.Address);
+
+        for (var i = 0; i < 4; i++) _connection.EmitNext();
+
+        Assert.That(addresses, Is.EquivalentTo(new[] { 3, 7 }));
+    }
+
+    [Test]
     public void EmitNext_OnFifthTick_RaisesSystemState()
     {
         SystemSnapshot? snapshot = null;

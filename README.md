@@ -9,7 +9,7 @@ feedback coming off a Roco/Fleischmann Z21. Every contact gets its own row on a 
 time it goes on you get a bar. A sensor that misbehaves ends up with a scatter of little bars on its
 row, and you can see when it fired and how long it stayed on.
 
-![Z21 Feedback Sniffer](docs/screenshot.png)
+![Z21 Feedback Sniffer](img/screenshot.png)
 
 ## What it does
 

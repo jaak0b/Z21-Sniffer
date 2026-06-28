@@ -14,7 +14,7 @@ Your last-used host and port are remembered between runs.
 
 ## No hardware handy? Use the simulator
 
-Open **Settings**, and under **Connection** set the **Source** to **Simulation**. The Host and Port boxes disappear — there's no controller to point at — and when you connect, the app feeds itself a synthetic stream of feedback instead of talking to a real Z21. One of the simulated sensors deliberately flickers, so you can see exactly what a ghost occupancy looks like on the timeline without setting up your layout. It's the quickest way to get a feel for the tool.
+Open **Settings**, and under **Connection** set the **Source** to **Simulation**. The Host and Port boxes disappear — there's no controller to point at — and when you connect, the app feeds itself a synthetic stream of feedback instead of talking to a real Z21. Two trains run their own routes: you see occupancy move from one block to the next as they travel, and each train's speed and direction draw out on its loco row, including a stop and a reversal. One sensor off to the side flickers on its own — rarely and unevenly — so you can see what a real ghost occupancy looks like and practise hunting it down without setting up your layout. It's the quickest way to get a feel for the tool.
 
 ## Other settings
 
