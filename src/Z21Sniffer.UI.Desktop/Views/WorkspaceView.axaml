@@ -154,9 +154,9 @@
       </TabItem>
 
       <TabItem Header="{Binding Localization[TrafficLog]}">
-        <DockPanel>
-          <StackPanel DockPanel.Dock="Top" Margin="8,6" Orientation="Horizontal" Spacing="6">
-            <controls:MultiSelectDropDown MinWidth="150" Title="{Binding Localization[FilterTypes]}"
+        <DockPanel Margin="-16">
+          <StackPanel DockPanel.Dock="Top" Margin="12,10,12,8" Orientation="Horizontal" Spacing="6">
+            <controls:MultiSelectDropDown VerticalAlignment="Center" Title="{Binding Localization[FilterTypes]}"
                                           ItemsSource="{Binding Log.KindToggles}" />
             <TextBox Width="220" Text="{Binding Log.SearchText}" Watermark="{Binding Localization[Search]}" />
             <ToggleButton x:Name="FollowToggle" Content="{Binding Localization[Follow]}" IsChecked="True" />
@@ -166,7 +166,7 @@
           </StackPanel>
 
           <ListBox x:Name="LogList" ItemsSource="{Binding Log.Filtered}" SelectionMode="Multiple"
-                   FontFamily="Consolas" Background="{DynamicResource BackgroundBrush}">
+                   Margin="12,0,0,0" FontFamily="Consolas" Background="{DynamicResource BackgroundBrush}">
             <ListBox.ItemTemplate>
               <DataTemplate x:DataType="logging:LogEntry">
                 <Grid ColumnDefinitions="Auto,Auto,*" >
