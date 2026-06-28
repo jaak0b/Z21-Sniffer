@@ -85,4 +85,4 @@ Set the **Highlight under** threshold in the top toolbar. Any ON-block shorter t
 
 ## Light and dark
 
-The **Dark** toggle in the top toolbar switches between a light and a dark (Graphite) theme; the bars, gridlines, axis and chrome all recolour live, and your choice is remembered. Every colour comes from the theme palette, so the neutral rows — a loco's speed lane, the system-current band, a powered-off stretch of track power — keep a fill that stands clear of the background in both light and dark, never washing out to invisible.
+The app starts in the dark (Graphite) theme. The **Dark** toggle in the top toolbar switches between the light and dark themes; the bars, gridlines, axis and chrome all recolour live, and your choice is remembered. Every colour comes from the theme palette, so the neutral rows — a loco's speed lane, the system-current band, a powered-off stretch of track power — keep a fill that stands clear of the background in both light and dark, never washing out to invisible.

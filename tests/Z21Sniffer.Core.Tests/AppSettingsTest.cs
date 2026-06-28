@@ -7,6 +7,14 @@ namespace Z21Sniffer.Core.Tests;
 public class AppSettingsTest
 {
     [Test]
+    public void DarkTheme_DefaultsToTrue()
+    {
+        var settings = new AppSettings("h", 1, "en");
+
+        Assert.That(settings.DarkTheme, Is.True);
+    }
+
+    [Test]
     public void CaptureTrainData_DefaultsToFalse()
     {
         var settings = new AppSettings("h", 1, "en");

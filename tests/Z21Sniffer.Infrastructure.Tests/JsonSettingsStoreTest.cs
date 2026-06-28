@@ -19,6 +19,7 @@ public class JsonSettingsStoreTest : TempDirectoryTest
         Assert.That(settings.Host, Is.EqualTo("192.168.0.111"));
         Assert.That(settings.Port, Is.EqualTo(21105));
         Assert.That(settings.Language, Is.EqualTo("en"));
+        Assert.That(settings.DarkTheme, Is.True);
     }
 
     [Test]
