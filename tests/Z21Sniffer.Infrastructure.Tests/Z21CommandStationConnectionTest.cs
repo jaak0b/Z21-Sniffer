@@ -22,6 +22,7 @@ public class Z21CommandStationConnectionTest
     private IZ21CommandStation _station = null!;
     private UdpTransportOptions _options = null!;
     private IBroadcastFlagsResponseHandler _readback = null!;
+    private IHardwareInfoResponseHandler _hardwareReadback = null!;
     private Z21CommandStationConnection _connection = null!;
 
     [SetUp]
@@ -31,7 +32,8 @@ public class Z21CommandStationConnectionTest
         A.CallTo(() => _station.Commands).Returns(A.Fake<IZ21CommandFactory>());
         _options = new UdpTransportOptions();
         _readback = A.Fake<IBroadcastFlagsResponseHandler>();
-        _connection = new Z21CommandStationConnection(_station, _options, new FeedbackDecoder(), new Z21SnapshotMapper(), _readback);
+        _hardwareReadback = A.Fake<IHardwareInfoResponseHandler>();
+        _connection = new Z21CommandStationConnection(_station, _options, new FeedbackDecoder(), new Z21SnapshotMapper(), _readback, _hardwareReadback);
     }
 
     [Test]
@@ -101,6 +103,27 @@ public class Z21CommandStationConnectionTest
         Assert.That(snapshot, Is.Not.Null);
         Assert.That(snapshot!.Address, Is.EqualTo(9));
         Assert.That(snapshot.Position, Is.EqualTo(TurnoutPosition.Output2));
+    }
+
+    [Test]
+    public void HardwareInfoReceived_RaisesMappedStationHardware()
+    {
+        StationHardware? hardware = null;
+        _connection.HardwareInfoReceived += (_, h) => hardware = h;
+
+        _hardwareReadback.OnHardwareInfoReceived += Raise.With(_hardwareReadback, new HardwareInfoEventArgs(513, 0x0140));
+
+        Assert.That(hardware, Is.Not.Null);
+        Assert.That(hardware!.TypeCode, Is.EqualTo(513));
+        Assert.That(hardware.FirmwareVersion, Is.EqualTo(0x0140));
+    }
+
+    [Test]
+    public async Task RequestCurrentStateAsync_RequestsHardwareInfo()
+    {
+        await _connection.RequestCurrentStateAsync();
+
+        A.CallTo(() => _station.Commands.Create<GetHardwareInfoCommand>(A<object[]>._)).MustHaveHappened();
     }
 
     [Test]

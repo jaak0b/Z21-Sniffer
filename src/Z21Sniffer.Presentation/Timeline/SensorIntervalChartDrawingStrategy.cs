@@ -30,4 +30,11 @@ public sealed class SensorIntervalChartDrawingStrategy : IIntervalChartDrawingSt
         var text = _barText.Describe(sensorSource.Label, sensorInterval.Sensor, context.FullDuration);
         surface.Text(text, rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.BarText));
     }
+
+    public string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at)
+    {
+        var sensorSource = (FeedbackSensorSource)source;
+        var sensorInterval = (FeedbackSensorInterval)interval;
+        return _barText.Describe(sensorSource.Label, sensorInterval.Sensor, at - interval.Start);
+    }
 }

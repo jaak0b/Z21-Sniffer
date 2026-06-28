@@ -41,6 +41,8 @@ public sealed class InfrastructureModule : Module
             .As<ISettingsStore>().SingleInstance();
         builder.Register(c => new JsonKeyValueStore(c.Resolve<IAppPaths>().KeyValueFile))
             .As<IKeyValueStore>().SingleInstance();
+        builder.Register(c => new JsonStationCurrentLimits(c.Resolve<IAppPaths>().HardwareCurrentFile))
+            .As<IStationCurrentLimits>().SingleInstance();
 
         builder.RegisterType<PingReachability>().As<INetworkReachability>().SingleInstance();
         builder.RegisterType<Z21CommandStationConnection>().AsSelf().SingleInstance();

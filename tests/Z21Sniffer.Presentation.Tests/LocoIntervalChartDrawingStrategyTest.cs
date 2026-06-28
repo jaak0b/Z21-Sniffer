@@ -99,12 +99,19 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_WithContent_RegistersHitAreaPerSampleWithSpeedDirectionAndTime()
+    public void Probe_AtHeldSample_ReportsSpeedAndDirection()
     {
-        Draw(Interval(forward: true, maxSpeed: 100, (2, 80), (4, 90)));
+        var interval = Interval(forward: true, maxSpeed: 100, (2, 80), (4, 90));
 
-        Assert.That(_surface.Hits, Has.Count.EqualTo(2));
-        Assert.That(_surface.Hits[0].Text, Does.Contain("Speed 80").And.Contain("forward"));
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(3)), Does.Contain("Speed 80").And.Contain("forward"));
+    }
+
+    [Test]
+    public void Probe_BeforeFirstSample_IsNull()
+    {
+        var interval = Interval(forward: true, maxSpeed: 100, (2, 80));
+
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(1)), Is.Null);
     }
 
     [Test]
@@ -198,20 +205,12 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_Tooltip_ReportsEachSamplesOwnDirection()
+    public void Probe_ReportsEachSamplesOwnDirection()
     {
-        Draw(MixedInterval(maxSpeed: 100, (2, 80, true), (4, 90, false)));
+        var interval = MixedInterval(maxSpeed: 100, (2, 80, true), (4, 90, false));
 
-        Assert.That(_surface.Hits[0].Text, Does.Contain("forward"));
-        Assert.That(_surface.Hits[1].Text, Does.Contain("backward"));
-    }
-
-    [Test]
-    public void Draw_WithoutContent_RegistersNoHitAreas()
-    {
-        Draw(Interval(forward: true, maxSpeed: 100, (2, 80)), showContent: false);
-
-        Assert.That(_surface.Hits, Is.Empty);
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(2)), Does.Contain("forward"));
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(4)), Does.Contain("backward"));
     }
 
     [Test]
@@ -229,24 +228,11 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_Reverse_TooltipReportsBackwardDirection()
+    public void Probe_Reverse_ReportsBackwardDirection()
     {
-        Draw(Interval(forward: false, maxSpeed: 100, (2, 80)));
+        var interval = Interval(forward: false, maxSpeed: 100, (2, 80));
 
-        Assert.That(_surface.Hits[0].Text, Does.Contain("Speed 80").And.Contain("backward"));
-    }
-
-    [Test]
-    public void Draw_HitArea_IsCenteredOnTheSamplePoint()
-    {
-        Draw(Interval(forward: true, maxSpeed: 100, (5, 50)));
-
-        var point = _surface.Polylines.Single().Points[0];
-        var hit = _surface.Hits.Single();
-        Assert.That(hit.Rect.X, Is.EqualTo(point.X - 4));
-        Assert.That(hit.Rect.Y, Is.EqualTo(point.Y - 4));
-        Assert.That(hit.Rect.W, Is.EqualTo(8));
-        Assert.That(hit.Rect.H, Is.EqualTo(8));
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(2)), Does.Contain("Speed 80").And.Contain("backward"));
     }
 
     [Test]
@@ -258,7 +244,7 @@ public class LocoIntervalChartDrawingStrategyTest
         foreach (var marker in _surface.Markers)
             Assert.That(points, Has.Some.Matches<PlotPoint>(p =>
                 Math.Abs(p.X - marker.CenterX) < 1e-6 && Math.Abs(p.Y - marker.CenterY) < 1e-6));
-        Assert.That(_surface.Hits, Has.Count.EqualTo(3));
+        Assert.That(_surface.Markers, Has.Count.EqualTo(3));
     }
 
     [Test]
@@ -329,7 +315,7 @@ public class LocoIntervalChartDrawingStrategyTest
 
         var atLeftEdge = _surface.Polylines.Single().Points.Where(point => point.X == Rect.X).ToList();
         Assert.That(atLeftEdge, Has.Count.EqualTo(1));
-        Assert.That(_surface.Hits, Has.Count.EqualTo(2));
+        Assert.That(_surface.Markers, Has.Count.EqualTo(2));
     }
 
     [Test]
@@ -337,16 +323,7 @@ public class LocoIntervalChartDrawingStrategyTest
     {
         Draw(Interval(forward: true, maxSpeed: 100, (10, 50)));
 
-        Assert.That(_surface.Hits, Has.Count.EqualTo(1));
-    }
-
-    [Test]
-    public void Draw_OffScreenReadings_RegisterNoHitAreas()
-    {
-        Draw(Interval(forward: true, maxSpeed: 100, (-3, 20), (-2, 90), (-1, 30), (3, 80)));
-
-        Assert.That(_surface.Hits, Has.Count.EqualTo(1));
-        Assert.That(_surface.Hits[0].Text, Does.Contain("80"));
+        Assert.That(_surface.Markers, Has.Count.EqualTo(1));
     }
 
     [Test]
@@ -391,6 +368,14 @@ public class LocoIntervalChartDrawingStrategyTest
 
         var label = _surface.Texts.Single(t => t.Ink.Key == TimelineInkKeys.LocoText);
         Assert.That(label.Text, Is.EqualTo("Loco 3"));
+    }
+
+    [Test]
+    public void Draw_WithoutContent_DrawsNoLabel()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 80)), showContent: false);
+
+        Assert.That(_surface.Texts.Where(t => t.Ink.Key == TimelineInkKeys.LocoText), Is.Empty);
     }
 
     [Test]

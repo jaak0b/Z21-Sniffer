@@ -17,9 +17,20 @@ public sealed class TrackPowerIntervalChartDrawingStrategy : IIntervalChartDrawi
 
         if (!context.ShowContent) return;
 
-        var name = LocalizationService.Instance[NameKeyFor(power.Status)];
-        var seconds = context.FullDuration.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
-        surface.Text($"{name} · {seconds} s", rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TextFor(power.Status)));
+        surface.Text(Describe(power.Status, context.FullDuration), rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TextFor(power.Status)));
+    }
+
+    public string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at)
+    {
+        var power = (TrackPowerInterval)interval;
+        return Describe(power.Status, at - interval.Start);
+    }
+
+    private string Describe(TrackPowerStatus status, TimeSpan duration)
+    {
+        var name = LocalizationService.Instance[NameKeyFor(status)];
+        var seconds = duration.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
+        return $"{name} · {seconds} s";
     }
 
     private string FillFor(TrackPowerStatus status) => status switch

@@ -27,6 +27,9 @@
     <DataTemplate DataType="vm:TrackPowerLegendContentViewModel">
       <views:TrackPowerLegendContentView />
     </DataTemplate>
+    <DataTemplate DataType="vm:SystemCurrentLegendContentViewModel">
+      <views:SystemCurrentLegendContentView />
+    </DataTemplate>
   </UserControl.DataTemplates>
 
   <UserControl.Styles>

@@ -11,6 +11,12 @@ public sealed class BarGeometry
         return (time - start).TotalSeconds / span * width;
     }
 
+    public DateTimeOffset XToTime(DateTimeOffset start, DateTimeOffset end, double width, double x)
+    {
+        if (width <= 0) return start;
+        return start.AddSeconds((end - start).TotalSeconds * (x / width));
+    }
+
     public BarSpan? Compute(
         DateTimeOffset viewportStart,
         DateTimeOffset viewportEnd,

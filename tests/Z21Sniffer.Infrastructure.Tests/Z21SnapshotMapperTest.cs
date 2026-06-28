@@ -1,5 +1,6 @@
 using CommandStation.Model;
 using NUnit.Framework;
+using Z21.Core.Model.EventArgs;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Infrastructure.Z21;
 
@@ -12,6 +13,15 @@ public class Z21SnapshotMapperTest
 
     [SetUp]
     public void SetUp() => _mapper = new Z21SnapshotMapper();
+
+    [Test]
+    public void ToHardware_MapsTypeCodeAndFirmwareVersion()
+    {
+        var hardware = _mapper.ToHardware(new HardwareInfoEventArgs(529, 0x0141));
+
+        Assert.That(hardware.TypeCode, Is.EqualTo(529));
+        Assert.That(hardware.FirmwareVersion, Is.EqualTo(0x0141));
+    }
 
     [Test]
     public void ToSystem_MapsTelemetryAndFaultFlags()

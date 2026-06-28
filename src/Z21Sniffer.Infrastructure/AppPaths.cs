@@ -15,4 +15,6 @@ public sealed class AppPaths : IAppPaths
     public string LogsDirectory => Path.Combine(DataDirectory, "logs");
 
     public string SessionsDirectory => Path.Combine(DataDirectory, "sessions");
+
+    public string HardwareCurrentFile => Path.Combine(DataDirectory, "hardware-current.json");
 }

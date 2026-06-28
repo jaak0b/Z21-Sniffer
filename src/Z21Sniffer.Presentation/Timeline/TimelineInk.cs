@@ -39,4 +39,12 @@ public static class TimelineInkKeys
     public const string TrackPowerText = "TrackPowerText";
 
     public const string TrackPowerOffText = "TrackPowerOffText";
+
+    public const string SystemCurrentBar = "SystemCurrentBar";
+
+    public const string SystemCurrentLine = "SystemCurrentLine";
+
+    public const string SystemCurrentBaseline = "SystemCurrentBaseline";
+
+    public const string SystemCurrentText = "SystemCurrentText";
 }

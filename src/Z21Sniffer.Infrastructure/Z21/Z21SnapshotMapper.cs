@@ -1,10 +1,14 @@
 using CommandStation.Model;
+using Z21.Core.Model.EventArgs;
 using Z21Sniffer.Core.Model;
 
 namespace Z21Sniffer.Infrastructure.Z21;
 
 public sealed class Z21SnapshotMapper
 {
+    public StationHardware ToHardware(HardwareInfoEventArgs hardware) =>
+        new(hardware.Z21HardwareType, hardware.FirmwareVersion);
+
     public SystemSnapshot ToSystem(SystemState state) => new(
         state.MainCurrent,
         state.SupplyVoltage,

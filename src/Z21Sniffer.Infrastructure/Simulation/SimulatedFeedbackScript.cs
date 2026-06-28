@@ -63,6 +63,8 @@ public sealed class SimulatedFeedbackScript
         Address: 5,
         Position: tick % 36 < 18 ? TurnoutPosition.Output1 : TurnoutPosition.Output2);
 
+    public StationHardware Hardware() => new(TypeCode: 513, FirmwareVersion: 0x0140);
+
     private LocoSnapshot Snapshot(Train train, Leg leg) => new(train.Address, leg.Speed, leg.Forward, train.MaxSpeed);
 
     private Leg CurrentLeg(Train train, int tick)

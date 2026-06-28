@@ -16,6 +16,8 @@ public interface ICommandStationConnection : IFeedbackSource
 
     event EventHandler<TurnoutSnapshot>? TurnoutInfoReceived;
 
+    event EventHandler<StationHardware>? HardwareInfoReceived;
+
     Task ConnectAsync(string host, int port);
 
     Task DisconnectAsync();

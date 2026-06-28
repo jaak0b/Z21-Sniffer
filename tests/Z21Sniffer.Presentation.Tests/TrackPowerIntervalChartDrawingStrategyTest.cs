@@ -102,6 +102,16 @@ public class TrackPowerIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Probe_DescribesTheStatusAndDurationAtTheCursorTime()
+    {
+        var interval = new TrackPowerInterval { Status = TrackPowerStatus.Short, Start = DateTimeOffset.UnixEpoch };
+
+        var text = _strategy.Probe(_source, interval, DateTimeOffset.UnixEpoch.AddSeconds(3));
+
+        Assert.That(text, Is.EqualTo($"{LocalizationService.Instance["TrackPowerShortState"]} · 3 s"));
+    }
+
+    [Test]
     public void Draw_WithoutContent_DrawsNoText()
     {
         Draw(TrackPowerStatus.On, Content(show: false));

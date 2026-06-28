@@ -20,8 +20,6 @@ public sealed class DrawingContextSurface : ITimelineSurface
         _verticalOffset = verticalOffset;
     }
 
-    public List<(Rect Rect, string Text)> HitAreas { get; } = new();
-
     public void Fill(BarRect rect, TimelineInk ink)
     {
         var shape = Shape(rect);
@@ -36,7 +34,6 @@ public sealed class DrawingContextSurface : ITimelineSurface
     public void Text(string text, double x, double y, TimelineInk ink)
     {
         var formatted = new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, _typeface, 11, BrushFor(ink));
-        HitAreas.Add((new Rect(_lastBar.X, _lastBar.Y + _verticalOffset, _lastBar.Width, _lastBar.Height), text));
         using (_context.PushClip(_lastBar))
         {
             _context.DrawText(formatted, new Point(x, y - formatted.Height / 2));
@@ -67,9 +64,6 @@ public sealed class DrawingContextSurface : ITimelineSurface
 
     public void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness) =>
         _context.DrawEllipse(null, new Pen(BrushFor(ink), thickness), new Point(centerX, centerY), radius, radius);
-
-    public void Hit(BarRect rect, string text) =>
-        HitAreas.Add((new Rect(rect.X, rect.Y + _verticalOffset, rect.W, rect.H), text));
 
     private Rect Shape(BarRect rect) => new(rect.X, rect.Y + 3, Math.Max(1, rect.W), Math.Max(1, rect.H - 6));
 

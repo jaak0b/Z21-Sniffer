@@ -32,6 +32,33 @@ public class TimelineLayoutTest
     }
 
     [Test]
+    public void XToTime_IsTheInverseOfTimeToX()
+    {
+        var time = T0.AddSeconds(3.7);
+        var x = _layout.TimeToX(Viewport(), time);
+
+        Assert.That(_layout.XToTime(Viewport(), x), Is.EqualTo(time));
+    }
+
+    [Test]
+    public void XToTime_MidWidthMapsToMidViewport() =>
+        Assert.That(_layout.XToTime(Viewport(), 500), Is.EqualTo(T0.AddSeconds(5)));
+
+    [Test]
+    public void XToTime_ZeroWidthViewport_ReturnsStart()
+    {
+        var degenerate = Viewport() with { Width = 0 };
+        Assert.That(_layout.XToTime(degenerate, 123), Is.EqualTo(T0));
+    }
+
+    [Test]
+    public void XToTime_NegativeWidthViewport_ReturnsStart()
+    {
+        var degenerate = Viewport() with { Width = -5 };
+        Assert.That(_layout.XToTime(degenerate, 123), Is.EqualTo(T0));
+    }
+
+    [Test]
     public void Ticks_ZeroStep_ReturnsEmpty()
     {
         Assert.That(_layout.Ticks(Viewport(), TimeSpan.Zero), Is.Empty);

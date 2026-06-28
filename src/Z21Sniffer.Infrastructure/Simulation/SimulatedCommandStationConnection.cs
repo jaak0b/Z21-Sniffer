@@ -24,6 +24,8 @@ public sealed class SimulatedCommandStationConnection : ICommandStationConnectio
 
     public event EventHandler<TurnoutSnapshot>? TurnoutInfoReceived;
 
+    public event EventHandler<StationHardware>? HardwareInfoReceived;
+
     public bool IsConnected { get; private set; }
 
     public async Task ConnectAsync(string host, int port)
@@ -32,6 +34,7 @@ public sealed class SimulatedCommandStationConnection : ICommandStationConnectio
         IsConnected = true;
         ConnectionChanged?.Invoke(this, true);
         TrackPowerChanged?.Invoke(this, true);
+        HardwareInfoReceived?.Invoke(this, _script.Hardware());
         await RequestCurrentStateAsync();
         _timer = new Timer(_ => EmitNext(), state: null, _interval, _interval);
     }

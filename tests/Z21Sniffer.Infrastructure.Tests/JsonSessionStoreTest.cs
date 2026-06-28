@@ -27,8 +27,22 @@ public class JsonSessionStoreTest : TempDirectoryTest
         loco.Apply(80, forward: false, maxSpeed: 28, Start.AddSeconds(2));
         loco.Apply(0, forward: true, maxSpeed: 28, Start.AddSeconds(6));
 
-        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco });
+        var current = new SystemCurrentSource { Id = "systemcurrent" };
+        current.Apply(milliamps: 820, maxCurrentMilliamps: 3200, Start);
+        current.Apply(milliamps: 1100, maxCurrentMilliamps: 3200, Start.AddSeconds(3));
+
+        var trackPower = new TrackPowerSource { Id = "trackpower" };
+        trackPower.Set(TrackPowerStatus.On, Start);
+        trackPower.Set(TrackPowerStatus.Short, Start.AddSeconds(4));
+
+        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco, current, trackPower });
     }
+
+    private static TrackPowerSource TrackPower(RecordingSession session) =>
+        session.Sources.OfType<TrackPowerSource>().Single();
+
+    private static SystemCurrentSource Current(RecordingSession session) =>
+        session.Sources.OfType<SystemCurrentSource>().Single();
 
     private static LocoIntervalSource Loco(RecordingSession session) =>
         session.Sources.OfType<LocoIntervalSource>().Single();
@@ -48,10 +62,40 @@ public class JsonSessionStoreTest : TempDirectoryTest
         var loaded = _store.LoadJson(path);
 
         Assert.That(loaded.StartedAt, Is.EqualTo(Start));
-        Assert.That(loaded.Sources, Has.Count.EqualTo(3));
+        Assert.That(loaded.Sources, Has.Count.EqualTo(5));
         Assert.That(loaded.Sources.OfType<FeedbackSensorSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<ConnectionSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<LocoIntervalSource>().Count(), Is.EqualTo(1));
+        Assert.That(loaded.Sources.OfType<SystemCurrentSource>().Count(), Is.EqualTo(1));
+        Assert.That(loaded.Sources.OfType<TrackPowerSource>().Count(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SaveJson_ThenLoadJson_RoundTripsTrackPowerSource()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        _store.SaveJson(SampleSession(), path);
+        var trackPower = TrackPower(_store.LoadJson(path));
+
+        Assert.That(trackPower.Intervals, Has.Count.EqualTo(2));
+        Assert.That(trackPower.Intervals[0].Status, Is.EqualTo(TrackPowerStatus.On));
+        Assert.That(trackPower.Intervals[0].End, Is.EqualTo(Start.AddSeconds(4)));
+        Assert.That(trackPower.Intervals[1].Status, Is.EqualTo(TrackPowerStatus.Short));
+    }
+
+    [Test]
+    public void SaveJson_ThenLoadJson_RoundTripsSystemCurrentSource()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        _store.SaveJson(SampleSession(), path);
+        var current = Current(_store.LoadJson(path));
+
+        var interval = current.Intervals.Single();
+        Assert.That(interval.MaxCurrentMilliamps, Is.EqualTo(3200));
+        Assert.That(interval.Samples.Select(s => s.Milliamps), Is.EqualTo(new[] { 820, 1100 }));
+        Assert.That(interval.Samples.Select(s => s.At), Is.EqualTo(new[] { Start, Start.AddSeconds(3) }));
     }
 
     [Test]

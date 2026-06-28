@@ -22,7 +22,7 @@ public class CommandStationConnectionFactoryTest
     {
         _live = new Z21CommandStationConnection(
             A.Fake<IZ21CommandStation>(), new UdpTransportOptions(), new FeedbackDecoder(), new Z21SnapshotMapper(),
-            A.Fake<IBroadcastFlagsResponseHandler>());
+            A.Fake<IBroadcastFlagsResponseHandler>(), A.Fake<IHardwareInfoResponseHandler>());
         _simulated = new SimulatedCommandStationConnection(new SimulatedFeedbackScript());
         _factory = new CommandStationConnectionFactory(
             _live, _simulated, A.Fake<INetworkReachability>(),

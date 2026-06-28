@@ -24,7 +24,7 @@ internal sealed class AlwaysConfirm : IRemovalConfirmation
     public Task<bool> ConfirmAsync() => Task.FromResult(true);
 }
 
-internal sealed record WorkspaceContext(WorkspaceViewModel Vm, FeedbackSensorIngest Ingest);
+internal sealed record WorkspaceContext(WorkspaceViewModel Vm, FeedbackSensorIngest Ingest, IntervalSourceRegistry Registry);
 
 internal sealed record TimelineContext(TimelineViewModel Vm, FeedbackSensorIngest Ingest, IntervalSourceRegistry Registry);
 
@@ -57,12 +57,13 @@ internal static class WorkspaceFactory
             A.Fake<IMcpServerController>(),
             A.Fake<IThemeController>(),
             A.Fake<ILogTextStore>(),
+            A.Fake<IStationCurrentLimits>(),
             post: action => action(),
             chooseSaveJsonPath: () => Task.FromResult<string?>(null),
             chooseOpenJsonPath: () => Task.FromResult<string?>(null),
             chooseExportLogPath: () => Task.FromResult<string?>(null),
             openSettings: () => Task.CompletedTask);
-        return new WorkspaceContext(vm, ingest);
+        return new WorkspaceContext(vm, ingest, registry);
     }
 
     private static FakeIndex<Type, IIntervalChartDrawingStrategy> ChartStrategies() => new(new()
@@ -71,6 +72,7 @@ internal static class WorkspaceFactory
         [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
         [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
         [typeof(TrackPowerInterval)] = new TrackPowerIntervalChartDrawingStrategy(),
+        [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalChartDrawingStrategy(),
     });
 
     private static FakeIndex<Type, IIntervalLegendDrawingStrategy> LegendStrategies(IIntervalSourceRegistry registry) => new(new()
@@ -79,5 +81,6 @@ internal static class WorkspaceFactory
         [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
         [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new AlwaysConfirm()),
         [typeof(TrackPowerInterval)] = new TrackPowerIntervalLegendDrawingStrategy(),
+        [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalLegendDrawingStrategy(),
     });
 }

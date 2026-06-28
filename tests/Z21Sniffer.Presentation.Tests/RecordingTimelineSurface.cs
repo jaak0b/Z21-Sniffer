@@ -16,8 +16,6 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
 
     public sealed record MarkerOp(double CenterX, double CenterY, double Radius, TimelineInk Ink, double Thickness);
 
-    public sealed record HitOp(BarRect Rect, string Text);
-
     public List<FillOp> Fills { get; } = new();
 
     public List<StrokeOp> Strokes { get; } = new();
@@ -29,8 +27,6 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
     public List<LineOp> Lines { get; } = new();
 
     public List<MarkerOp> Markers { get; } = new();
-
-    public List<HitOp> Hits { get; } = new();
 
     public void Fill(BarRect rect, TimelineInk ink) => Fills.Add(new FillOp(rect, ink));
 
@@ -48,6 +44,4 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
 
     public void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness) =>
         Markers.Add(new MarkerOp(centerX, centerY, radius, ink, thickness));
-
-    public void Hit(BarRect rect, string text) => Hits.Add(new HitOp(rect, text));
 }

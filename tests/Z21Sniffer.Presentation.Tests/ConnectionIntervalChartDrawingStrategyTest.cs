@@ -89,4 +89,14 @@ public class ConnectionIntervalChartDrawingStrategyTest
 
         Assert.That(_surface.Texts, Is.Empty);
     }
+
+    [Test]
+    public void Probe_DescribesTheConnectionStateAndDurationAtTheCursorTime()
+    {
+        var interval = new ConnectionInterval { Connected = false, Start = DateTimeOffset.UnixEpoch };
+
+        var text = _strategy.Probe(_source, interval, DateTimeOffset.UnixEpoch.AddSeconds(3));
+
+        Assert.That(text, Is.EqualTo($"{LocalizationService.Instance["Disconnected"]} · 3 s"));
+    }
 }

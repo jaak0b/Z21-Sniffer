@@ -30,6 +30,41 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void WorkspaceView_RendersEveryLegendRowWithItsConcreteView()
+    {
+        var context = BuildWorkspace();
+        context.Registry.GetOrCreate<FeedbackSensorSource>("sensor:1.1", source => source.Sensor = new SensorKey(1, 1));
+        context.Registry.GetOrCreate<ConnectionSource>("connection");
+        context.Registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3);
+        context.Registry.GetOrCreate<TrackPowerSource>("trackpower");
+        context.Registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+
+        var window = new Window { Content = new WorkspaceView { DataContext = context.Vm }, Width = 1000, Height = 600 };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var rendered = window.GetVisualDescendants().Select(visual => visual.GetType()).ToHashSet();
+        Assert.That(rendered, Does.Contain(typeof(SensorLegendContentView)));
+        Assert.That(rendered, Does.Contain(typeof(ConnectionLegendContentView)));
+        Assert.That(rendered, Does.Contain(typeof(LocoLegendContentView)));
+        Assert.That(rendered, Does.Contain(typeof(TrackPowerLegendContentView)));
+        Assert.That(rendered, Does.Contain(typeof(SystemCurrentLegendContentView)),
+            "the System current legend row fell back to its type name instead of resolving to SystemCurrentLegendContentView");
+    }
+
+    [AvaloniaTest]
+    public void WorkspaceView_RendersTheSystemCurrentLegendWithItsOwnView()
+    {
+        var view = new WorkspaceView();
+        var content = new SystemCurrentLegendContentViewModel(new Z21Sniffer.Core.Recording.SystemCurrentSource { Id = "systemcurrent" });
+
+        var template = view.DataTemplates.FirstOrDefault(t => t.Match(content));
+
+        Assert.That(template, Is.Not.Null, "WorkspaceView has no DataTemplate for SystemCurrentLegendContentViewModel, so the legend falls back to the type name");
+        Assert.That(template!.Build(content), Is.TypeOf<SystemCurrentLegendContentView>());
+    }
+
+    [AvaloniaTest]
     public void WorkspaceView_LoadsAndHostsTimelineControl()
     {
         var window = new Window
@@ -139,6 +174,24 @@ public class WorkspaceViewTest
 
         Assert.That(control.Bounds.Width, Is.GreaterThan(0));
         Assert.That(timeline.Vm.Sources.OfType<LocoIntervalSource>(), Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_WithSystemCurrentLane_RendersAndTooltipsTheReadingWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var current = timeline.Registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+        current.Apply(milliamps: 800, maxCurrentMilliamps: 3200, clock.Now);
+        current.Apply(milliamps: 1600, maxCurrentMilliamps: 3200, clock.Now.AddSeconds(2));
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.Sources.OfType<SystemCurrentSource>(), Is.Not.Empty);
     }
 
     [AvaloniaTest]

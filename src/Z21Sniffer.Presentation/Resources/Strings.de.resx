@@ -145,6 +145,9 @@
   <data name="ConnectionDetails" xml:space="preserve"><value>Verbindung zur Zentrale</value></data>
   <data name="SensorDetails" xml:space="preserve"><value>R-Bus-Rückmeldung · Modul {0}, Kontakt {1}</value></data>
   <data name="LocoDetails" xml:space="preserve"><value>Lokomotive · Adresse {0}</value></data>
+  <data name="SystemCurrent" xml:space="preserve"><value>Systemstrom</value></data>
+  <data name="SystemCurrentDetails" xml:space="preserve"><value>Stromaufnahme des Boosters</value></data>
+  <data name="SystemCurrentReading" xml:space="preserve"><value>{0} mA</value></data>
   <data name="LogTurnout" xml:space="preserve"><value>Weiche {0} → {1}</value></data>
   <data name="LogTurnoutOutput1" xml:space="preserve"><value>Ausgang 1</value></data>
   <data name="LogTurnoutOutput2" xml:space="preserve"><value>Ausgang 2</value></data>

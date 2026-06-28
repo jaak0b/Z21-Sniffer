@@ -38,6 +38,7 @@ public sealed class MonitoredCommandStationConnection : ICommandStationConnectio
         _inner.SystemStateReceived += (_, snapshot) => SystemStateReceived?.Invoke(this, snapshot);
         _inner.LocoInfoReceived += (_, loco) => LocoInfoReceived?.Invoke(this, loco);
         _inner.TurnoutInfoReceived += (_, turnout) => TurnoutInfoReceived?.Invoke(this, turnout);
+        _inner.HardwareInfoReceived += (_, hardware) => HardwareInfoReceived?.Invoke(this, hardware);
     }
 
     public event EventHandler<IReadOnlyList<SensorState>>? FeedbackReceived;
@@ -51,6 +52,8 @@ public sealed class MonitoredCommandStationConnection : ICommandStationConnectio
     public event EventHandler<LocoSnapshot>? LocoInfoReceived;
 
     public event EventHandler<TurnoutSnapshot>? TurnoutInfoReceived;
+
+    public event EventHandler<StationHardware>? HardwareInfoReceived;
 
     public bool IsConnected => _health.Composite;
 

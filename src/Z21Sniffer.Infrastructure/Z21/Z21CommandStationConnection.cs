@@ -19,6 +19,7 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
     private readonly FeedbackDecoder _decoder;
     private readonly Z21SnapshotMapper _mapper;
     private readonly IBroadcastFlagsResponseHandler _broadcastFlagsReadback;
+    private readonly IHardwareInfoResponseHandler _hardwareInfoReadback;
 
     private readonly uint[] _broadcastFlags =
     [
@@ -33,13 +34,15 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
         UdpTransportOptions options,
         FeedbackDecoder decoder,
         Z21SnapshotMapper mapper,
-        IBroadcastFlagsResponseHandler broadcastFlagsReadback)
+        IBroadcastFlagsResponseHandler broadcastFlagsReadback,
+        IHardwareInfoResponseHandler hardwareInfoReadback)
     {
         _station = station;
         _options = options;
         _decoder = decoder;
         _mapper = mapper;
         _broadcastFlagsReadback = broadcastFlagsReadback;
+        _hardwareInfoReadback = hardwareInfoReadback;
 
         _station.FeedbackChanged += OnFeedbackChanged;
         _station.TrackPowerChanged += OnTrackPowerChanged;
@@ -47,6 +50,7 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
         _station.SystemStateReceived += OnSystemStateReceived;
         _station.LocoInfoReceived += OnLocoInfoReceived;
         _station.TurnoutInfoReceived += OnTurnoutInfoReceived;
+        _hardwareInfoReadback.OnHardwareInfoReceived += OnHardwareInfoReceived;
     }
 
     public event EventHandler<IReadOnlyList<SensorState>>? FeedbackReceived;
@@ -60,6 +64,8 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
     public event EventHandler<LocoSnapshot>? LocoInfoReceived;
 
     public event EventHandler<TurnoutSnapshot>? TurnoutInfoReceived;
+
+    public event EventHandler<StationHardware>? HardwareInfoReceived;
 
     public bool IsConnected => _station.IsConnected;
 
@@ -110,6 +116,7 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
         await _station.RequestFeedbackAsync(0);
         await _station.RequestFeedbackAsync(1);
         await _station.RequestSystemStateAsync();
+        await _station.SendCommandsAsync(_station.Commands.Create<GetHardwareInfoCommand>(Array.Empty<object>()));
     }
 
     public Task DisconnectAsync() => _station.DisconnectAsync();
@@ -134,4 +141,7 @@ public sealed class Z21CommandStationConnection : ICommandStationConnection
 
     private void OnTurnoutInfoReceived(object? sender, TurnoutInfo turnout) =>
         TurnoutInfoReceived?.Invoke(this, _mapper.ToTurnout(turnout));
+
+    private void OnHardwareInfoReceived(object? sender, HardwareInfoEventArgs hardware) =>
+        HardwareInfoReceived?.Invoke(this, _mapper.ToHardware(hardware));
 }

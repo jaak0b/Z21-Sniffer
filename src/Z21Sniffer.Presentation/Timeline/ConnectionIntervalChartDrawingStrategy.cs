@@ -17,8 +17,19 @@ public sealed class ConnectionIntervalChartDrawingStrategy : IIntervalChartDrawi
 
         if (!context.ShowContent) return;
 
-        var state = LocalizationService.Instance[connection.Connected ? "Connected" : "Disconnected"];
-        var seconds = context.FullDuration.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
-        surface.Text($"{state} · {seconds} s", rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.ConnectionText));
+        surface.Text(Describe(connection.Connected, context.FullDuration), rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.ConnectionText));
+    }
+
+    public string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at)
+    {
+        var connection = (ConnectionInterval)interval;
+        return Describe(connection.Connected, at - interval.Start);
+    }
+
+    private string Describe(bool connected, TimeSpan duration)
+    {
+        var state = LocalizationService.Instance[connected ? "Connected" : "Disconnected"];
+        var seconds = duration.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
+        return $"{state} · {seconds} s";
     }
 }

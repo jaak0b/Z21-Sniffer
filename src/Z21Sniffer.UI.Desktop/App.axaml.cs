@@ -58,6 +58,7 @@ public partial class App : Application
                 mcpController,
                 new AvaloniaThemeController(),
                 container.Resolve<ILogTextStore>(),
+                container.Resolve<IStationCurrentLimits>(),
                 action => Dispatcher.UIThread.Post(() =>
                 {
                     try

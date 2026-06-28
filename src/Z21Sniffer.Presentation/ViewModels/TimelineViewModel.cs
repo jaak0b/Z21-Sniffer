@@ -46,6 +46,7 @@ public sealed partial class TimelineViewModel : ObservableObject
         _chartStrategies = chartStrategies;
         _legendStrategies = legendStrategies;
         Renderer = new BarChartRenderer(chartStrategies);
+        Hover = new TimelineHover(chartStrategies);
         _clock = clock;
         _startedAt = clock.Now;
         _window = new TimelineWindow(clock.Now, TimeSpan.FromSeconds(60));
@@ -60,6 +61,8 @@ public sealed partial class TimelineViewModel : ObservableObject
     public ObservableCollection<LegendRowViewModel> LegendRows { get; } = new();
 
     public BarChartRenderer Renderer { get; }
+
+    public TimelineHover Hover { get; }
 
     public IReadOnlyList<IIntervalSource> Sources => _registry.Sources;
 

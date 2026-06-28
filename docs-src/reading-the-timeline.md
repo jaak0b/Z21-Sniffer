@@ -41,11 +41,20 @@ Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar
 - **Direction** reads off a **zero line through the bar**: forward speed is drawn *above* it, reverse speed *below* it. A loco that only ever drives one way uses the whole bar for that direction; once it actually reverses within a run, the zero line sits in the middle with forward above and reverse below, and the reversal shows up as the trace crossing the line. A glance tells you which way the loco was heading, and how fast, at any moment.
 - The line is **stepped, not smoothed**: each speed step is held flat until the decoder is commanded to a new one, then the trace jumps straight to it. That mirrors what the loco actually did — no invented in‑between speeds — so a reversal is a clean vertical step down through the zero line and back up the other side.
 - Every recorded reading is marked with a small **circle right on the line** where the data point sits, so you can tell where an actual sample was taken from where the line is just holding a value between readings.
-- **Hover the line** to read the exact speed at that instant — labelled, e.g. `Speed 67` — along with the direction and the time.
+- **Hover anywhere across the row** to read the speed at that instant — labelled with its direction, e.g. `Speed 67 · forward`. You don't have to land precisely on the line, and you don't have to find a data point: the reading is the speed the loco was actually holding at the moment under your cursor (stepped, never invented). Keep the cursor still while recording and the value updates on its own as the trace scrolls underneath it.
 - The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.
 - Loco bars are **taller** than sensor bars to give the graph room, and they grow as you zoom in and shrink back to the normal bar height as you zoom out.
 - Like sensors, each loco is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry); the name is remembered between runs.
 - When a loco bar runs off the **left edge** of the view — because you've scrolled or zoomed into the middle of a long run — the graph doesn't crowd every earlier reading against the edge. Instead the line simply enters at the speed that was in effect at that moment (the last reading before the edge) and carries on, so the start of an off-screen run stays clean rather than smearing into a vertical streak.
+
+## Watching the system current
+
+The command station reports how much current the booster is drawing, and that gets its own **System current** row — a line graph of the amperage over time, in milliamps. A spike that lines up with a sensor blip or a short on the track-power row is a strong clue to what tripped: an overloaded section, a partial short, a motor stalling.
+
+- The line is **interpolated, not stepped**: current is a continuously varying analog measurement that the station happens to sample at intervals, so the trace runs straight between readings — the honest approximation of a value that really does glide between samples. (This is the opposite of the loco speed graph, which holds each step flat because speed only changes when the decoder is commanded.) Each actual reading is marked with a small circle.
+- The graph is **scaled to your station's rated maximum current**, so a trace near the top of the row means the booster is near its limit. The app reads the station's hardware type on connect and looks up its rated current — a Z21 at ~3.2 A, a z21start at ~1.7 A, a Z21 XL at ~7 A, and so on.
+- That lookup lives in a plain **`hardware-current.json`** file in the app's data folder, written with sensible defaults the first time you run. If your booster isn't covered, or you want a different ceiling, edit the milliamp value for your model and restart.
+- **Hover anywhere across the row** to read the exact current at that instant, e.g. `900 mA`. As with the loco graph, you don't need to be on the line or on a data point — between two samples the value is interpolated to the cursor's exact moment — and it keeps updating live as the trace scrolls under a still cursor.
 
 ## Scrolling and zooming through history
 
@@ -61,7 +70,7 @@ Scrolling or zooming pauses the live follow so the view holds still while you st
 
 The panel on the left is the legend — one entry per row, lined up with its bar:
 
-- Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, and a locomotive for a loco. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
+- Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, a locomotive for a loco, and a small waveform for the system-current row. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
 - **Rename** a sensor by typing a friendly name straight into its entry (press Enter or click away to keep it). The name is remembered between runs.
 - **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs.
 - **Remove** a sensor with the **✕** that appears when you hover its entry; you'll be asked to confirm. It disappears from both the legend and the timeline.

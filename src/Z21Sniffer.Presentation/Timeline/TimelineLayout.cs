@@ -2,13 +2,13 @@ namespace Z21Sniffer.Presentation.Timeline;
 
 public sealed class TimelineLayout
 {
-    public double TimeToX(TimelineViewport viewport, DateTimeOffset time)
-    {
-        var span = (viewport.End - viewport.Start).TotalSeconds;
-        if (span <= 0) return 0;
-        var offset = (time - viewport.Start).TotalSeconds;
-        return offset / span * viewport.Width;
-    }
+    private readonly BarGeometry _geometry = new();
+
+    public double TimeToX(TimelineViewport viewport, DateTimeOffset time) =>
+        _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, time);
+
+    public DateTimeOffset XToTime(TimelineViewport viewport, double x) =>
+        _geometry.XToTime(viewport.Start, viewport.End, viewport.Width, x);
 
     public IReadOnlyList<TimelineTick> Ticks(TimelineViewport viewport, TimeSpan step)
     {

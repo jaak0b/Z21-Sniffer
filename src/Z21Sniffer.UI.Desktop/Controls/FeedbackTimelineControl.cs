@@ -36,13 +36,17 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.TrackPowerOff] = "SurfaceAltBrush",
         [TimelineInkKeys.TrackPowerText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.TrackPowerOffText] = "TextPrimaryBrush",
+        [TimelineInkKeys.SystemCurrentBar] = "SurfaceAltBrush",
+        [TimelineInkKeys.SystemCurrentLine] = "WarningBrush",
+        [TimelineInkKeys.SystemCurrentBaseline] = "TextSecondaryBrush",
+        [TimelineInkKeys.SystemCurrentText] = "TextSecondaryBrush",
     };
 
-    private List<(Rect Rect, string Text)> _hitAreas = new();
     private TimelineViewModel? _viewModel;
     private double _verticalOffset;
     private bool _dragging;
     private double _lastDragX;
+    private Point? _lastPointer;
 
     public FeedbackTimelineControl()
     {
@@ -108,15 +112,30 @@ public sealed class FeedbackTimelineControl : Control
             return;
         }
 
-        var absolute = new Point(point.X, point.Y + _verticalOffset);
-        var hit = _hitAreas.FirstOrDefault(area => area.Rect.Contains(absolute));
-        ToolTip.SetTip(this, hit.Text);
+        _lastPointer = point;
+        UpdateTooltip();
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
         _dragging = false;
+    }
+
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        _lastPointer = null;
+        ToolTip.SetTip(this, null);
+    }
+
+    private void UpdateTooltip()
+    {
+        if (_viewModel is null || _lastPointer is not { } point || Bounds.Width <= 0) return;
+
+        var viewport = new ChartViewport(_viewModel.ViewportStart, _viewModel.ViewportEnd, Bounds.Width);
+        var value = _viewModel.Hover.ValueAt(_viewModel.Sources, viewport, _viewModel.ZoomFraction, point.X, point.Y + _verticalOffset);
+        ToolTip.SetTip(this, value);
     }
 
     public override void Render(DrawingContext context)
@@ -148,7 +167,7 @@ public sealed class FeedbackTimelineControl : Control
             Bounds.Height,
             MinContentWidth,
             _viewModel.ZoomFraction);
-        _hitAreas = surface.HitAreas;
+        UpdateTooltip();
     }
 
     private IBrush Brush(string inkKey, Color fallback) =>

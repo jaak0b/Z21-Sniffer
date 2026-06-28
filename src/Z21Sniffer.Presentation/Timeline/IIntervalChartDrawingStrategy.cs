@@ -8,4 +8,6 @@ public interface IIntervalChartDrawingStrategy
     double LaneHeight(double zoomFraction);
 
     void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context, ChartViewport viewport);
+
+    string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at);
 }

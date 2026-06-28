@@ -30,6 +30,7 @@ public class WorkspaceViewModelTest
     private ISessionStore _sessionStore = null!;
     private ICommandStationConnection _connection = null!;
     private ILogTextStore _logTextStore = null!;
+    private IStationCurrentLimits _currentLimits = null!;
     private StubClock _clock = null!;
     private string? _savePath;
     private string? _importPath;
@@ -45,6 +46,8 @@ public class WorkspaceViewModelTest
         _sessionStore = A.Fake<ISessionStore>();
         _connection = A.Fake<ICommandStationConnection>();
         _logTextStore = A.Fake<ILogTextStore>();
+        _currentLimits = A.Fake<IStationCurrentLimits>();
+        A.CallTo(() => _currentLimits.MaxCurrentMilliamps(A<StationHardware>._)).Returns(3200);
         _clock = new StubClock();
         A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
         A.CallTo(() => _factory.Create(A<bool>._)).Returns(_connection);
@@ -66,6 +69,7 @@ public class WorkspaceViewModelTest
             [typeof(ConnectionInterval)] = new ConnectionIntervalChartDrawingStrategy(),
             [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
             [typeof(TrackPowerInterval)] = new TrackPowerIntervalChartDrawingStrategy(),
+            [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalChartDrawingStrategy(),
         });
         var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
         {
@@ -73,6 +77,7 @@ public class WorkspaceViewModelTest
             [typeof(ConnectionInterval)] = new ConnectionIntervalLegendDrawingStrategy(),
             [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
             [typeof(TrackPowerInterval)] = new TrackPowerIntervalLegendDrawingStrategy(),
+            [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalLegendDrawingStrategy(),
         });
 
         return new WorkspaceViewModel(
@@ -80,6 +85,7 @@ public class WorkspaceViewModelTest
             A.Fake<IMcpServerController>(),
             A.Fake<IThemeController>(),
             _logTextStore,
+            _currentLimits,
             post: action => action(),
             chooseSaveJsonPath: () => Task.FromResult(_savePath),
             chooseOpenJsonPath: () => Task.FromResult(_importPath),
@@ -248,6 +254,33 @@ public class WorkspaceViewModelTest
         var trackPower = _vm.Timeline.Sources.OfType<TrackPowerSource>().Single();
         Assert.That(trackPower.Id, Is.EqualTo("trackpower"));
         Assert.That(trackPower.Intervals.Last().Status, Is.EqualTo(TrackPowerStatus.Short));
+    }
+
+    [Test]
+    public async Task SystemStateWhileRecording_RecordsSystemCurrentScaledToTheResolvedDeviceLimit()
+    {
+        A.CallTo(() => _currentLimits.MaxCurrentMilliamps(A<StationHardware>._)).Returns(7000);
+        await StartRecording();
+        _connection.HardwareInfoReceived += Raise.With(_connection, new StationHardware(529, 0));
+
+        _connection.SystemStateReceived += Raise.With(_connection,
+            new SystemSnapshot(1234, 0, 0, false, false, false, false, false, false));
+
+        var current = _vm.Timeline.Sources.OfType<SystemCurrentSource>().Single();
+        Assert.That(current.Id, Is.EqualTo("systemcurrent"));
+        Assert.That(current.Intervals.Last().Samples.Last().Milliamps, Is.EqualTo(1234));
+        Assert.That(current.Intervals.Last().MaxCurrentMilliamps, Is.EqualTo(7000));
+    }
+
+    [Test]
+    public async Task SystemState_WhenNotRecording_DoesNotCreateSystemCurrentSource()
+    {
+        await ActivateConnection();
+
+        _connection.SystemStateReceived += Raise.With(_connection,
+            new SystemSnapshot(500, 0, 0, false, false, false, false, false, false));
+
+        Assert.That(_vm.Timeline.Sources.OfType<SystemCurrentSource>(), Is.Empty);
     }
 
     [Test]

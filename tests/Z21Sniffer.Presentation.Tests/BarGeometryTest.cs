@@ -67,4 +67,24 @@ public class BarGeometryTest
 
         Assert.That(span, Is.Null);
     }
+
+    [Test]
+    public void TimeToX_MapsProportionally() =>
+        Assert.That(_geometry.TimeToX(T0, T0.AddSeconds(10), 1000, T0.AddSeconds(3)), Is.EqualTo(300).Within(1e-9));
+
+    [Test]
+    public void TimeToX_ZeroSpan_ReturnsZero() =>
+        Assert.That(_geometry.TimeToX(T0, T0, 1000, T0.AddSeconds(3)), Is.EqualTo(0));
+
+    [Test]
+    public void XToTime_IsTheInverseOfTimeToX()
+    {
+        var x = _geometry.TimeToX(T0, T0.AddSeconds(10), 1000, T0.AddSeconds(3.7));
+
+        Assert.That(_geometry.XToTime(T0, T0.AddSeconds(10), 1000, x), Is.EqualTo(T0.AddSeconds(3.7)));
+    }
+
+    [Test]
+    public void XToTime_ZeroWidth_ReturnsStart() =>
+        Assert.That(_geometry.XToTime(T0, T0.AddSeconds(10), 0, 123), Is.EqualTo(T0));
 }
