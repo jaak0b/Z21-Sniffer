@@ -6,13 +6,9 @@ public static class TimelineInkKeys
 {
     public const string Bar = "Bar";
 
-    public const string HighlightedBar = "HighlightedBar";
-
     public const string HighlightOutline = "HighlightOutline";
 
     public const string BarText = "BarText";
-
-    public const string HighlightedBarText = "HighlightedBarText";
 
     public const string StoppedFlag = "StoppedFlag";
 

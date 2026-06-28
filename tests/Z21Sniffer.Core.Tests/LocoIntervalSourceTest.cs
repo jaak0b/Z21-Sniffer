@@ -143,4 +143,8 @@ public class LocoIntervalSourceTest
     {
         Assert.That(_source.IntervalType, Is.EqualTo(typeof(LocoInterval)));
     }
+
+    [Test]
+    public void HighlightsShortIntervals_IsFalse() =>
+        Assert.That(_source.HighlightsShortIntervals, Is.False);
 }

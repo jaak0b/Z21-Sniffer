@@ -43,7 +43,7 @@ public class SystemCurrentIntervalChartDrawingStrategyTest
     }
 
     private void Draw(SystemCurrentInterval interval, bool showContent = true) =>
-        _strategy.Draw(_source, interval, _surface, Rect, new BarContentContext(showContent, false, TimeSpan.FromSeconds(5)), Viewport);
+        _strategy.Draw(_source, interval, _surface, Rect, new BarContentContext(showContent, TimeSpan.FromSeconds(5)), Viewport);
 
     [Test]
     public void LaneHeight_ScalesFromBaseToDoubleWithZoom()

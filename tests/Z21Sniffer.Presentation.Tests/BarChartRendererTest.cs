@@ -22,7 +22,8 @@ public class BarChartRendererTest
         _surface = new RecordingTimelineSurface();
         _renderer = new BarChartRenderer(Index(
             (typeof(FeedbackSensorInterval), new SensorIntervalChartDrawingStrategy()),
-            (typeof(ConnectionInterval), new ConnectionIntervalChartDrawingStrategy())));
+            (typeof(ConnectionInterval), new ConnectionIntervalChartDrawingStrategy()),
+            (typeof(LocoInterval), new LocoIntervalChartDrawingStrategy())));
     }
 
     private static IIndex<Type, IIntervalChartDrawingStrategy> Index(
@@ -104,15 +105,50 @@ public class BarChartRendererTest
         Assert.That(_surface.Texts, Has.Count.EqualTo(1));
     }
 
+    private void RenderWithThreshold(IReadOnlyList<IIntervalSource> sources, double threshold) =>
+        _renderer.Render(_surface, sources, Viewport(), T0.AddSeconds(10),
+            highlightUnderSeconds: threshold, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50, zoomFraction: 1);
+
     [Test]
-    public void Render_ShortInterval_HighlightedWhenUnderThreshold()
+    public void Render_ShortInterval_OutlinesItWhenUnderThreshold()
     {
         var sensor = Sensor(SensorA, order: 0, (2, 6));
 
-        _renderer.Render(_surface, new IIntervalSource[] { sensor }, Viewport(), T0.AddSeconds(10),
-            highlightUnderSeconds: 10, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50, zoomFraction: 1);
+        RenderWithThreshold(new IIntervalSource[] { sensor }, threshold: 10);
 
-        Assert.That(_surface.Fills, Has.Some.Matches<RecordingTimelineSurface.FillOp>(f => f.Ink.Key == TimelineInkKeys.HighlightedBar));
+        Assert.That(_surface.Strokes, Has.Some.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
+    }
+
+    [Test]
+    public void Render_ShortButStillOpenInterval_DrawsNoHighlightOutline()
+    {
+        var sensor = Sensor(SensorA, order: 0, (9.5, null));
+
+        RenderWithThreshold(new IIntervalSource[] { sensor }, threshold: 10);
+
+        Assert.That(_surface.Strokes, Has.None.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
+    }
+
+    [Test]
+    public void Render_LongInterval_DrawsNoHighlightOutline()
+    {
+        var sensor = Sensor(SensorA, order: 0, (2, 6));
+
+        RenderWithThreshold(new IIntervalSource[] { sensor }, threshold: 1);
+
+        Assert.That(_surface.Strokes, Has.None.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
+    }
+
+    [Test]
+    public void Render_ShortInterval_OnAnOptedOutSource_DrawsNoHighlightOutline()
+    {
+        var loco = new LocoIntervalSource { Id = "loco:3", Address = 3, Order = 0 };
+        loco.Apply(speed: 5, forward: true, maxSpeed: 100, T0.AddSeconds(2));
+        loco.Apply(speed: 0, forward: true, maxSpeed: 100, T0.AddSeconds(2.4));
+
+        RenderWithThreshold(new IIntervalSource[] { loco }, threshold: 10);
+
+        Assert.That(_surface.Strokes, Has.None.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
     }
 
     [Test]

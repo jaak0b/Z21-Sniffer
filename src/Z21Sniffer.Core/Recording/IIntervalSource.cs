@@ -9,6 +9,8 @@ public interface IIntervalSource
 
     Type IntervalType { get; }
 
+    bool HighlightsShortIntervals { get; }
+
     int Order { get; set; }
 
     IReadOnlyList<IInterval> Intervals { get; }

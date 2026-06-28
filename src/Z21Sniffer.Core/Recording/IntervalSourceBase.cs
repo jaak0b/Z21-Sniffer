@@ -20,6 +20,8 @@ public abstract class IntervalSourceBase<T> : IIntervalSource<T> where T : class
 
     public Type IntervalType => typeof(T);
 
+    public virtual bool HighlightsShortIntervals => true;
+
     protected IKeyValueStore Persistence { get; private set; } = new InMemoryKeyValueStore();
 
     public void UsePersistence(IKeyValueStore store) => Persistence = store;

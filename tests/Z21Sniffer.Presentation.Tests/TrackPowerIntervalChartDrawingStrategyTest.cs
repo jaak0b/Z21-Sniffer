@@ -35,7 +35,7 @@ public class TrackPowerIntervalChartDrawingStrategyTest
     }
 
     private static BarContentContext Content(bool show) =>
-        new(ShowContent: show, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3));
+        new(ShowContent: show, FullDuration: TimeSpan.FromSeconds(3));
 
     [Test]
     public void LaneHeight_IsFixed()
@@ -80,7 +80,7 @@ public class TrackPowerIntervalChartDrawingStrategyTest
     [Test]
     public void Draw_WithContent_RoundsDurationToThreeDecimals()
     {
-        Draw(TrackPowerStatus.On, new BarContentContext(ShowContent: true, Highlighted: false, FullDuration: TimeSpan.FromSeconds(1.23456)));
+        Draw(TrackPowerStatus.On, new BarContentContext(ShowContent: true, FullDuration: TimeSpan.FromSeconds(1.23456)));
 
         Assert.That(_surface.Texts.Single().Text, Is.EqualTo($"{LocalizationService.Instance["TrackPowerOnState"]} · 1.235 s"));
     }

@@ -24,6 +24,10 @@ public class IntervalSourceBaseTest
     public void SetUp() => _source = new TestSource();
 
     [Test]
+    public void HighlightsShortIntervals_DefaultsToTrue() =>
+        Assert.That(_source.HighlightsShortIntervals, Is.True);
+
+    [Test]
     public void CreateInterval_SetsStartOpenAndTracksCurrent()
     {
         var interval = _source.Open(T0);

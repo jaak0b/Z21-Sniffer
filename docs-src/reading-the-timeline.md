@@ -81,7 +81,7 @@ With a lot of sensors the legend and bars scroll together, only drawing what's o
 
 ## Hunting a flaky sensor
 
-Set the **Highlight under** threshold in the top toolbar. Any ON-block shorter than that many seconds is drawn with a warning fill and a bright outline — and the moment you change the number, every block re-evaluates. Highlighting is on out of the box; dial the threshold down until only the suspicious blips light up, and you've found your ghost. Set it to **0** to turn highlighting off entirely.
+Set the **Highlight under** threshold in the top toolbar. Any block shorter than that many seconds keeps its normal colour but gains a bright red outline — so the label inside stays readable while the short blip still jumps out — and the moment you change the number, every block re-evaluates. Highlighting works across every row that draws discrete blocks (feedback sensors, the connection, track power), not just sensors; the line-graph rows (loco speed, system current) opt out, since a short segment there isn't a ghost. Highlighting is on out of the box; dial the threshold down until only the suspicious blips light up, and you've found your ghost. Set it to **0** to turn highlighting off entirely.
 
 ## Light and dark
 

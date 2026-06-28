@@ -20,10 +20,8 @@ public sealed class FeedbackTimelineControl : Control
     private readonly IReadOnlyDictionary<string, string> _inkResources = new Dictionary<string, string>
     {
         [TimelineInkKeys.Bar] = "SensorBarBrush",
-        [TimelineInkKeys.HighlightedBar] = "WarningBrush",
         [TimelineInkKeys.HighlightOutline] = "DangerBrush",
         [TimelineInkKeys.BarText] = "TextPrimaryBrush",
-        [TimelineInkKeys.HighlightedBarText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.ConnectionText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.Connected] = "SuccessBrush",
         [TimelineInkKeys.Disconnected] = "DangerBrush",

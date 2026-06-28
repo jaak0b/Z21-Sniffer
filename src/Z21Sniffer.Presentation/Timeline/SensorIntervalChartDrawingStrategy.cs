@@ -16,8 +16,7 @@ public sealed class SensorIntervalChartDrawingStrategy : IIntervalChartDrawingSt
         var sensorSource = (FeedbackSensorSource)source;
         var sensorInterval = (FeedbackSensorInterval)interval;
 
-        surface.Fill(rect, new TimelineInk(context.Highlighted ? TimelineInkKeys.HighlightedBar : TimelineInkKeys.Bar));
-        if (context.Highlighted) surface.Stroke(rect, new TimelineInk(TimelineInkKeys.HighlightOutline), 2);
+        surface.Fill(rect, new TimelineInk(TimelineInkKeys.Bar));
 
         if (sensorInterval.EndReason == IntervalEndReason.Stopped)
         {
@@ -28,8 +27,7 @@ public sealed class SensorIntervalChartDrawingStrategy : IIntervalChartDrawingSt
         if (!context.ShowContent) return;
 
         var text = _barText.Describe(sensorSource.Label, sensorInterval.Sensor, context.FullDuration);
-        var textInk = context.Highlighted ? TimelineInkKeys.HighlightedBarText : TimelineInkKeys.BarText;
-        surface.Text(text, rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(textInk));
+        surface.Text(text, rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.BarText));
     }
 
     public string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at)

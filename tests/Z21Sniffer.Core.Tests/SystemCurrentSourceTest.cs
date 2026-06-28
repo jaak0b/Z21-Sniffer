@@ -84,4 +84,8 @@ public class SystemCurrentSourceTest
     {
         Assert.That(_source.IntervalType, Is.EqualTo(typeof(SystemCurrentInterval)));
     }
+
+    [Test]
+    public void HighlightsShortIntervals_IsFalse() =>
+        Assert.That(_source.HighlightsShortIntervals, Is.False);
 }

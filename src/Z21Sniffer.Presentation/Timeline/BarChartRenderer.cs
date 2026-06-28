@@ -36,9 +36,14 @@ public sealed class BarChartRenderer
                 if (_geometry.Compute(viewport.Start, viewport.End, viewport.Width, interval.Start, interval.End, now) is not { } span) continue;
 
                 var rect = new BarRect(span.X, row.Top - verticalOffset, span.Width, row.Height);
-                var highlighted = highlightUnderSeconds is { } threshold && span.FullDurationSeconds < threshold;
-                var context = new BarContentContext(span.Width >= minContentWidth, highlighted, TimeSpan.FromSeconds(span.FullDurationSeconds));
+                var context = new BarContentContext(span.Width >= minContentWidth, TimeSpan.FromSeconds(span.FullDurationSeconds));
                 strategy.Draw(row.Source, interval, surface, rect, context, viewport);
+
+                var highlighted = !interval.IsOpen
+                    && row.Source.HighlightsShortIntervals
+                    && highlightUnderSeconds is { } threshold
+                    && span.FullDurationSeconds < threshold;
+                if (highlighted) surface.Stroke(rect, new TimelineInk(TimelineInkKeys.HighlightOutline), 2);
             }
         }
     }

@@ -5,6 +5,8 @@ namespace Z21Sniffer.Core.Recording;
 
 public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
 {
+    public override bool HighlightsShortIntervals => false;
+
     public int Address { get; set; }
 
     public string Label
