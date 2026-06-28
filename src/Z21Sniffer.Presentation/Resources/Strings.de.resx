@@ -103,9 +103,9 @@
   <data name="Minimize" xml:space="preserve"><value>Minimieren</value></data>
   <data name="Maximize" xml:space="preserve"><value>Maximieren</value></data>
   <data name="Restore" xml:space="preserve"><value>Wiederherstellen</value></data>
-  <data name="Off" xml:space="preserve"><value>aus</value></data>
   <data name="UnitSeconds" xml:space="preserve"><value>s</value></data>
-  <data name="ThresholdTooltip" xml:space="preserve"><value>Hebt Kontakte hervor, deren EIN-Dauer kürzer als diese Sekundenzahl ist. 0 deaktiviert die Hervorhebung.</value></data>
+  <data name="HighlightBandTooltip" xml:space="preserve"><value>Hebt Blöcke hervor, deren EIN-Dauer zwischen dem unteren und oberen Wert in Sekunden liegt (oberen auf 0 setzen, um die Hervorhebung auszuschalten).</value></data>
+  <data name="RangeSeparator" xml:space="preserve"><value>bis</value></data>
   <data name="ConfirmRemove" xml:space="preserve"><value>Sensor entfernen</value></data>
   <data name="Yes" xml:space="preserve"><value>Ja</value></data>
   <data name="No" xml:space="preserve"><value>Nein</value></data>

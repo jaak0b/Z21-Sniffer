@@ -166,7 +166,8 @@ public sealed class FeedbackTimelineControl : Control
             _verticalOffset,
             Bounds.Height,
             MinContentWidth,
-            _viewModel.ZoomFraction);
+            _viewModel.ZoomFraction,
+            _viewModel.HighlightOverSeconds);
         UpdateTooltip();
     }
 

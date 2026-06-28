@@ -28,6 +28,9 @@ public sealed partial class TimelineViewModel : ObservableObject
     private double _highlightThresholdSeconds = 0.5;
 
     [ObservableProperty]
+    private double _highlightMinSeconds;
+
+    [ObservableProperty]
     private double _scrollValueSeconds;
 
     [ObservableProperty]
@@ -75,6 +78,14 @@ public sealed partial class TimelineViewModel : ObservableObject
     public double ZoomFraction { get; private set; }
 
     public double? HighlightUnderSeconds => HighlightThresholdSeconds > 0 ? HighlightThresholdSeconds : null;
+
+    public double? HighlightOverSeconds => HighlightMinSeconds > 0 ? HighlightMinSeconds : null;
+
+    partial void OnHighlightMinSecondsChanged(double value) =>
+        HighlightMinSeconds = Math.Min(value, HighlightThresholdSeconds);
+
+    partial void OnHighlightThresholdSecondsChanged(double value) =>
+        HighlightMinSeconds = Math.Min(HighlightMinSeconds, value);
 
     public RecordingSession ToSession() => new(_startedAt, _registry.Sources.ToList());
 

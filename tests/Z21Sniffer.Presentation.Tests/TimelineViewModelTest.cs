@@ -511,4 +511,39 @@ public class TimelineViewModelTest
     {
         Assert.That(_vm.HighlightUnderSeconds, Is.EqualTo(0.5));
     }
+
+    [Test]
+    public void HighlightOverSeconds_DefaultsToNoLowerBound()
+    {
+        Assert.That(_vm.HighlightOverSeconds, Is.Null);
+    }
+
+    [Test]
+    public void HighlightOverSeconds_PositiveMin_ReturnsTheMin()
+    {
+        _vm.HighlightMinSeconds = 0.1;
+
+        Assert.That(_vm.HighlightOverSeconds, Is.EqualTo(0.1));
+    }
+
+    [Test]
+    public void HighlightMinSeconds_AboveTheUpperThreshold_IsClampedToIt()
+    {
+        _vm.HighlightThresholdSeconds = 0.5;
+
+        _vm.HighlightMinSeconds = 1.0;
+
+        Assert.That(_vm.HighlightMinSeconds, Is.EqualTo(0.5));
+    }
+
+    [Test]
+    public void HighlightThresholdSeconds_LoweredBelowTheMin_PullsTheMinDown()
+    {
+        _vm.HighlightThresholdSeconds = 1.0;
+        _vm.HighlightMinSeconds = 0.8;
+
+        _vm.HighlightThresholdSeconds = 0.5;
+
+        Assert.That(_vm.HighlightMinSeconds, Is.EqualTo(0.5));
+    }
 }

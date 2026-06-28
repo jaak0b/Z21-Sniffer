@@ -24,7 +24,8 @@ public sealed class BarChartRenderer
         double verticalOffset,
         double visibleHeight,
         double minContentWidth,
-        double zoomFraction)
+        double zoomFraction,
+        double? highlightOverSeconds = null)
     {
         foreach (var row in _rowLayout.Compute(sources, zoomFraction))
         {
@@ -39,10 +40,12 @@ public sealed class BarChartRenderer
                 var context = new BarContentContext(span.Width >= minContentWidth, TimeSpan.FromSeconds(span.FullDurationSeconds));
                 strategy.Draw(row.Source, interval, surface, rect, context, viewport);
 
+                var withinUpperBound = highlightUnderSeconds is { } upper && span.FullDurationSeconds < upper;
+                var withinLowerBound = highlightOverSeconds is not { } lower || span.FullDurationSeconds > lower;
                 var highlighted = !interval.IsOpen
                     && row.Source.HighlightsShortIntervals
-                    && highlightUnderSeconds is { } threshold
-                    && span.FullDurationSeconds < threshold;
+                    && withinUpperBound
+                    && withinLowerBound;
                 if (highlighted) surface.Stroke(rect, new TimelineInk(TimelineInkKeys.HighlightOutline), 2);
             }
         }

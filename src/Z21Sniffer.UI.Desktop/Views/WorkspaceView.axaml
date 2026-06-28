@@ -104,10 +104,12 @@
           </Button>
           <Button Content="{Binding Recording.ToggleLabel}" Command="{Binding Recording.ToggleCommand}" />
           <Border Width="1" Height="20" VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Margin="8,0" />
-          <controls:UnitInputBox Width="96" Value="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
-                                 Unit="{Binding Localization[UnitSeconds]}" Watermark="{Binding Localization[Off]}"
-                                 ToolTip.Tip="{Binding Localization[ThresholdTooltip]}"
-                                 VerticalAlignment="Center" />
+          <controls:RangeInputBox MinValue="{Binding Timeline.HighlightMinSeconds, Mode=TwoWay}"
+                                  MaxValue="{Binding Timeline.HighlightThresholdSeconds, Mode=TwoWay}"
+                                  Unit="{Binding Localization[UnitSeconds]}"
+                                  Separator="{Binding Localization[RangeSeparator]}"
+                                  ToolTip.Tip="{Binding Localization[HighlightBandTooltip]}"
+                                  VerticalAlignment="Center" />
           <Border Width="1" Height="20" VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Margin="8,0" />
           <Button Content="{Binding Localization[Session]}" Click="OnSessionMenu" />
         </WrapPanel>

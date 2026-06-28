@@ -130,6 +130,30 @@ public class BarChartRendererTest
     }
 
     [Test]
+    public void Render_IntervalInsideTheBand_IsOutlined()
+    {
+        var sensor = Sensor(SensorA, order: 0, (2, 2.3));
+
+        _renderer.Render(_surface, new IIntervalSource[] { sensor }, Viewport(), T0.AddSeconds(10),
+            highlightUnderSeconds: 0.5, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50, zoomFraction: 1,
+            highlightOverSeconds: 0.1);
+
+        Assert.That(_surface.Strokes, Has.Some.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
+    }
+
+    [Test]
+    public void Render_IntervalShorterThanTheLowerBound_IsNotOutlined()
+    {
+        var sensor = Sensor(SensorA, order: 0, (2, 2.05));
+
+        _renderer.Render(_surface, new IIntervalSource[] { sensor }, Viewport(), T0.AddSeconds(10),
+            highlightUnderSeconds: 0.5, verticalOffset: 0, visibleHeight: 1000, minContentWidth: 50, zoomFraction: 1,
+            highlightOverSeconds: 0.1);
+
+        Assert.That(_surface.Strokes, Has.None.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.HighlightOutline));
+    }
+
+    [Test]
     public void Render_LongInterval_DrawsNoHighlightOutline()
     {
         var sensor = Sensor(SensorA, order: 0, (2, 6));
