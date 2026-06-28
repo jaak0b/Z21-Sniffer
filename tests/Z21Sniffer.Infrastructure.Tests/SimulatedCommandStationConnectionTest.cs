@@ -33,6 +33,10 @@ public class SimulatedCommandStationConnectionTest
     }
 
     [Test]
+    public async Task ConfirmSessionAsync_AlwaysConfirms() =>
+        Assert.That(await _connection.ConfirmSessionAsync(CancellationToken.None), Is.True);
+
+    [Test]
     public void EmitNext_RaisesFeedbackReceived()
     {
         IReadOnlyList<SensorState>? received = null;

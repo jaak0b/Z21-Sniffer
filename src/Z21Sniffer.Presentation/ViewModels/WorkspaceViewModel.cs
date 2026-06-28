@@ -25,7 +25,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly Func<Task<string?>> _chooseExportLogPath;
     private readonly Func<Task> _openSettings;
     private readonly HashSet<ICommandStationConnection> _wired = new();
-    private SystemSnapshot? _lastSnapshot;
 
     private const string EnglishCode = "en";
     private const string GermanCode = "de";
@@ -75,7 +74,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Connection = new ConnectionViewModel(factory, settings);
         Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, _recordingClock);
-        Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected, () => _lastSnapshot);
+        Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected);
         Log = new TrafficLogViewModel(Localization, clock);
         Mcp = new McpServerViewModel(mcpController, loaded.McpPort);
         Theme = new ThemeViewModel(themeController, loaded.DarkTheme);
@@ -136,7 +135,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         });
         connection.SystemStateReceived += (_, snapshot) => _post(() =>
         {
-            _lastSnapshot = snapshot;
             Log.AppendSystem(snapshot);
             if (Recording.IsRecording)
                 _registry.GetOrCreate<TrackPowerSource>("trackpower").Apply(snapshot, _recordingClock.Now);

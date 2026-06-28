@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Infrastructure.Simulation;
 using Z21Sniffer.Infrastructure.Z21;
@@ -6,14 +7,16 @@ namespace Z21Sniffer.Infrastructure;
 
 public sealed class CommandStationConnectionFactory : ICommandStationConnectionFactory
 {
-    private readonly Z21CommandStationConnection _live;
+    private readonly ICommandStationConnection _live;
     private readonly SimulatedCommandStationConnection _simulated;
 
     public CommandStationConnectionFactory(
         Z21CommandStationConnection live,
-        SimulatedCommandStationConnection simulated)
+        SimulatedCommandStationConnection simulated,
+        INetworkReachability reachability,
+        ILogger<MonitoredCommandStationConnection> logger)
     {
-        _live = live;
+        _live = new MonitoredCommandStationConnection(live, reachability, logger);
         _simulated = simulated;
     }
 

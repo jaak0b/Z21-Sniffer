@@ -2,6 +2,7 @@ using CommandStation.Transport.Udp;
 using FakeItEasy;
 using NUnit.Framework;
 using Z21.Core;
+using Z21.Core.ResponseHandler.SystemState;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Infrastructure;
 using Z21Sniffer.Infrastructure.Simulation;
@@ -20,9 +21,12 @@ public class CommandStationConnectionFactoryTest
     public void SetUp()
     {
         _live = new Z21CommandStationConnection(
-            A.Fake<IZ21CommandStation>(), new UdpTransportOptions(), new FeedbackDecoder(), new Z21SnapshotMapper());
+            A.Fake<IZ21CommandStation>(), new UdpTransportOptions(), new FeedbackDecoder(), new Z21SnapshotMapper(),
+            A.Fake<IBroadcastFlagsResponseHandler>());
         _simulated = new SimulatedCommandStationConnection(new SimulatedFeedbackScript());
-        _factory = new CommandStationConnectionFactory(_live, _simulated);
+        _factory = new CommandStationConnectionFactory(
+            _live, _simulated, A.Fake<INetworkReachability>(),
+            A.Fake<Microsoft.Extensions.Logging.ILogger<MonitoredCommandStationConnection>>());
     }
 
     [TearDown]
@@ -33,6 +37,6 @@ public class CommandStationConnectionFactoryTest
         Assert.That(_factory.Create(simulated: true), Is.SameAs(_simulated));
 
     [Test]
-    public void Create_WhenNotSimulated_ReturnsLiveConnection() =>
-        Assert.That(_factory.Create(simulated: false), Is.SameAs(_live));
+    public void Create_WhenNotSimulated_ReturnsLiveConnectionWrappedInHealthMonitor() =>
+        Assert.That(_factory.Create(simulated: false), Is.TypeOf<MonitoredCommandStationConnection>());
 }

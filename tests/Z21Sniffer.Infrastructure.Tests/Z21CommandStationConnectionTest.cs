@@ -8,6 +8,8 @@ using Z21.Core;
 using Z21.Core.Command;
 using Z21.Core.Command.SystemState;
 using Z21.Core.Model;
+using Z21.Core.Model.EventArgs;
+using Z21.Core.ResponseHandler.SystemState;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Infrastructure.Z21;
@@ -19,6 +21,7 @@ public class Z21CommandStationConnectionTest
 {
     private IZ21CommandStation _station = null!;
     private UdpTransportOptions _options = null!;
+    private IBroadcastFlagsResponseHandler _readback = null!;
     private Z21CommandStationConnection _connection = null!;
 
     [SetUp]
@@ -27,7 +30,8 @@ public class Z21CommandStationConnectionTest
         _station = A.Fake<IZ21CommandStation>();
         A.CallTo(() => _station.Commands).Returns(A.Fake<IZ21CommandFactory>());
         _options = new UdpTransportOptions();
-        _connection = new Z21CommandStationConnection(_station, _options, new FeedbackDecoder(), new Z21SnapshotMapper());
+        _readback = A.Fake<IBroadcastFlagsResponseHandler>();
+        _connection = new Z21CommandStationConnection(_station, _options, new FeedbackDecoder(), new Z21SnapshotMapper(), _readback);
     }
 
     [Test]
@@ -164,6 +168,53 @@ public class Z21CommandStationConnectionTest
         A.CallTo(() => _station.RequestFeedbackAsync(0)).MustHaveHappened();
         A.CallTo(() => _station.RequestFeedbackAsync(1)).MustHaveHappened();
         A.CallTo(() => _station.RequestSystemStateAsync()).MustHaveHappened();
+    }
+
+    [Test]
+    public async Task RequestCurrentStateAsync_ReArmsBroadcastFlagsBeforeRequestingState()
+    {
+        await _connection.RequestCurrentStateAsync();
+
+        A.CallTo(() => _station.Commands.Create<SetBroadcastFlagsCommand>(A<object[]>._)).MustHaveHappened()
+            .Then(A.CallTo(() => _station.SendCommandsAsync(A<IZ21Command[]>._)).MustHaveHappened())
+            .Then(A.CallTo(() => _station.RequestSystemStateAsync()).MustHaveHappened());
+    }
+
+    [Test]
+    public async Task ConfirmSessionAsync_SetsThenReadsBackBroadcastFlags()
+    {
+        var task = _connection.ConfirmSessionAsync(CancellationToken.None);
+        _readback.OnBroadcastFlagsReceived += Raise.With(_readback, new BroadcastFlagsReceivedEventArgs(2u));
+        await task;
+
+        A.CallTo(() => _station.Commands.Create<SetBroadcastFlagsCommand>(A<object[]>._)).MustHaveHappened()
+            .Then(A.CallTo(() => _station.Commands.Create<GetBroadcastFlagsCommand>(A<object[]>._)).MustHaveHappened());
+    }
+
+    [Test]
+    public async Task ConfirmSessionAsync_WhenFlagsEchoed_ReturnsTrueAndRequestsFeedbackAndState()
+    {
+        var task = _connection.ConfirmSessionAsync(CancellationToken.None);
+        _readback.OnBroadcastFlagsReceived += Raise.With(_readback, new BroadcastFlagsReceivedEventArgs(2u));
+        var result = await task;
+
+        Assert.That(result, Is.True);
+        A.CallTo(() => _station.RequestFeedbackAsync(0)).MustHaveHappened();
+        A.CallTo(() => _station.RequestFeedbackAsync(1)).MustHaveHappened();
+        A.CallTo(() => _station.RequestSystemStateAsync()).MustHaveHappened();
+    }
+
+    [Test]
+    public async Task ConfirmSessionAsync_WhenCancelledBeforeEcho_ReturnsFalseAndSkipsFeedback()
+    {
+        using var cts = new CancellationTokenSource();
+
+        var task = _connection.ConfirmSessionAsync(cts.Token);
+        cts.Cancel();
+        var result = await task;
+
+        Assert.That(result, Is.False);
+        A.CallTo(() => _station.RequestFeedbackAsync(0)).MustNotHaveHappened();
     }
 
     [Test]

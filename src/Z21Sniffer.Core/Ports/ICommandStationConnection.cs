@@ -20,6 +20,8 @@ public interface ICommandStationConnection : IFeedbackSource
 
     Task DisconnectAsync();
 
+    Task<bool> ConfirmSessionAsync(CancellationToken token);
+
     Task RequestCurrentStateAsync();
 
     Task SetTrackPowerAsync(bool on);

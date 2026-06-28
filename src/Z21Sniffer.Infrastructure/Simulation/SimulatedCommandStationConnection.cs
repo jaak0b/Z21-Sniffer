@@ -36,6 +36,8 @@ public sealed class SimulatedCommandStationConnection : ICommandStationConnectio
         _timer = new Timer(_ => EmitNext(), state: null, _interval, _interval);
     }
 
+    public Task<bool> ConfirmSessionAsync(CancellationToken token) => Task.FromResult(true);
+
     public Task RequestCurrentStateAsync()
     {
         FeedbackReceived?.Invoke(this, _script.Frame(_tick));

@@ -13,7 +13,8 @@
       "!**/Views/**/*.cs",
       "!**/Controls/**/*.cs",
       "!**/*Module.cs",
-      "!**/KestrelMcpServerController.cs"
+      "!**/KestrelMcpServerController.cs",
+      "!**/PingReachability.cs"
     ]
   }
 }

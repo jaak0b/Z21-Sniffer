@@ -213,11 +213,11 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
-    public async Task StartRecording_SeedsTrackPowerRow()
+    public async Task StartRecording_DoesNotInventTrackPowerRowBeforeAnyStationReply()
     {
         await StartRecording();
 
-        Assert.That(_vm.Timeline.Sources.OfType<TrackPowerSource>().Single(), Is.Not.Null);
+        Assert.That(_vm.Timeline.Sources.OfType<TrackPowerSource>(), Is.Empty);
     }
 
     [Test]
@@ -230,6 +230,7 @@ public class WorkspaceViewModelTest
                 ProgrammingMode: false, PowerLost: false, HighTemperature: false));
 
         var trackPower = _vm.Timeline.Sources.OfType<TrackPowerSource>().Single();
+        Assert.That(trackPower.Id, Is.EqualTo("trackpower"));
         Assert.That(trackPower.Intervals.Last().Status, Is.EqualTo(TrackPowerStatus.Short));
     }
 
