@@ -9,7 +9,7 @@ public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
 
     public string Label
     {
-        get => Persistence.GetValue($"{Id}/label", Address.ToString(CultureInfo.InvariantCulture)) ?? string.Empty;
+        get => Persistence.GetValue<string>($"{Id}/label") ?? Address.ToString(CultureInfo.InvariantCulture);
         set => Persistence.SetValue($"{Id}/label", value);
     }
 
@@ -27,14 +27,12 @@ public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
         }
 
         var interval = CurrentInterval;
-        if (interval is null || interval.Forward != forward)
+        if (interval is null)
         {
-            CloseInterval(at, IntervalEndReason.FallingEdge);
             interval = CreateInterval(at);
-            interval.Forward = forward;
             interval.MaxSpeed = maxSpeed;
         }
 
-        interval.Samples.Add(new LocoSpeedSample(at, speed));
+        interval.Samples.Add(new LocoSpeedSample(at, speed, forward));
     }
 }

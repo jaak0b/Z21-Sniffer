@@ -35,10 +35,11 @@ Each segment is labelled with its state and how long it held (e.g. `Power on · 
 
 ## Watching locomotive speed
 
-Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar carries a **line graph of the speed** over time, drawn right inside it. While a loco is moving you get one bar; the moment its speed drops to zero the bar ends (a falling edge) and the next time it pulls away a fresh bar begins.
+Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar carries a **line graph of the speed** over time, drawn right inside it. While a loco is moving you get one bar — it keeps going across a change of direction — and the moment its speed drops to zero the bar ends (a falling edge); the next time the loco pulls away a fresh bar begins.
 
 - Each bar is **labelled with the loco's identity** — its address with a `Loco` tag, e.g. `Loco 27`, or `Express · Loco 27` once you've named it — so you can tell whose trace you're looking at. Speed and direction aren't repeated there as bare numbers; the graph already shows both.
-- **Direction** is shown by which way the graph is oriented. Driving forward, the line sits low at a standstill and climbs toward the top as the loco speeds up. In reverse the whole graph flips — zero is at the top and full speed is at the bottom — so a glance tells you which way the loco was heading.
+- **Direction** reads off a **zero line through the bar**: forward speed is drawn *above* it, reverse speed *below* it. A loco that only ever drives one way uses the whole bar for that direction; once it actually reverses within a run, the zero line sits in the middle with forward above and reverse below, and the reversal shows up as the trace crossing the line. A glance tells you which way the loco was heading, and how fast, at any moment.
+- The line is **stepped, not smoothed**: each speed step is held flat until the decoder is commanded to a new one, then the trace jumps straight to it. That mirrors what the loco actually did — no invented in‑between speeds — so a reversal is a clean vertical step down through the zero line and back up the other side.
 - Every recorded reading is marked with a small **circle right on the line** where the data point sits, so you can tell where an actual sample was taken from where the line is just holding a value between readings.
 - **Hover the line** to read the exact speed at that instant — labelled, e.g. `Speed 67` — along with the direction and the time.
 - The speed is scaled against the decoder's own range (14, 28, or 128 speed steps), so a bar that reaches the top means full throttle for that loco.

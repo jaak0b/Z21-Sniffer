@@ -7,7 +7,7 @@ namespace Z21Sniffer.Presentation.Timeline;
 
 public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStrategy
 {
-    private const double BaseHeight = 26;
+    private const double BaseHeight = 34;
     private const double Inset = 3;
     private const double FlagWidth = 4;
     private const double LineThickness = 2;
@@ -33,28 +33,29 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
 
         var left = rect.X;
         var right = rect.X + rect.W;
+        var baseline = BaselineFor(loco, rect);
         var plotted = loco.Samples
-            .Select(sample => new PlottedSample(sample, _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At), SpeedY(sample.Speed, loco, rect)))
+            .Select(sample => new PlottedSample(sample, _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At), SpeedY(sample.Speed, sample.Forward, loco.MaxSpeed, baseline)))
             .ToList();
 
         var onScreen = plotted.Where(sample => sample.X >= left && sample.X <= right).ToList();
         var entry = plotted.LastOrDefault(sample => sample.X < left);
 
-        var points = new List<PlotPoint>();
-        if (entry is { } enter) points.Add(new PlotPoint(left, enter.Y));
-        points.AddRange(onScreen.Select(sample => new PlotPoint(sample.X, sample.Y)));
-        if (points.Count > 0) points.Add(points[^1] with { X = right });
-        surface.Polyline(points, new TimelineInk(TimelineInkKeys.LocoSpeedLine), LineThickness);
+        var corners = new List<PlotPoint>();
+        if (entry is { } enter) corners.Add(new PlotPoint(left, enter.Y));
+        corners.AddRange(onScreen.Select(sample => new PlotPoint(sample.X, sample.Y)));
+        if (corners.Count > 0) corners.Add(corners[^1] with { X = right });
+        surface.Polyline(Step(corners), new TimelineInk(TimelineInkKeys.LocoSpeedLine), LineThickness);
 
         foreach (var sample in onScreen)
             surface.Marker(sample.X, sample.Y, MarkerRadius, new TimelineInk(TimelineInkKeys.LocoSpeedLine), MarkerThickness);
 
         if (!context.ShowContent) return;
 
-        var direction = LocalizationService.Instance[loco.Forward ? "LogForward" : "LogBackward"];
         var speedWord = LocalizationService.Instance["SpeedLabel"];
         foreach (var sample in onScreen)
         {
+            var direction = LocalizationService.Instance[sample.Sample.Forward ? "LogForward" : "LogBackward"];
             var tooltip = string.Create(CultureInfo.CurrentCulture, $"{speedWord} {sample.Sample.Speed} · {direction} · {sample.Sample.At:HH:mm:ss}");
             surface.Hit(new BarRect(sample.X - 4, sample.Y - 4, 8, 8), tooltip);
         }
@@ -70,14 +71,40 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
             : labelled;
     }
 
-    private double SpeedY(int speed, LocoInterval loco, BarRect rect)
+    private Baseline BaselineFor(LocoInterval loco, BarRect rect)
     {
         var top = rect.Y + Inset;
         var bottom = rect.Y + rect.H - Inset;
         var usable = bottom - top;
-        var fraction = loco.MaxSpeed > 0 ? Math.Clamp((double)speed / loco.MaxSpeed, 0, 1) : 0;
-        return loco.Forward ? bottom - fraction * usable : top + fraction * usable;
+        var hasForward = loco.Samples.Any(sample => sample.Forward);
+        var hasReverse = loco.Samples.Any(sample => !sample.Forward);
+
+        if (hasForward && hasReverse) return new Baseline(top + usable / 2, usable / 2, usable / 2);
+        if (hasReverse) return new Baseline(top, 0, usable);
+        return new Baseline(bottom, usable, 0);
+    }
+
+    private double SpeedY(int speed, bool forward, int maxSpeed, Baseline baseline)
+    {
+        var fraction = maxSpeed > 0 ? Math.Clamp((double)speed / maxSpeed, 0, 1) : 0;
+        return forward ? baseline.Zero - fraction * baseline.Up : baseline.Zero + fraction * baseline.Down;
+    }
+
+    private List<PlotPoint> Step(IReadOnlyList<PlotPoint> corners)
+    {
+        if (corners.Count == 0) return new List<PlotPoint>();
+
+        var stepped = new List<PlotPoint> { corners[0] };
+        for (var index = 1; index < corners.Count; index++)
+        {
+            stepped.Add(new PlotPoint(corners[index].X, corners[index - 1].Y));
+            stepped.Add(corners[index]);
+        }
+
+        return stepped;
     }
 
     private sealed record PlottedSample(LocoSpeedSample Sample, double X, double Y);
+
+    private readonly record struct Baseline(double Zero, double Up, double Down);
 }

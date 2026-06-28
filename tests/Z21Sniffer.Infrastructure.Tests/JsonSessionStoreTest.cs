@@ -24,7 +24,7 @@ public class JsonSessionStoreTest : TempDirectoryTest
 
         var loco = new LocoIntervalSource { Id = "loco:482", Address = 482 };
         loco.Apply(40, forward: true, maxSpeed: 28, Start);
-        loco.Apply(80, forward: true, maxSpeed: 28, Start.AddSeconds(2));
+        loco.Apply(80, forward: false, maxSpeed: 28, Start.AddSeconds(2));
         loco.Apply(0, forward: true, maxSpeed: 28, Start.AddSeconds(6));
 
         return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco });
@@ -65,10 +65,10 @@ public class JsonSessionStoreTest : TempDirectoryTest
         Assert.That(loco.Address, Is.EqualTo(482));
         Assert.That(loco.Intervals, Has.Count.EqualTo(1));
         var interval = loco.Intervals.Single();
-        Assert.That(interval.Forward, Is.True);
         Assert.That(interval.MaxSpeed, Is.EqualTo(28));
         Assert.That(interval.End, Is.EqualTo(Start.AddSeconds(6)));
         Assert.That(interval.Samples.Select(s => s.Speed), Is.EqualTo(new[] { 40, 80 }));
+        Assert.That(interval.Samples.Select(s => s.Forward), Is.EqualTo(new[] { true, false }));
     }
 
     [Test]

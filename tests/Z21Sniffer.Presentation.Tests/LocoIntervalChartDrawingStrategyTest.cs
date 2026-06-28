@@ -31,8 +31,15 @@ public class LocoIntervalChartDrawingStrategyTest
 
     private LocoInterval Interval(bool forward, int maxSpeed, params (double AtSeconds, int Speed)[] samples)
     {
-        var interval = new LocoInterval { Forward = forward, MaxSpeed = maxSpeed, Start = T0 };
-        foreach (var (at, speed) in samples) interval.Samples.Add(new LocoSpeedSample(T0.AddSeconds(at), speed));
+        var interval = new LocoInterval { MaxSpeed = maxSpeed, Start = T0 };
+        foreach (var sample in samples) interval.Samples.Add(new LocoSpeedSample(T0.AddSeconds(sample.AtSeconds), sample.Speed, forward));
+        return interval;
+    }
+
+    private LocoInterval MixedInterval(int maxSpeed, params (double AtSeconds, int Speed, bool Forward)[] samples)
+    {
+        var interval = new LocoInterval { MaxSpeed = maxSpeed, Start = T0 };
+        foreach (var sample in samples) interval.Samples.Add(new LocoSpeedSample(T0.AddSeconds(sample.AtSeconds), sample.Speed, sample.Forward));
         return interval;
     }
 
@@ -42,9 +49,9 @@ public class LocoIntervalChartDrawingStrategyTest
     [Test]
     public void LaneHeight_ScalesFromBaseToDoubleWithZoom()
     {
-        Assert.That(_strategy.LaneHeight(0), Is.EqualTo(26));
-        Assert.That(_strategy.LaneHeight(0.5), Is.EqualTo(39));
-        Assert.That(_strategy.LaneHeight(1), Is.EqualTo(52));
+        Assert.That(_strategy.LaneHeight(0), Is.EqualTo(34));
+        Assert.That(_strategy.LaneHeight(0.5), Is.EqualTo(51));
+        Assert.That(_strategy.LaneHeight(1), Is.EqualTo(68));
     }
 
     [Test]
@@ -133,6 +140,49 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_Bidirectional_CentersBaseline_ForwardAbove_ReverseBelow()
+    {
+        Draw(MixedInterval(maxSpeed: 100, (2, 100, true), (4, 100, false)));
+
+        var forwardMarker = _surface.Markers[0];
+        var reverseMarker = _surface.Markers[1];
+        Assert.That(forwardMarker.CenterY, Is.EqualTo(3).Within(1e-6));
+        Assert.That(reverseMarker.CenterY, Is.EqualTo(49).Within(1e-6));
+    }
+
+    [Test]
+    public void Draw_Bidirectional_EqualSpeeds_AreEquidistantFromCenterBaseline()
+    {
+        Draw(MixedInterval(maxSpeed: 100, (2, 50, true), (4, 50, false)));
+
+        var center = Rect.Y + Rect.H / 2;
+        Assert.That(center - _surface.Markers[0].CenterY, Is.EqualTo(_surface.Markers[1].CenterY - center).Within(1e-6));
+    }
+
+    [Test]
+    public void Draw_Reversal_StepRiserCrossesTheCenterBaseline()
+    {
+        Draw(MixedInterval(maxSpeed: 100, (2, 60, true), (4, 60, false)));
+
+        var center = Rect.Y + Rect.H / 2;
+        var points = _surface.Polylines.Single().Points;
+        var riser = Enumerable.Range(1, points.Count - 1)
+            .Any(i => Math.Abs(points[i].X - points[i - 1].X) < 1e-6
+                && Math.Min(points[i].Y, points[i - 1].Y) < center
+                && Math.Max(points[i].Y, points[i - 1].Y) > center);
+        Assert.That(riser, Is.True);
+    }
+
+    [Test]
+    public void Draw_Tooltip_ReportsEachSamplesOwnDirection()
+    {
+        Draw(MixedInterval(maxSpeed: 100, (2, 80, true), (4, 90, false)));
+
+        Assert.That(_surface.Hits[0].Text, Does.Contain("forward"));
+        Assert.That(_surface.Hits[1].Text, Does.Contain("backward"));
+    }
+
+    [Test]
     public void Draw_WithoutContent_RegistersNoHitAreas()
     {
         Draw(Interval(forward: true, maxSpeed: 100, (2, 80)), showContent: false);
@@ -176,12 +226,29 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_PlotsEverySampleAsAPolylinePoint()
+    public void Draw_PlotsEverySampleAsAPolylineVertex()
     {
         Draw(Interval(forward: true, maxSpeed: 100, (1, 30), (3, 60), (5, 90)));
 
-        Assert.That(_surface.Polylines.Single().Points, Has.Count.EqualTo(4));
+        var points = _surface.Polylines.Single().Points;
+        foreach (var marker in _surface.Markers)
+            Assert.That(points, Has.Some.Matches<PlotPoint>(p =>
+                Math.Abs(p.X - marker.CenterX) < 1e-6 && Math.Abs(p.Y - marker.CenterY) < 1e-6));
         Assert.That(_surface.Hits, Has.Count.EqualTo(3));
+    }
+
+    [Test]
+    public void Draw_SteppedPath_HasOnlyAxisAlignedSegments()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (1, 30), (3, 60), (5, 90)));
+
+        var points = _surface.Polylines.Single().Points;
+        for (var index = 1; index < points.Count; index++)
+        {
+            var sameX = Math.Abs(points[index].X - points[index - 1].X) < 1e-6;
+            var sameY = Math.Abs(points[index].Y - points[index - 1].Y) < 1e-6;
+            Assert.That(sameX || sameY, Is.True, $"segment {index} is diagonal");
+        }
     }
 
     [Test]
@@ -197,7 +264,7 @@ public class LocoIntervalChartDrawingStrategyTest
     [Test]
     public void Draw_IntervalWithNoSamples_DrawsNoLineAndDoesNotThrow()
     {
-        var interval = new LocoInterval { Forward = true, MaxSpeed = 100, Start = T0 };
+        var interval = new LocoInterval { MaxSpeed = 100, Start = T0 };
 
         Assert.That(() => Draw(interval), Throws.Nothing);
         Assert.That(_surface.Polylines.Single().Points, Is.Empty);
@@ -209,9 +276,8 @@ public class LocoIntervalChartDrawingStrategyTest
         Draw(Interval(forward: true, maxSpeed: 100, (2, 50)));
 
         var points = _surface.Polylines.Single().Points;
-        Assert.That(points, Has.Count.EqualTo(2));
-        Assert.That(points[1].X, Is.EqualTo(Rect.X + Rect.W));
-        Assert.That(points[1].Y, Is.EqualTo(points[0].Y));
+        Assert.That(points.Last().X, Is.EqualTo(Rect.X + Rect.W));
+        Assert.That(points.Select(p => p.Y), Is.All.EqualTo(points[0].Y));
     }
 
     [Test]
@@ -265,11 +331,9 @@ public class LocoIntervalChartDrawingStrategyTest
         Draw(Interval(forward: true, maxSpeed: 100, (-2, 40), (20, 80)));
 
         var points = _surface.Polylines.Single().Points;
-        Assert.That(points, Has.Count.EqualTo(2));
         Assert.That(points[0].X, Is.EqualTo(Rect.X));
-        Assert.That(points[1].X, Is.EqualTo(Rect.X + Rect.W));
-        Assert.That(points[0].Y, Is.EqualTo(30.6).Within(1e-6));
-        Assert.That(points[1].Y, Is.EqualTo(30.6).Within(1e-6));
+        Assert.That(points.Last().X, Is.EqualTo(Rect.X + Rect.W));
+        Assert.That(points.Select(p => p.Y), Is.All.EqualTo(30.6).Within(1e-6));
     }
 
     [Test]

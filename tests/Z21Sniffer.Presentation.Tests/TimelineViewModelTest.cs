@@ -186,7 +186,7 @@ public class TimelineViewModelTest
         _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
         _vm.Tick();
 
-        Assert.That(_vm.LegendRows.Single().Height, Is.EqualTo(42.63).Within(0.05));
+        Assert.That(_vm.LegendRows.Single().Height, Is.EqualTo(55.74).Within(0.05));
     }
 
     [Test]

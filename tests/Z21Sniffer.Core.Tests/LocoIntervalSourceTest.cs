@@ -21,9 +21,9 @@ public class LocoIntervalSourceTest
 
         var interval = _source.Intervals.Single();
         Assert.That(interval.IsOpen, Is.True);
-        Assert.That(interval.Forward, Is.True);
         Assert.That(interval.MaxSpeed, Is.EqualTo(126));
         Assert.That(interval.Samples.Single().Speed, Is.EqualTo(40));
+        Assert.That(interval.Samples.Single().Forward, Is.True);
         Assert.That(interval.Samples.Single().At, Is.EqualTo(T0));
     }
 
@@ -58,20 +58,27 @@ public class LocoIntervalSourceTest
     }
 
     [Test]
-    public void Apply_DirectionFlipWithoutZero_ClosesAndReopensFlipped()
+    public void Apply_DirectionFlipWithoutZero_StaysOneIntervalWithPerSampleDirection()
     {
         _source.Apply(40, forward: true, maxSpeed: 126, T0);
         _source.Apply(40, forward: false, maxSpeed: 126, T0.AddSeconds(1));
 
+        var interval = _source.Intervals.Single();
+        Assert.That(interval.IsOpen, Is.True);
+        Assert.That(interval.Samples.Select(s => s.Forward), Is.EqualTo(new[] { true, false }));
+        Assert.That(interval.Samples.Select(s => s.Speed), Is.EqualTo(new[] { 40, 40 }));
+    }
+
+    [Test]
+    public void Apply_StopThenReverse_ClosesFirstBarAndOpensASecond()
+    {
+        _source.Apply(40, forward: true, maxSpeed: 126, T0);
+        _source.Apply(0, forward: true, maxSpeed: 126, T0.AddSeconds(1));
+        _source.Apply(30, forward: false, maxSpeed: 126, T0.AddSeconds(2));
+
         Assert.That(_source.Intervals, Has.Count.EqualTo(2));
-        var first = _source.Intervals[0];
-        var second = _source.Intervals[1];
-        Assert.That(first.IsOpen, Is.False);
-        Assert.That(first.EndReason, Is.EqualTo(IntervalEndReason.FallingEdge));
-        Assert.That(first.End, Is.EqualTo(T0.AddSeconds(1)));
-        Assert.That(second.Forward, Is.False);
-        Assert.That(second.IsOpen, Is.True);
-        Assert.That(second.Samples.Single().Speed, Is.EqualTo(40));
+        Assert.That(_source.Intervals[0].EndReason, Is.EqualTo(IntervalEndReason.FallingEdge));
+        Assert.That(_source.Intervals[1].Samples.Single().Forward, Is.False);
     }
 
     [Test]
@@ -86,6 +93,19 @@ public class LocoIntervalSourceTest
         _source.Label = "Express";
 
         Assert.That(_source.Label, Is.EqualTo("Express"));
+    }
+
+    [Test]
+    public void Label_PersistsUnderTheSourceScopedKey_AcrossReconstructedSources()
+    {
+        var store = new InMemoryKeyValueStore();
+        _source.UsePersistence(store);
+        _source.Label = "Express";
+
+        var reloaded = new LocoIntervalSource { Id = "loco:482", Address = 482 };
+        reloaded.UsePersistence(store);
+
+        Assert.That(reloaded.Label, Is.EqualTo("Express"));
     }
 
     [Test]
