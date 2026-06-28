@@ -12,6 +12,8 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
 
     public sealed record PolylineOp(IReadOnlyList<PlotPoint> Points, TimelineInk Ink, double Thickness);
 
+    public sealed record LineOp(double StartX, double StartY, double EndX, double EndY, TimelineInk Ink, double Thickness, bool Dashed);
+
     public sealed record MarkerOp(double CenterX, double CenterY, double Radius, TimelineInk Ink, double Thickness);
 
     public sealed record HitOp(BarRect Rect, string Text);
@@ -23,6 +25,8 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
     public List<TextOp> Texts { get; } = new();
 
     public List<PolylineOp> Polylines { get; } = new();
+
+    public List<LineOp> Lines { get; } = new();
 
     public List<MarkerOp> Markers { get; } = new();
 
@@ -38,6 +42,9 @@ internal sealed class RecordingTimelineSurface : ITimelineSurface
 
     public void Polyline(IReadOnlyList<PlotPoint> points, TimelineInk ink, double thickness) =>
         Polylines.Add(new PolylineOp(points, ink, thickness));
+
+    public void Line(double startX, double startY, double endX, double endY, TimelineInk ink, double thickness, bool dashed) =>
+        Lines.Add(new LineOp(startX, startY, endX, endY, ink, thickness, dashed));
 
     public void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness) =>
         Markers.Add(new MarkerOp(centerX, centerY, radius, ink, thickness));

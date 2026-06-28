@@ -56,6 +56,15 @@ public sealed class DrawingContextSurface : ITimelineSurface
         }
     }
 
+    public void Line(double startX, double startY, double endX, double endY, TimelineInk ink, double thickness, bool dashed)
+    {
+        var pen = new Pen(BrushFor(ink), thickness)
+        {
+            DashStyle = dashed ? new DashStyle(new double[] { 2, 2 }, 0) : null,
+        };
+        _context.DrawLine(pen, new Point(startX, startY), new Point(endX, endY));
+    }
+
     public void Marker(double centerX, double centerY, double radius, TimelineInk ink, double thickness) =>
         _context.DrawEllipse(null, new Pen(BrushFor(ink), thickness), new Point(centerX, centerY), radius, radius);
 

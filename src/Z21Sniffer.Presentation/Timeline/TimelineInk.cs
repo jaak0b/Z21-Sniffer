@@ -24,6 +24,8 @@ public static class TimelineInkKeys
 
     public const string LocoSpeedLine = "LocoSpeedLine";
 
+    public const string LocoBaseline = "LocoBaseline";
+
     public const string LocoText = "LocoText";
 
     public const string TrackPowerOn = "TrackPowerOn";

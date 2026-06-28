@@ -140,6 +140,30 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_ForwardOnly_DrawsAThinBaselineLineAcrossTheBarAtTheZeroPosition()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 50)));
+
+        var line = _surface.Lines.Single(l => l.Ink.Key == TimelineInkKeys.LocoBaseline);
+        Assert.That(line.StartX, Is.EqualTo(Rect.X));
+        Assert.That(line.EndX, Is.EqualTo(Rect.X + Rect.W));
+        Assert.That(line.StartY, Is.EqualTo(49).Within(1e-6));
+        Assert.That(line.EndY, Is.EqualTo(49).Within(1e-6));
+        Assert.That(line.Thickness, Is.LessThan(2));
+        Assert.That(line.Dashed, Is.True);
+    }
+
+    [Test]
+    public void Draw_Bidirectional_BaselineLineRunsThroughTheCenter()
+    {
+        Draw(MixedInterval(maxSpeed: 100, (2, 50, true), (4, 50, false)));
+
+        var line = _surface.Lines.Single(l => l.Ink.Key == TimelineInkKeys.LocoBaseline);
+        Assert.That(line.StartY, Is.EqualTo(Rect.Y + Rect.H / 2).Within(1e-6));
+        Assert.That(line.EndY, Is.EqualTo(Rect.Y + Rect.H / 2).Within(1e-6));
+    }
+
+    [Test]
     public void Draw_Bidirectional_CentersBaseline_ForwardAbove_ReverseBelow()
     {
         Draw(MixedInterval(maxSpeed: 100, (2, 100, true), (4, 100, false)));

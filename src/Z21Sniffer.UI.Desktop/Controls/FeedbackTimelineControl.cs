@@ -28,6 +28,7 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.StoppedFlag] = "DangerBrush",
         [TimelineInkKeys.LocoBar] = "SurfaceAltBrush",
         [TimelineInkKeys.LocoSpeedLine] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.LocoBaseline] = "TextSecondaryBrush",
         [TimelineInkKeys.LocoText] = "TextSecondaryBrush",
         [TimelineInkKeys.TrackPowerProgramming] = "SuccessBrush",
         [TimelineInkKeys.TrackPowerOn] = "PrimaryBrush",

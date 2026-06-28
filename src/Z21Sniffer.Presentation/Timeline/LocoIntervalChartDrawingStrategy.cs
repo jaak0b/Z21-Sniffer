@@ -11,6 +11,7 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
     private const double Inset = 3;
     private const double FlagWidth = 4;
     private const double LineThickness = 2;
+    private const double BaselineThickness = 1;
     private const double MarkerRadius = 2.5;
     private const double MarkerThickness = 2.5;
 
@@ -34,6 +35,7 @@ public sealed class LocoIntervalChartDrawingStrategy : IIntervalChartDrawingStra
         var left = rect.X;
         var right = rect.X + rect.W;
         var baseline = BaselineFor(loco, rect);
+        surface.Line(left, baseline.Zero, right, baseline.Zero, new TimelineInk(TimelineInkKeys.LocoBaseline), BaselineThickness, dashed: true);
         var plotted = loco.Samples
             .Select(sample => new PlottedSample(sample, _geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At), SpeedY(sample.Speed, sample.Forward, loco.MaxSpeed, baseline)))
             .ToList();
