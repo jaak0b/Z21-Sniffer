@@ -1,5 +1,10 @@
 # Z21 Feedback Sniffer
 
+[![Build & test](https://github.com/jaak0b/Z21-Sniffer/actions/workflows/build.yml/badge.svg)](https://github.com/jaak0b/Z21-Sniffer/actions/workflows/build.yml)
+[![Coverage & mutation](https://github.com/jaak0b/Z21-Sniffer/actions/workflows/nightly.yml/badge.svg)](https://github.com/jaak0b/Z21-Sniffer/actions/workflows/nightly.yml)
+[![Release](https://img.shields.io/github/v/release/jaak0b/Z21-Sniffer)](https://github.com/jaak0b/Z21-Sniffer/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/jaak0b/Z21-Sniffer)](LICENSE)
+
 A Windows tool for tracking down flaky feedback on a model railway.
 
 I built this because of ghost occupancies: a track section that says it's occupied when nothing is
