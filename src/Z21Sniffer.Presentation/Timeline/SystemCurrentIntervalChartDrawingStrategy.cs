@@ -23,10 +23,11 @@ public sealed class SystemCurrentIntervalChartDrawingStrategy : SampledSeriesCha
         var current = (SystemCurrentInterval)interval;
         var top = rect.Y + Inset;
         var bottom = rect.Y + rect.H - Inset;
+        var scaleMax = ScaleMaxFor(current);
         var points = current.Samples
             .Select(sample => new PlotPoint(
                 Geometry.TimeToX(viewport.Start, viewport.End, viewport.Width, sample.At),
-                CurrentY(sample.Milliamps, current.MaxCurrentMilliamps, top, bottom)))
+                CurrentY(sample.Milliamps, scaleMax, top, bottom)))
             .ToList();
 
         return new SeriesPlot(bottom, points);
@@ -40,12 +41,22 @@ public sealed class SystemCurrentIntervalChartDrawingStrategy : SampledSeriesCha
         var points = current.Samples.Select(sample => new SeriesPoint(sample.At, sample.Milliamps)).ToList();
         if (Shape.ValueAt(points, at) is not { } value) return null;
 
-        return string.Format(CultureInfo.CurrentCulture, LocalizationService.Instance["SystemCurrentReading"], (int)Math.Round(value));
+        var milliamps = (int)Math.Round(value);
+        return current is { DeviceName: { } name, MaxCurrentMilliamps: { } max }
+            ? string.Format(CultureInfo.CurrentCulture, LocalizationService.Instance["SystemCurrentReadingNamed"], name, milliamps, max)
+            : string.Format(CultureInfo.CurrentCulture, LocalizationService.Instance["SystemCurrentReading"], milliamps);
     }
 
-    private double CurrentY(int milliamps, int maxCurrentMilliamps, double top, double bottom)
+    private int ScaleMaxFor(SystemCurrentInterval interval)
     {
-        var fraction = maxCurrentMilliamps > 0 ? Math.Clamp((double)milliamps / maxCurrentMilliamps, 0, 1) : 0;
+        if (interval.MaxCurrentMilliamps is { } known) return known;
+        var peak = interval.Samples.Count == 0 ? 0 : interval.Samples.Max(sample => sample.Milliamps);
+        return Math.Max(1, peak);
+    }
+
+    private double CurrentY(int milliamps, int scaleMax, double top, double bottom)
+    {
+        var fraction = scaleMax > 0 ? Math.Clamp((double)milliamps / scaleMax, 0, 1) : 0;
         return bottom - fraction * (bottom - top);
     }
 }

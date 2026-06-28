@@ -13,6 +13,10 @@ public class AppPathsTest
         Assert.That(_paths.SettingsFile, Is.EqualTo(Path.Combine("base", "data", "settings.json")));
 
     [Test]
+    public void KeyValueFile_IsKvJsonUnderDataDirectory() =>
+        Assert.That(_paths.KeyValueFile, Is.EqualTo(Path.Combine("base", "data", "kv.json")));
+
+    [Test]
     public void LogsDirectory_IsLogsUnderDataDirectory() =>
         Assert.That(_paths.LogsDirectory, Is.EqualTo(Path.Combine("base", "data", "logs")));
 

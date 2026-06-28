@@ -29,9 +29,15 @@ public class SystemCurrentIntervalChartDrawingStrategyTest
     [TearDown]
     public void TearDown() => LocalizationService.Instance.Apply("en");
 
-    private SystemCurrentInterval Interval(int maxCurrent, params (double AtSeconds, int Milliamps)[] samples)
+    private SystemCurrentInterval Interval(int maxCurrent, params (double AtSeconds, int Milliamps)[] samples) =>
+        Build(typeCode: 513, deviceName: "Z21 (black)", maxCurrent, samples);
+
+    private SystemCurrentInterval UnknownInterval(params (double AtSeconds, int Milliamps)[] samples) =>
+        Build(typeCode: 0, deviceName: null, maxCurrentMilliamps: null, samples);
+
+    private SystemCurrentInterval Build(int typeCode, string? deviceName, int? maxCurrentMilliamps, (double AtSeconds, int Milliamps)[] samples)
     {
-        var interval = new SystemCurrentInterval { MaxCurrentMilliamps = maxCurrent, Start = T0 };
+        var interval = new SystemCurrentInterval { TypeCode = typeCode, DeviceName = deviceName, MaxCurrentMilliamps = maxCurrentMilliamps, Start = T0 };
         foreach (var sample in samples) interval.Samples.Add(new SystemCurrentSample(T0.AddSeconds(sample.AtSeconds), sample.Milliamps));
         return interval;
     }
@@ -198,9 +204,17 @@ public class SystemCurrentIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Probe_BetweenSamples_ReportsInterpolatedMilliamps()
+    public void Probe_ForAKnownDevice_ShowsNameInterpolatedCurrentAndMax()
     {
-        var interval = Interval(3200, (0, 800), (10, 1000));
+        var interval = Build(typeCode: 529, deviceName: "Z21 XL", maxCurrentMilliamps: 6000, new[] { (0d, 800), (10d, 1000) });
+
+        Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(5)), Is.EqualTo("Z21 XL: 900 / 6000 mA"));
+    }
+
+    [Test]
+    public void Probe_ForAnUnknownDevice_ShowsOnlyTheCurrent()
+    {
+        var interval = UnknownInterval((0, 800), (10, 1000));
 
         Assert.That(_strategy.Probe(_source, interval, T0.AddSeconds(5)), Is.EqualTo("900 mA"));
     }
@@ -218,5 +232,22 @@ public class SystemCurrentIntervalChartDrawingStrategyTest
     {
         Assert.That(() => Draw(Interval(maxCurrent: 0, (2, 500))), Throws.Nothing);
         Assert.That(_surface.Polylines.Single().Points[0].Y, Is.EqualTo(49).Within(1e-6));
+    }
+
+    [Test]
+    public void Draw_UnknownDevice_AutoScalesToTheIntervalsOwnPeak()
+    {
+        Draw(UnknownInterval((2, 500), (4, 1000)));
+
+        var points = _surface.Polylines.Single().Points;
+        Assert.That(points[0].Y, Is.EqualTo(26).Within(1e-6), "500 of a 1000 peak sits mid-row");
+        Assert.That(points[1].Y, Is.EqualTo(3).Within(1e-6), "the peak 1000 reaches the top");
+    }
+
+    [Test]
+    public void Draw_UnknownDeviceWithNoSamples_DoesNotThrow()
+    {
+        Assert.That(() => Draw(UnknownInterval()), Throws.Nothing);
+        Assert.That(_surface.Polylines.Single().Points, Is.Empty);
     }
 }

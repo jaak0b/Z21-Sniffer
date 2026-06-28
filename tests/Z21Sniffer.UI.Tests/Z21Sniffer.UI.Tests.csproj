@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\src\Z21Sniffer.UI.Desktop\hardware-current.json" Link="hardware-current.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Z21Sniffer.UI.Desktop\Z21Sniffer.UI.Desktop.csproj" />
     <ProjectReference Include="..\..\src\Z21Sniffer.Presentation\Z21Sniffer.Presentation.csproj" />
   </ItemGroup>

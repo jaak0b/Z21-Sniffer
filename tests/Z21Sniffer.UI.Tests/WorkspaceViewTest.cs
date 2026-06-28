@@ -182,8 +182,8 @@ public class WorkspaceViewTest
         var clock = new StubClock();
         var timeline = WorkspaceFactory.BuildTimelineContext(clock);
         var current = timeline.Registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
-        current.Apply(milliamps: 800, maxCurrentMilliamps: 3200, clock.Now);
-        current.Apply(milliamps: 1600, maxCurrentMilliamps: 3200, clock.Now.AddSeconds(2));
+        current.Apply(800, typeCode: 513, deviceName: "Z21 (black)", maxCurrentMilliamps: 3000, clock.Now);
+        current.Apply(1600, typeCode: 513, deviceName: "Z21 (black)", maxCurrentMilliamps: 3000, clock.Now.AddSeconds(2));
         var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
         var window = new Window { Content = control, Width = 800, Height = 300 };
 

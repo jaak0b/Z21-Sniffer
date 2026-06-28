@@ -21,7 +21,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private readonly RecordingClock _recordingClock;
     private readonly IStationCurrentLimits _stationCurrentLimits;
     private readonly Action<Action> _post;
-    private int _maxCurrentMilliamps;
+    private StationHardware _hardware = new(TypeCode: 0, FirmwareVersion: 0);
+    private StationCurrentLimit? _stationLimit;
     private readonly Func<Task<string?>> _chooseSaveJsonPath;
     private readonly Func<Task<string?>> _chooseOpenJsonPath;
     private readonly Func<Task<string?>> _chooseExportLogPath;
@@ -60,7 +61,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _sessionStore = sessionStore;
         _logTextStore = logTextStore;
         _stationCurrentLimits = stationCurrentLimits;
-        _maxCurrentMilliamps = stationCurrentLimits.MaxCurrentMilliamps(new StationHardware(TypeCode: 0, FirmwareVersion: 0));
         _ingest = ingest;
         _locoIngest = new LocoIngest(registry);
         _registry = registry;
@@ -142,14 +142,18 @@ public sealed partial class WorkspaceViewModel : ObservableObject
             Log.AppendTrackPower(on);
         });
         connection.HardwareInfoReceived += (_, hardware) => _post(() =>
-            _maxCurrentMilliamps = _stationCurrentLimits.MaxCurrentMilliamps(hardware));
+        {
+            _hardware = hardware;
+            _stationLimit = _stationCurrentLimits.Lookup(hardware);
+        });
         connection.SystemStateReceived += (_, snapshot) => _post(() =>
         {
             Log.AppendSystem(snapshot);
             if (Recording.IsRecording)
             {
                 _registry.GetOrCreate<TrackPowerSource>("trackpower").Apply(snapshot, _recordingClock.Now);
-                _registry.GetOrCreate<SystemCurrentSource>("systemcurrent").Apply(snapshot.MainCurrentMilliamps, _maxCurrentMilliamps, _recordingClock.Now);
+                _registry.GetOrCreate<SystemCurrentSource>("systemcurrent")
+                    .Apply(snapshot.MainCurrentMilliamps, _hardware.TypeCode, _stationLimit?.Name, _stationLimit?.MaxCurrentMilliamps, _recordingClock.Now);
             }
         });
         connection.LocoInfoReceived += (_, loco) => _post(() =>

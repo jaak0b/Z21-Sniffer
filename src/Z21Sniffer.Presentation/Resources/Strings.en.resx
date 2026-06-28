@@ -148,6 +148,7 @@
   <data name="SystemCurrent" xml:space="preserve"><value>System current</value></data>
   <data name="SystemCurrentDetails" xml:space="preserve"><value>Booster current draw</value></data>
   <data name="SystemCurrentReading" xml:space="preserve"><value>{0} mA</value></data>
+  <data name="SystemCurrentReadingNamed" xml:space="preserve"><value>{0}: {1} / {2} mA</value></data>
   <data name="LogTurnout" xml:space="preserve"><value>Turnout {0} → {1}</value></data>
   <data name="LogTurnoutOutput1" xml:space="preserve"><value>output 1</value></data>
   <data name="LogTurnoutOutput2" xml:space="preserve"><value>output 2</value></data>

@@ -47,7 +47,6 @@ public class WorkspaceViewModelTest
         _connection = A.Fake<ICommandStationConnection>();
         _logTextStore = A.Fake<ILogTextStore>();
         _currentLimits = A.Fake<IStationCurrentLimits>();
-        A.CallTo(() => _currentLimits.MaxCurrentMilliamps(A<StationHardware>._)).Returns(3200);
         _clock = new StubClock();
         A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
         A.CallTo(() => _factory.Create(A<bool>._)).Returns(_connection);
@@ -257,19 +256,39 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
-    public async Task SystemStateWhileRecording_RecordsSystemCurrentScaledToTheResolvedDeviceLimit()
+    public async Task SystemStateWhileRecording_RecordsSystemCurrentWithTheResolvedDeviceNameAndLimit()
     {
-        A.CallTo(() => _currentLimits.MaxCurrentMilliamps(A<StationHardware>._)).Returns(7000);
+        A.CallTo(() => _currentLimits.Lookup(A<StationHardware>.That.Matches(h => h.TypeCode == 529)))
+            .Returns(new StationCurrentLimit("Z21 XL", 6000));
         await StartRecording();
         _connection.HardwareInfoReceived += Raise.With(_connection, new StationHardware(529, 0));
 
         _connection.SystemStateReceived += Raise.With(_connection,
             new SystemSnapshot(1234, 0, 0, false, false, false, false, false, false));
 
-        var current = _vm.Timeline.Sources.OfType<SystemCurrentSource>().Single();
-        Assert.That(current.Id, Is.EqualTo("systemcurrent"));
-        Assert.That(current.Intervals.Last().Samples.Last().Milliamps, Is.EqualTo(1234));
-        Assert.That(current.Intervals.Last().MaxCurrentMilliamps, Is.EqualTo(7000));
+        var source = _vm.Timeline.Sources.OfType<SystemCurrentSource>().Single();
+        Assert.That(source.Id, Is.EqualTo("systemcurrent"));
+        var interval = source.Intervals.Last();
+        Assert.That(interval.TypeCode, Is.EqualTo(529));
+        Assert.That(interval.DeviceName, Is.EqualTo("Z21 XL"));
+        Assert.That(interval.MaxCurrentMilliamps, Is.EqualTo(6000));
+        Assert.That(interval.Samples.Last().Milliamps, Is.EqualTo(1234));
+    }
+
+    [Test]
+    public async Task SystemStateWhileRecording_ForAnUnknownDevice_RecordsWithNullNameAndMax()
+    {
+        A.CallTo(() => _currentLimits.Lookup(A<StationHardware>._)).Returns(null);
+        await StartRecording();
+        _connection.HardwareInfoReceived += Raise.With(_connection, new StationHardware(99999, 0));
+
+        _connection.SystemStateReceived += Raise.With(_connection,
+            new SystemSnapshot(500, 0, 0, false, false, false, false, false, false));
+
+        var interval = _vm.Timeline.Sources.OfType<SystemCurrentSource>().Single().Intervals.Last();
+        Assert.That(interval.TypeCode, Is.EqualTo(99999));
+        Assert.That(interval.DeviceName, Is.Null);
+        Assert.That(interval.MaxCurrentMilliamps, Is.Null);
     }
 
     [Test]

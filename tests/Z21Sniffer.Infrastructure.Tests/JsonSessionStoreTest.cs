@@ -28,8 +28,8 @@ public class JsonSessionStoreTest : TempDirectoryTest
         loco.Apply(0, forward: true, maxSpeed: 28, Start.AddSeconds(6));
 
         var current = new SystemCurrentSource { Id = "systemcurrent" };
-        current.Apply(milliamps: 820, maxCurrentMilliamps: 3200, Start);
-        current.Apply(milliamps: 1100, maxCurrentMilliamps: 3200, Start.AddSeconds(3));
+        current.Apply(820, typeCode: 513, deviceName: "Z21 (black)", maxCurrentMilliamps: 3000, Start);
+        current.Apply(1100, typeCode: 513, deviceName: "Z21 (black)", maxCurrentMilliamps: 3000, Start.AddSeconds(3));
 
         var trackPower = new TrackPowerSource { Id = "trackpower" };
         trackPower.Set(TrackPowerStatus.On, Start);
@@ -93,7 +93,9 @@ public class JsonSessionStoreTest : TempDirectoryTest
         var current = Current(_store.LoadJson(path));
 
         var interval = current.Intervals.Single();
-        Assert.That(interval.MaxCurrentMilliamps, Is.EqualTo(3200));
+        Assert.That(interval.TypeCode, Is.EqualTo(513));
+        Assert.That(interval.DeviceName, Is.EqualTo("Z21 (black)"));
+        Assert.That(interval.MaxCurrentMilliamps, Is.EqualTo(3000));
         Assert.That(interval.Samples.Select(s => s.Milliamps), Is.EqualTo(new[] { 820, 1100 }));
         Assert.That(interval.Samples.Select(s => s.At), Is.EqualTo(new[] { Start, Start.AddSeconds(3) }));
     }

@@ -41,7 +41,7 @@ public sealed class InfrastructureModule : Module
             .As<ISettingsStore>().SingleInstance();
         builder.Register(c => new JsonKeyValueStore(c.Resolve<IAppPaths>().KeyValueFile))
             .As<IKeyValueStore>().SingleInstance();
-        builder.Register(c => new JsonStationCurrentLimits(c.Resolve<IAppPaths>().HardwareCurrentFile))
+        builder.Register(_ => new JsonStationCurrentLimits(Path.Combine(AppContext.BaseDirectory, "hardware-current.json")))
             .As<IStationCurrentLimits>().SingleInstance();
 
         builder.RegisterType<PingReachability>().As<INetworkReachability>().SingleInstance();

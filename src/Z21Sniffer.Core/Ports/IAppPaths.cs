@@ -11,6 +11,4 @@ public interface IAppPaths
     string LogsDirectory { get; }
 
     string SessionsDirectory { get; }
-
-    string HardwareCurrentFile { get; }
 }

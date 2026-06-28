@@ -4,5 +4,5 @@ namespace Z21Sniffer.Core.Ports;
 
 public interface IStationCurrentLimits
 {
-    int MaxCurrentMilliamps(StationHardware hardware);
+    StationCurrentLimit? Lookup(StationHardware hardware);
 }

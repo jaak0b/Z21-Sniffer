@@ -1,0 +1,10 @@
+[
+  { "hardwareId": 512, "name": "Z21 (black)", "maxCurrentMilliamps": 3000 },
+  { "hardwareId": 513, "name": "Z21 (black)", "maxCurrentMilliamps": 3000 },
+  { "hardwareId": 515, "name": "z21 (white)", "maxCurrentMilliamps": 2000 },
+  { "hardwareId": 516, "name": "z21 start", "maxCurrentMilliamps": 2000 },
+  { "hardwareId": 517, "name": "Z21 Single Booster", "maxCurrentMilliamps": 3000 },
+  { "hardwareId": 518, "name": "Z21 Dual Booster", "maxCurrentMilliamps": 3000 },
+  { "hardwareId": 529, "name": "Z21 XL", "maxCurrentMilliamps": 6000 },
+  { "hardwareId": 530, "name": "Z21 XL Booster", "maxCurrentMilliamps": 6000 }
+]
