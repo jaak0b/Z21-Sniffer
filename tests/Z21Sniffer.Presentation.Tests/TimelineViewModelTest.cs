@@ -219,17 +219,6 @@ public class TimelineViewModelTest
     }
 
     [Test]
-    public void ClearCommand_WithNoRows_StillRaisesChanged()
-    {
-        var changed = false;
-        _vm.Changed += (_, _) => changed = true;
-
-        _vm.ClearCommand.Execute(null);
-
-        Assert.That(changed, Is.True);
-    }
-
-    [Test]
     public void LoadSession_WithSameSourceIds_StillRaisesChanged()
     {
         Feed(SensorA, occupied: true);
@@ -327,29 +316,6 @@ public class TimelineViewModelTest
     }
 
     [Test]
-    public void ClearCommand_RemovesRowsAndIntervals()
-    {
-        Feed(SensorA, occupied: true);
-
-        _vm.ClearCommand.Execute(null);
-
-        Assert.That(_vm.LegendRows, Is.Empty);
-        Assert.That(_vm.Sources, Is.Empty);
-    }
-
-    [Test]
-    public void ClearCommand_RaisesChanged()
-    {
-        Feed(SensorA, occupied: true);
-        var changed = false;
-        _vm.Changed += (_, _) => changed = true;
-
-        _vm.ClearCommand.Execute(null);
-
-        Assert.That(changed, Is.True);
-    }
-
-    [Test]
     public void ToSession_CapturesRegistrySourcesAndStartedAt()
     {
         Feed(SensorA, occupied: true);
@@ -378,6 +344,41 @@ public class TimelineViewModelTest
         Assert.That(_vm.LegendRows, Has.Count.EqualTo(2));
         Assert.That(_vm.StartedAt, Is.EqualTo(start));
         Assert.That(reordered, Is.True);
+        Assert.That(changed, Is.True);
+    }
+
+    [Test]
+    public void Reconcile_GuardStopsChangedHandlersFromReentrantlyRebuildingRows()
+    {
+        var added = 0;
+        _vm.Changed += (_, _) =>
+        {
+            if (added >= 30) return;
+            added++;
+            _registry.GetOrCreate<FeedbackSensorSource>($"sensor:9.{added}", s => s.Sensor = new SensorKey(9, added))
+                .Apply(occupied: true, _clock.Now);
+        };
+
+        Feed(SensorA, occupied: true);
+
+        Assert.That(_vm.LegendRows, Has.Count.LessThan(10));
+    }
+
+    [Test]
+    public void BeginSession_ResetsOriginFollowingAndCollapsesScrollback()
+    {
+        _clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(600);
+        _vm.Tick();
+        _vm.TogglePauseCommand.Execute(null);
+        Assert.That(_vm.ScrollMaxSeconds, Is.GreaterThan(0));
+        var changed = false;
+        _vm.Changed += (_, _) => changed = true;
+
+        _vm.BeginSession();
+
+        Assert.That(_vm.StartedAt, Is.EqualTo(_clock.Now));
+        Assert.That(_vm.ScrollMaxSeconds, Is.EqualTo(0).Within(0.001));
+        Assert.That(_vm.Following, Is.True);
         Assert.That(changed, Is.True);
     }
 

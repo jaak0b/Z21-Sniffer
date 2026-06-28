@@ -196,6 +196,22 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
+    public async Task RestartingRecording_CollapsesTimelineScrollbackToTheNewStart()
+    {
+        await StartRecording();
+        _clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(120);
+        _vm.Timeline.Tick();
+        Assert.That(_vm.Timeline.ScrollMaxSeconds, Is.GreaterThan(0));
+
+        _vm.Recording.ToggleCommand.Execute(null);
+        _vm.Recording.ToggleCommand.Execute(null);
+        _vm.Timeline.Tick();
+
+        Assert.That(_vm.Timeline.ScrollMaxSeconds, Is.LessThan(1));
+        Assert.That(_vm.Timeline.StartedAt, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
     public async Task StartRecording_RequestsCurrentStateFromConnection()
     {
         await StartRecording();

@@ -64,9 +64,15 @@ public sealed class AvaloniaSnifferApi : ISnifferApi
 
     public Task DisconnectAsync() => OnUiAsync(() => _vm.Connection.DisconnectAsync());
 
-    public Task ClearAsync() => OnUi(() =>
+    public Task StartRecordingAsync() => OnUi(() =>
     {
-        _vm.Timeline.ClearCommand.Execute(null);
+        if (!_vm.Recording.IsRecording) _vm.Recording.ToggleCommand.Execute(null);
+        return true;
+    });
+
+    public Task StopRecordingAsync() => OnUi(() =>
+    {
+        if (_vm.Recording.IsRecording) _vm.Recording.ToggleCommand.Execute(null);
         return true;
     });
 

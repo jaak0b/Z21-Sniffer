@@ -33,7 +33,7 @@ With that in place (and the checkbox ticked in Settings), Claude can call the to
 **Control:**
 
 - **connect** / **disconnect** — to the Z21 or the simulator.
-- **clear_recording** — start a fresh capture.
+- **start_recording** / **stop_recording** — begin a fresh capture (the timeline resets to now) or stop and keep it on screen for review.
 - **rename_sensor** — give a contact a friendly name.
 - **set_track_power** — switch track power on or off.
 

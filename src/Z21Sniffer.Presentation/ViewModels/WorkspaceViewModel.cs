@@ -91,7 +91,10 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         Recording.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(RecordingViewModel.IsRecording) && Recording.IsRecording)
+            {
+                Timeline.BeginSession();
                 _ = Connection.RequestCurrentStateAsync();
+            }
         };
     }
 

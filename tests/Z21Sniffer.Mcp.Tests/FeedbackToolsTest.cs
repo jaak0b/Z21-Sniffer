@@ -62,6 +62,24 @@ public class FeedbackToolsTest
     }
 
     [Test]
+    public async Task Connect_ToSimulator_DelegatesAndConfirmsSimulator()
+    {
+        var message = await _tools.Connect("ignored", 0, simulated: true);
+
+        A.CallTo(() => _api.ConnectAsync("ignored", 0, true)).MustHaveHappened();
+        Assert.That(message, Does.Contain("simulator"));
+    }
+
+    [Test]
+    public async Task Disconnect_DelegatesToApiAndConfirms()
+    {
+        var message = await _tools.Disconnect();
+
+        A.CallTo(() => _api.DisconnectAsync()).MustHaveHappened();
+        Assert.That(message, Does.Contain("Disconnect").IgnoreCase);
+    }
+
+    [Test]
     public async Task SetTrackPower_DelegatesToApiAndReportsState()
     {
         var on = await _tools.SetTrackPower(true);
@@ -71,6 +89,24 @@ public class FeedbackToolsTest
         A.CallTo(() => _api.SetTrackPowerAsync(false)).MustHaveHappened();
         Assert.That(on, Does.Contain("on"));
         Assert.That(off, Does.Contain("off"));
+    }
+
+    [Test]
+    public async Task StartRecording_DelegatesToApiAndConfirms()
+    {
+        var message = await _tools.StartRecording();
+
+        A.CallTo(() => _api.StartRecordingAsync()).MustHaveHappened();
+        Assert.That(message, Does.Contain("start").IgnoreCase);
+    }
+
+    [Test]
+    public async Task StopRecording_DelegatesToApiAndConfirms()
+    {
+        var message = await _tools.StopRecording();
+
+        A.CallTo(() => _api.StopRecordingAsync()).MustHaveHappened();
+        Assert.That(message, Does.Contain("stop").IgnoreCase);
     }
 
     [Test]

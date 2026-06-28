@@ -18,7 +18,9 @@ public interface ISnifferApi
 
     Task DisconnectAsync();
 
-    Task ClearAsync();
+    Task StartRecordingAsync();
+
+    Task StopRecordingAsync();
 
     Task RenameSensorAsync(int module, int contact, string name);
 

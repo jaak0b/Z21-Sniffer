@@ -52,12 +52,20 @@ public sealed class FeedbackTools
         return "Disconnecting.";
     }
 
-    [McpServerTool(Name = "clear_recording")]
-    [Description("Clear all recorded intervals and sensor rows, starting a fresh capture.")]
-    public async Task<string> ClearRecording()
+    [McpServerTool(Name = "start_recording")]
+    [Description("Start a fresh recording: clears the timeline and begins capturing feedback from now.")]
+    public async Task<string> StartRecording()
     {
-        await _api.ClearAsync();
-        return "Recording cleared.";
+        await _api.StartRecordingAsync();
+        return "Recording started.";
+    }
+
+    [McpServerTool(Name = "stop_recording")]
+    [Description("Stop the current recording. The captured timeline stays on screen for review.")]
+    public async Task<string> StopRecording()
+    {
+        await _api.StopRecordingAsync();
+        return "Recording stopped.";
     }
 
     [McpServerTool(Name = "rename_sensor")]

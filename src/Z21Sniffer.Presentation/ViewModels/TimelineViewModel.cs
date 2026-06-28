@@ -94,6 +94,14 @@ public sealed partial class TimelineViewModel : ObservableObject
 
     public void Tick() => Refresh();
 
+    public void BeginSession()
+    {
+        _startedAt = _clock.Now;
+        Following = true;
+        Refresh();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
     public void PanBySeconds(double seconds)
     {
         Following = false;
@@ -140,14 +148,6 @@ public sealed partial class TimelineViewModel : ObservableObject
     {
         Following = !Following;
         Refresh();
-        Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    private void Clear()
-    {
-        _startedAt = _clock.Now;
-        _registry.Clear();
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
