@@ -11,6 +11,7 @@ namespace Z21Sniffer.UI.Desktop.Controls;
 public sealed class TimeAxisControl : Control
 {
     private readonly TimelineLayout _layout = new();
+    private readonly ThemeBrushResolver _brushes = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private readonly Typeface _typeface = Typeface.Default;
 
@@ -46,9 +47,7 @@ public sealed class TimeAxisControl : Control
         base.Render(context);
         if (_viewModel is null || Bounds.Width <= 0) return;
 
-        var brush = this.TryFindResource("TextSecondaryBrush", ActualThemeVariant, out var value) && value is IBrush found
-            ? found
-            : new SolidColorBrush(Color.FromRgb(0x60, 0x60, 0x60));
+        var brush = _brushes.Resolve(this, ActualThemeVariant, "TextSecondaryBrush");
 
         var viewport = new TimelineViewport(_viewModel.ViewportStart, _viewModel.ViewportEnd, Bounds.Width, Bounds.Height, 1);
         var step = TimeSpan.FromSeconds(Math.Max(1, (viewport.End - viewport.Start).TotalSeconds / 6));

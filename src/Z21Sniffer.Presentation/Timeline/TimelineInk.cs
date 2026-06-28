@@ -12,6 +12,8 @@ public static class TimelineInkKeys
 
     public const string BarText = "BarText";
 
+    public const string HighlightedBarText = "HighlightedBarText";
+
     public const string StoppedFlag = "StoppedFlag";
 
     public const string Connected = "Connected";

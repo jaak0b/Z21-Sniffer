@@ -28,7 +28,8 @@ public sealed class SensorIntervalChartDrawingStrategy : IIntervalChartDrawingSt
         if (!context.ShowContent) return;
 
         var text = _barText.Describe(sensorSource.Label, sensorInterval.Sensor, context.FullDuration);
-        surface.Text(text, rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(TimelineInkKeys.BarText));
+        var textInk = context.Highlighted ? TimelineInkKeys.HighlightedBarText : TimelineInkKeys.BarText;
+        surface.Text(text, rect.X + 5, rect.Y + rect.H / 2, new TimelineInk(textInk));
     }
 
     public string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at)

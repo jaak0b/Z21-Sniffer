@@ -65,6 +65,14 @@ public class SensorIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_HighlightedWithContent_DrawsLabelInTheHighlightedTextInk()
+    {
+        Draw(new BarContentContext(ShowContent: true, Highlighted: true, FullDuration: TimeSpan.FromSeconds(3)));
+
+        Assert.That(_surface.Texts.Single().Ink.Key, Is.EqualTo(TimelineInkKeys.HighlightedBarText));
+    }
+
+    [Test]
     public void Draw_WithoutContent_DrawsNoText()
     {
         Draw(new BarContentContext(ShowContent: false, Highlighted: false, FullDuration: TimeSpan.FromSeconds(3)));

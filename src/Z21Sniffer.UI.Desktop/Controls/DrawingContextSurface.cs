@@ -8,12 +8,12 @@ namespace Z21Sniffer.UI.Desktop.Controls;
 public sealed class DrawingContextSurface : ITimelineSurface
 {
     private readonly DrawingContext _context;
-    private readonly Func<string, Color, IBrush> _resolveBrush;
+    private readonly Func<string, IBrush> _resolveBrush;
     private readonly Typeface _typeface = Typeface.Default;
     private readonly double _verticalOffset;
     private Rect _lastBar;
 
-    public DrawingContextSurface(DrawingContext context, Func<string, Color, IBrush> resolveBrush, double verticalOffset)
+    public DrawingContextSurface(DrawingContext context, Func<string, IBrush> resolveBrush, double verticalOffset)
     {
         _context = context;
         _resolveBrush = resolveBrush;
@@ -67,5 +67,5 @@ public sealed class DrawingContextSurface : ITimelineSurface
 
     private Rect Shape(BarRect rect) => new(rect.X, rect.Y + 3, Math.Max(1, rect.W), Math.Max(1, rect.H - 6));
 
-    private IBrush BrushFor(TimelineInk ink) => _resolveBrush(ink.Key, Colors.Gray);
+    private IBrush BrushFor(TimelineInk ink) => _resolveBrush(ink.Key);
 }

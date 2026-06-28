@@ -20,6 +20,8 @@
     <Color x:Key="DangerForegroundColor">#FFFFFF</Color>
     <Color x:Key="WarningColor">#E0A458</Color>
     <Color x:Key="SuccessColor">#3BA55D</Color>
+    <Color x:Key="SensorBarColor">#473D80</Color>
+    <Color x:Key="LocoSpeedLineColor">#FFFFFF</Color>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
@@ -41,4 +43,6 @@
     <SolidColorBrush x:Key="DangerForegroundBrush" Color="{StaticResource DangerForegroundColor}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SensorBarBrush" Color="{StaticResource SensorBarColor}"/>
+    <SolidColorBrush x:Key="LocoSpeedLineBrush" Color="{StaticResource LocoSpeedLineColor}"/>
 </ResourceDictionary>

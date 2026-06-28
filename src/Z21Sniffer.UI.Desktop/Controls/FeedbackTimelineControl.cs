@@ -14,20 +14,22 @@ public sealed class FeedbackTimelineControl : Control
     private const double MinContentWidth = 52;
 
     private readonly TimelineLayout _layout = new();
+    private readonly ThemeBrushResolver _brushes = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
 
     private readonly IReadOnlyDictionary<string, string> _inkResources = new Dictionary<string, string>
     {
-        [TimelineInkKeys.Bar] = "PrimaryBrush",
+        [TimelineInkKeys.Bar] = "SensorBarBrush",
         [TimelineInkKeys.HighlightedBar] = "WarningBrush",
         [TimelineInkKeys.HighlightOutline] = "DangerBrush",
-        [TimelineInkKeys.BarText] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.BarText] = "TextPrimaryBrush",
+        [TimelineInkKeys.HighlightedBarText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.ConnectionText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.Connected] = "SuccessBrush",
         [TimelineInkKeys.Disconnected] = "DangerBrush",
         [TimelineInkKeys.StoppedFlag] = "DangerBrush",
         [TimelineInkKeys.LocoBar] = "SurfaceAltBrush",
-        [TimelineInkKeys.LocoSpeedLine] = "PrimaryForegroundBrush",
+        [TimelineInkKeys.LocoSpeedLine] = "LocoSpeedLineBrush",
         [TimelineInkKeys.LocoBaseline] = "TextSecondaryBrush",
         [TimelineInkKeys.LocoText] = "TextSecondaryBrush",
         [TimelineInkKeys.TrackPowerProgramming] = "SuccessBrush",
@@ -149,7 +151,7 @@ public sealed class FeedbackTimelineControl : Control
         var end = _viewModel.ViewportEnd;
 
         var gridStep = TimeSpan.FromSeconds(Math.Max(1, (end - start).TotalSeconds / 6));
-        var gridPen = new Pen(Brush("BorderBrush", Color.FromArgb(0x33, 0x88, 0x88, 0x88)));
+        var gridPen = new Pen(Brush("BorderBrush"));
         var axisViewport = new TimelineViewport(start, end, Bounds.Width, Bounds.Height, RowHeight);
         foreach (var tick in _layout.Ticks(axisViewport, gridStep))
         {
@@ -170,11 +172,6 @@ public sealed class FeedbackTimelineControl : Control
         UpdateTooltip();
     }
 
-    private IBrush Brush(string inkKey, Color fallback) =>
-        Resolve(_inkResources.TryGetValue(inkKey, out var resource) ? resource : inkKey, fallback);
-
-    private IBrush Resolve(string resourceKey, Color fallback) =>
-        this.TryFindResource(resourceKey, ActualThemeVariant, out var value) && value is IBrush brush
-            ? brush
-            : new SolidColorBrush(fallback);
+    private IBrush Brush(string inkKey) =>
+        _brushes.Resolve(this, ActualThemeVariant, _inkResources.TryGetValue(inkKey, out var resource) ? resource : inkKey);
 }
