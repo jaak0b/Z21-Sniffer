@@ -127,8 +127,8 @@ public sealed partial class TimelineViewModel : ObservableObject
 
     public void ZoomByFactor(double factor, double anchorFraction)
     {
-        Following = false;
         _window = _viewport.Zoom(_window, factor, anchorFraction, _startedAt, _clock.Now);
+        Following = _viewport.MaxScrollSeconds(_window, _startedAt, _clock.Now) <= 0;
         Refresh();
         Changed?.Invoke(this, EventArgs.Empty);
     }

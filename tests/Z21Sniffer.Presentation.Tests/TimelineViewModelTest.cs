@@ -259,6 +259,28 @@ public class TimelineViewModelTest
     }
 
     [Test]
+    public void ZoomingOutToTheFullExtent_KeepsFollowingThePresent()
+    {
+        var vm = ViewportVm();
+
+        vm.ZoomByFactor(100, anchorFraction: 1);
+
+        Assert.That(vm.Following, Is.True);
+    }
+
+    [Test]
+    public void ZoomedOutToTheFullExtent_StillAdvancesAsTimePasses()
+    {
+        var vm = ViewportVm();
+        vm.ZoomByFactor(100, anchorFraction: 1);
+
+        _clock.Now = DateTimeOffset.UnixEpoch.AddSeconds(900);
+        vm.Tick();
+
+        Assert.That(vm.ViewportEnd, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
     public void SetScrollSeconds_RaisesChanged()
     {
         var vm = ViewportVm();
