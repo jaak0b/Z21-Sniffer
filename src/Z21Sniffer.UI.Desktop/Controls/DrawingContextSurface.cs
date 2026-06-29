@@ -24,12 +24,20 @@ public sealed class DrawingContextSurface : ITimelineSurface
     {
         var shape = Shape(rect);
         if (ink.Key != TimelineInkKeys.StoppedFlag) _lastBar = shape;
-        var radius = ink.Key == TimelineInkKeys.StoppedFlag ? 0 : 3;
-        _context.DrawRectangle(BrushFor(ink), null, shape, radius, radius);
+        _context.DrawRectangle(BrushFor(ink), null, Rounded(shape, rect.Corners, ink));
     }
 
     public void Stroke(BarRect rect, TimelineInk ink, double thickness) =>
-        _context.DrawRectangle(null, new Pen(BrushFor(ink), thickness), Shape(rect), 3, 3);
+        _context.DrawRectangle(null, new Pen(BrushFor(ink), thickness), Rounded(Shape(rect), rect.Corners, ink));
+
+    private RoundedRect Rounded(Rect shape, BarCorners corners, TimelineInk ink)
+    {
+        if (ink.Key == TimelineInkKeys.StoppedFlag) return new RoundedRect(shape);
+
+        var left = corners.SquareLeft ? 0 : 3;
+        var right = corners.SquareRight ? 0 : 3;
+        return new RoundedRect(shape, new CornerRadius(left, right, right, left));
+    }
 
     public void Text(string text, double x, double y, TimelineInk ink)
     {

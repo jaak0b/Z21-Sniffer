@@ -1,6 +1,8 @@
 namespace Z21Sniffer.Presentation.Timeline;
 
-public readonly record struct BarRect(double X, double Y, double W, double H);
+public readonly record struct BarCorners(bool SquareLeft, bool SquareRight);
+
+public readonly record struct BarRect(double X, double Y, double W, double H, BarCorners Corners = default);
 
 public readonly record struct PlotPoint(double X, double Y);
 

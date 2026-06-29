@@ -86,6 +86,36 @@ public class BarChartRendererTest
     }
 
     [Test]
+    public void Render_TouchingIntervals_SquareOnlyTheirSharedCorners()
+    {
+        var connection = new ConnectionSource { Id = "connection" };
+        connection.Set(connected: true, T0.AddSeconds(1));
+        connection.Set(connected: false, T0.AddSeconds(4));
+
+        Render(new IIntervalSource[] { connection });
+
+        var bars = _surface.Fills
+            .Where(f => f.Ink.Key is TimelineInkKeys.Connected or TimelineInkKeys.Disconnected)
+            .ToList();
+        Assert.That(bars, Has.Count.EqualTo(2));
+        Assert.That(bars[0].Rect.Corners, Is.EqualTo(new BarCorners(SquareLeft: false, SquareRight: true)));
+        Assert.That(bars[1].Rect.Corners, Is.EqualTo(new BarCorners(SquareLeft: true, SquareRight: false)));
+    }
+
+    [Test]
+    public void Render_SeparatedBars_KeepBothEndsRounded()
+    {
+        var sensor = Sensor(SensorA, order: 0, (1, 2), (4, 5));
+
+        Render(new IIntervalSource[] { sensor });
+
+        var bars = _surface.Fills.Where(f => f.Ink.Key == TimelineInkKeys.Bar).ToList();
+        Assert.That(bars, Has.Count.EqualTo(2));
+        Assert.That(bars, Has.All.Matches<RecordingTimelineSurface.FillOp>(f =>
+            f.Rect.Corners == new BarCorners(SquareLeft: false, SquareRight: false)));
+    }
+
+    [Test]
     public void Render_NarrowBar_DrawsNoContent()
     {
         var sensor = Sensor(SensorA, order: 0, (2, 2.02));
