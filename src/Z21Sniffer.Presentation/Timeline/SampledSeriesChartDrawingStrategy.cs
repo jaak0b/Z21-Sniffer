@@ -13,8 +13,7 @@ public abstract class SampledSeriesChartDrawingStrategy : IIntervalChartDrawingS
     protected const double FlagWidth = 4;
     protected const double LineThickness = 2;
     protected const double BaselineThickness = 1;
-    protected const double MarkerRadius = 2.5;
-    protected const double MarkerThickness = 2.5;
+    protected const double MaxMarkerSize = 2.5;
 
     protected BarGeometry Geometry { get; } = new();
 
@@ -54,12 +53,19 @@ public abstract class SampledSeriesChartDrawingStrategy : IIntervalChartDrawingS
         if (corners.Count > 0) corners.Add(corners[^1] with { X = right });
         surface.Polyline(Shape.BuildPath(corners), new TimelineInk(LineInk), LineThickness);
 
+        var markerSize = MarkerSizeFor(rect.H);
         foreach (var point in onScreen)
-            surface.Marker(point.X, point.Y, MarkerRadius, new TimelineInk(LineInk), MarkerThickness);
+            surface.Marker(point.X, point.Y, markerSize, new TimelineInk(LineInk), markerSize);
 
         if (!context.ShowContent) return;
 
         surface.Text(LabelFor(source), rect.X + 5, rect.Y + Inset + 6, new TimelineInk(TextInk));
+    }
+
+    protected double MarkerSizeFor(double laneHeight)
+    {
+        var zoom = Math.Clamp(laneHeight / BaseHeight - 1, 0, 1);
+        return MaxMarkerSize * zoom * zoom;
     }
 
     public abstract string? Probe(IIntervalSource source, IInterval interval, DateTimeOffset at);

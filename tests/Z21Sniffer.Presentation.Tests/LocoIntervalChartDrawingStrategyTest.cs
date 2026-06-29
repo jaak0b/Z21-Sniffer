@@ -127,15 +127,31 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
-    public void Draw_Markers_UseTheSpeedLineInkAndAreSlightlyThickerThanTheLine()
+    public void Draw_Markers_UseTheSpeedLineInk()
     {
         Draw(Interval(forward: true, maxSpeed: 100, (2, 80)));
 
-        var line = _surface.Polylines.Single();
         var marker = _surface.Markers.Single();
         Assert.That(marker.Ink.Key, Is.EqualTo(TimelineInkKeys.LocoSpeedLine));
         Assert.That(marker.Radius, Is.GreaterThan(0));
-        Assert.That(marker.Thickness, Is.GreaterThan(line.Thickness));
+    }
+
+    [Test]
+    public void Draw_Markers_FallOffSteeplyAsTheLaneShrinksToZeroWhenZoomedOut()
+    {
+        var interval = Interval(forward: true, maxSpeed: 100, (2, 80));
+        var context = new BarContentContext(false, TimeSpan.FromSeconds(5));
+
+        double Radius(double laneHeight)
+        {
+            _surface.Markers.Clear();
+            _strategy.Draw(_source, interval, _surface, new BarRect(0, 0, 100, laneHeight), context, Viewport);
+            return _surface.Markers.Single().Radius;
+        }
+
+        Assert.That(Radius(34), Is.EqualTo(0.0).Within(1e-6), "fully zoomed out — invisible");
+        Assert.That(Radius(51), Is.EqualTo(0.625).Within(1e-6), "half zoom — already tiny");
+        Assert.That(Radius(68), Is.EqualTo(2.5).Within(1e-6), "fully zoomed in — full size");
     }
 
     [Test]
