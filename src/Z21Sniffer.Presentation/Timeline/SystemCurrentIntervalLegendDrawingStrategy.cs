@@ -8,7 +8,9 @@ public sealed class SystemCurrentIntervalLegendDrawingStrategy : IIntervalLegend
 {
     public string TypeLabel => LocalizationService.Instance["SystemCurrent"];
 
-    public string IconGeometry => "M1,13 L4,13 L6,4 L9,15 L11,9 L13,9";
+    public string IconGeometry => "M1,11 L4,11 L6,4 L9,12 L11,8 L15,8";
+
+    public bool IconStroked => true;
 
     public string RowLabel(IIntervalSource source) => LocalizationService.Instance["SystemCurrent"];
 

@@ -61,6 +61,24 @@ public class SourceVisibilityViewModelTest
     }
 
     [Test]
+    public void BuildTree_CarriesWhetherEachTypesIconIsStroked()
+    {
+        var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
+        {
+            [typeof(FeedbackSensorInterval)] = new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()),
+            [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalLegendDrawingStrategy(),
+        });
+        var vm = new SourceVisibilityViewModel(_registry, legend);
+        Sensor(1, 1);
+        _registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+
+        var tree = vm.BuildTree();
+
+        Assert.That(tree.Single(group => group.TypeLabel == "Sensor").IconStroked, Is.False);
+        Assert.That(tree.Single(group => group.TypeLabel == "System current").IconStroked, Is.True);
+    }
+
+    [Test]
     public void GroupState_ReflectsItsItemsVisibility()
     {
         Sensor(1, 1);

@@ -142,6 +142,10 @@
                       <TextBlock DockPanel.Dock="Left" Text="≡" VerticalAlignment="Center" Margin="2,0,6,0"
                                  Cursor="SizeAll" Foreground="{DynamicResource TextSecondaryBrush}"
                                  PointerPressed="OnDragHandlePressed" />
+                      <Path Classes="legendIcon" DockPanel.Dock="Left" Data="{Binding IconGeometry}"
+                            IsVisible="{Binding !IconStroked}" />
+                      <Path Classes="legendIconStroked" DockPanel.Dock="Left" Data="{Binding IconGeometry}"
+                            IsVisible="{Binding IconStroked}" />
                       <ContentControl Content="{Binding Content}" />
                     </DockPanel>
                   </DataTemplate>

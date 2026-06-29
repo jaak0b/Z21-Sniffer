@@ -20,6 +20,8 @@ public sealed class SensorIntervalLegendDrawingStrategy : IIntervalLegendDrawing
 
     public string IconGeometry => "M5,5 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z M7.3,8 H8.7 V12 H7.3 Z M2,12 H14 V13.4 H2 Z";
 
+    public bool IconStroked => false;
+
     public string RowLabel(IIntervalSource source) => ((FeedbackSensorSource)source).Label;
 
     public object CreateContent(IIntervalSource source) =>

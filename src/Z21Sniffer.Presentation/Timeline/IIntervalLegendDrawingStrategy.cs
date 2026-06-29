@@ -10,5 +10,7 @@ public interface IIntervalLegendDrawingStrategy
 
     string IconGeometry { get; }
 
+    bool IconStroked { get; }
+
     string RowLabel(IIntervalSource source);
 }

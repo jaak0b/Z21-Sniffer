@@ -5,8 +5,6 @@
              x:DataType="vm:SystemCurrentLegendContentViewModel"
              ToolTip.Tip="{Binding Details}">
   <DockPanel Height="26" LastChildFill="True">
-    <Path Classes="legendIcon" DockPanel.Dock="Left"
-          Data="M1,13 L4,13 L6,4 L9,15 L11,9 L13,9" />
     <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
   </DockPanel>
 </UserControl>

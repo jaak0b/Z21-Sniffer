@@ -29,7 +29,7 @@ public class LegendContentViewTest
     }
 
     [AvaloniaTest]
-    public void LocoLegend_RendersIconAndDetailTooltip()
+    public void LocoLegend_RendersDetailTooltip()
     {
         LocalizationService.Instance.Apply("en");
         var registry = new IntervalSourceRegistry();
@@ -39,12 +39,11 @@ public class LegendContentViewTest
 
         Render(view, vm);
 
-        Assert.That(view.GetLogicalDescendants().OfType<Path>(), Is.Not.Empty);
         Assert.That(ToolTip.GetTip(view), Is.EqualTo("Locomotive · address 7"));
     }
 
     [AvaloniaTest]
-    public void SensorLegend_RendersIconAndDetailTooltip()
+    public void SensorLegend_RendersDetailTooltip()
     {
         LocalizationService.Instance.Apply("en");
         var registry = new IntervalSourceRegistry();
@@ -54,12 +53,11 @@ public class LegendContentViewTest
 
         Render(view, vm);
 
-        Assert.That(view.GetLogicalDescendants().OfType<Path>(), Is.Not.Empty);
         Assert.That(ToolTip.GetTip(view), Is.EqualTo("R-Bus feedback · module 2, contact 3"));
     }
 
     [AvaloniaTest]
-    public void TrackPowerLegend_RendersIconLabelAndDetailTooltip()
+    public void TrackPowerLegend_RendersLabelAndDetailTooltip()
     {
         LocalizationService.Instance.Apply("en");
         var vm = new TrackPowerLegendContentViewModel(new TrackPowerSource());
@@ -67,7 +65,6 @@ public class LegendContentViewTest
 
         Render(view, vm);
 
-        Assert.That(view.GetLogicalDescendants().OfType<Path>(), Is.Not.Empty);
         Assert.That(ToolTip.GetTip(view), Is.EqualTo("Command station track power"));
     }
 
@@ -84,7 +81,7 @@ public class LegendContentViewTest
     }
 
     [AvaloniaTest]
-    public void ConnectionLegend_RendersIconAndDetailTooltip()
+    public void ConnectionLegend_RendersDetailTooltip()
     {
         LocalizationService.Instance.Apply("en");
         var vm = new ConnectionLegendContentViewModel(new ConnectionSource());
@@ -92,7 +89,6 @@ public class LegendContentViewTest
 
         Render(view, vm);
 
-        Assert.That(view.GetLogicalDescendants().OfType<Path>(), Is.Not.Empty);
         Assert.That(ToolTip.GetTip(view), Is.EqualTo("Command station connection"));
     }
 }

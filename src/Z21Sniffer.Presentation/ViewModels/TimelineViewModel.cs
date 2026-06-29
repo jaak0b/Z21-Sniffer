@@ -211,7 +211,8 @@ public sealed partial class TimelineViewModel : ObservableObject
         LegendRows.Clear();
         foreach (var source in ordered)
         {
-            LegendRows.Add(new LegendRowViewModel(source, _legendStrategies[source.IntervalType].CreateContent(source))
+            var legend = _legendStrategies[source.IntervalType];
+            LegendRows.Add(new LegendRowViewModel(source, legend.CreateContent(source), legend.IconGeometry, legend.IconStroked)
             {
                 Height = _chartStrategies[source.IntervalType].LaneHeight(ZoomFraction)
             });

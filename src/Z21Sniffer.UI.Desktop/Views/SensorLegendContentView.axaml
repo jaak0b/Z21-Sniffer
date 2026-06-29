@@ -8,8 +8,6 @@
     <Button DockPanel.Dock="Right" Content="✕" Width="22" Padding="0" Margin="4,0,0,0"
             IsVisible="{Binding $parent[ListBoxItem].IsPointerOver, FallbackValue=False}"
             Command="{Binding RemoveCommand}" />
-    <Path Classes="legendIcon" DockPanel.Dock="Left"
-          Data="M5,5 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z M7.3,8 H8.7 V12 H7.3 Z M2,12 H14 V13.4 H2 Z" />
     <TextBox Text="{Binding Label, Mode=TwoWay}" BorderThickness="0" Background="Transparent" VerticalAlignment="Center"
              LostFocus="OnLostFocus" KeyDown="OnKeyDown" />
   </DockPanel>

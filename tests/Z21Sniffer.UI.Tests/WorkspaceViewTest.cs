@@ -13,6 +13,7 @@ using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Presentation.ViewModels;
 using Z21Sniffer.UI.Desktop.Controls;
 using Z21Sniffer.UI.Desktop.Views;
+using Path = Avalonia.Controls.Shapes.Path;
 
 namespace Z21Sniffer.UI.Tests;
 
@@ -108,6 +109,24 @@ public class WorkspaceViewTest
         Dispatcher.UIThread.RunJobs();
 
         Assert.That(timeline.Vm.CursorTime, Is.Null);
+    }
+
+    [AvaloniaTest]
+    public void WorkspaceView_RendersLegendIconsStrokedForSystemCurrentAndFilledOtherwise()
+    {
+        var context = BuildWorkspace();
+        context.Registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+        context.Registry.GetOrCreate<ConnectionSource>("connection");
+
+        var window = new Window { Content = new WorkspaceView { DataContext = context.Vm }, Width = 1000, Height = 600 };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var legend = window.GetVisualDescendants().OfType<ListBox>().First(list => list.Name == "LegendList");
+        var icons = legend.GetVisualDescendants().OfType<Path>().Where(path => path.IsVisible).ToList();
+
+        Assert.That(icons.Any(path => path.Classes.Contains("legendIconStroked")), Is.True, "the System current icon should render stroked");
+        Assert.That(icons.Any(path => path.Classes.Contains("legendIcon")), Is.True, "other icons should render filled");
     }
 
     [AvaloniaTest]

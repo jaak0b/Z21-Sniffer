@@ -192,13 +192,23 @@ public partial class WorkspaceView : UserControl
         var icon = new Path
         {
             Data = Geometry.Parse(group.IconGeometry),
-            Fill = ThemeBrush("TextSecondaryBrush"),
             Width = 15,
             Height = 15,
             Stretch = Stretch.Uniform,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 8, 0),
         };
+        if (group.IconStroked)
+        {
+            icon.Stroke = ThemeBrush("TextSecondaryBrush");
+            icon.StrokeThickness = 1.4;
+            icon.StrokeLineCap = PenLineCap.Round;
+            icon.StrokeJoin = PenLineJoin.Round;
+        }
+        else
+        {
+            icon.Fill = ThemeBrush("TextSecondaryBrush");
+        }
         var content = new StackPanel { Orientation = Orientation.Horizontal };
         content.Children.Add(icon);
         content.Children.Add(new TextBlock { Text = group.TypeLabel, FontWeight = FontWeight.Medium, VerticalAlignment = VerticalAlignment.Center });

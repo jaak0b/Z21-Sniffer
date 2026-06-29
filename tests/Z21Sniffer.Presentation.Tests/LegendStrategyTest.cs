@@ -156,4 +156,15 @@ public class LegendStrategyTest
         Assert.That(icons, Has.All.StartWith("M"));
         Assert.That(icons.Distinct().Count(), Is.EqualTo(6));
     }
+
+    [Test]
+    public void OnlyTheSystemCurrentIcon_IsStroked()
+    {
+        Assert.That(new SystemCurrentIntervalLegendDrawingStrategy().IconStroked, Is.True);
+        Assert.That(new ConnectionIntervalLegendDrawingStrategy().IconStroked, Is.False);
+        Assert.That(new TrackPowerIntervalLegendDrawingStrategy().IconStroked, Is.False);
+        Assert.That(new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconStroked, Is.False);
+        Assert.That(new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconStroked, Is.False);
+        Assert.That(new AccessoryIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconStroked, Is.False);
+    }
 }

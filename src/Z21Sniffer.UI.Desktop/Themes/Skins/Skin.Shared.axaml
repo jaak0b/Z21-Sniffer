@@ -356,6 +356,19 @@
         <Setter Property="Fill" Value="{DynamicResource TextSecondaryBrush}"/>
     </Style>
 
+    <Style Selector="Path.legendIconStroked">
+        <Setter Property="Width" Value="15"/>
+        <Setter Property="Height" Value="15"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Margin" Value="0,0,6,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Fill" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{DynamicResource TextSecondaryBrush}"/>
+        <Setter Property="StrokeThickness" Value="1.4"/>
+        <Setter Property="StrokeLineCap" Value="Round"/>
+        <Setter Property="StrokeJoin" Value="Round"/>
+    </Style>
+
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>

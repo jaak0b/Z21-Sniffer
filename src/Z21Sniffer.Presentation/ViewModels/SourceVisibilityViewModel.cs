@@ -34,16 +34,19 @@ public sealed class SourceVisibilityItem
 
 public sealed class SourceVisibilityGroup
 {
-    public SourceVisibilityGroup(string typeLabel, string iconGeometry, IReadOnlyList<SourceVisibilityItem> sources)
+    public SourceVisibilityGroup(string typeLabel, string iconGeometry, bool iconStroked, IReadOnlyList<SourceVisibilityItem> sources)
     {
         TypeLabel = typeLabel;
         IconGeometry = iconGeometry;
+        IconStroked = iconStroked;
         Sources = sources;
     }
 
     public string TypeLabel { get; }
 
     public string IconGeometry { get; }
+
+    public bool IconStroked { get; }
 
     public IReadOnlyList<SourceVisibilityItem> Sources { get; }
 
@@ -77,7 +80,7 @@ public sealed class SourceVisibilityViewModel
     public IReadOnlyList<SourceVisibilityGroup> BuildTree(string filter = "")
     {
         var trimmed = filter.Trim();
-        var groups = new List<(Type Type, string Label, string Icon, List<SourceVisibilityItem> Items)>();
+        var groups = new List<(Type Type, string Label, string Icon, bool IconStroked, List<SourceVisibilityItem> Items)>();
 
         foreach (var source in _registry.Sources)
         {
@@ -89,14 +92,14 @@ public sealed class SourceVisibilityViewModel
             var bucket = groups.FirstOrDefault(group => group.Type == source.IntervalType);
             if (bucket.Items is null)
             {
-                bucket = (source.IntervalType, typeLabel, strategy.IconGeometry, new List<SourceVisibilityItem>());
+                bucket = (source.IntervalType, typeLabel, strategy.IconGeometry, strategy.IconStroked, new List<SourceVisibilityItem>());
                 groups.Add(bucket);
             }
 
             bucket.Items.Add(new SourceVisibilityItem(rowLabel, source));
         }
 
-        return groups.Select(group => new SourceVisibilityGroup(group.Label, group.Icon, group.Items)).ToList();
+        return groups.Select(group => new SourceVisibilityGroup(group.Label, group.Icon, group.IconStroked, group.Items)).ToList();
     }
 
     public void ShowAll()
