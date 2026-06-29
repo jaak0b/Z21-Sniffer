@@ -116,7 +116,9 @@ public sealed class FeedbackTimelineControl : Control
         }
 
         _lastPointer = point;
+        _viewModel?.SetCursor(point.X, Bounds.Width);
         UpdateTooltip();
+        InvalidateVisual();
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
@@ -129,7 +131,9 @@ public sealed class FeedbackTimelineControl : Control
     {
         base.OnPointerExited(e);
         _lastPointer = null;
+        _viewModel?.ClearCursor();
         ToolTip.SetTip(this, null);
+        InvalidateVisual();
     }
 
     private void UpdateTooltip()
@@ -159,6 +163,13 @@ public sealed class FeedbackTimelineControl : Control
             context.DrawLine(gridPen, new Point(tick.X, 0), new Point(tick.X, Bounds.Height));
         }
 
+        if (_viewModel.CursorFraction is { } cursorFraction)
+        {
+            var cursorX = cursorFraction * Bounds.Width;
+            var cursorPen = new Pen(Brush("BorderBrush")) { DashStyle = new DashStyle(new double[] { 2, 3 }, 0) };
+            context.DrawLine(cursorPen, new Point(cursorX, 0), new Point(cursorX, Bounds.Height));
+        }
+
         var surface = new DrawingContextSurface(context, Brush, _verticalOffset);
         _viewModel.Renderer.Render(
             surface,
@@ -171,6 +182,7 @@ public sealed class FeedbackTimelineControl : Control
             MinContentWidth,
             _viewModel.ZoomFraction,
             _viewModel.HighlightOverSeconds);
+
         UpdateTooltip();
     }
 

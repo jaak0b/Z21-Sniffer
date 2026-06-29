@@ -71,4 +71,40 @@ public class TimelineLayoutTest
 
         Assert.That(ticks.Select(t => t.X), Is.EqualTo(new[] { 0d, 500d, 1000d }));
     }
+
+    [Test]
+    public void RangesOverlap_Overlapping_IsTrue() =>
+        Assert.That(_layout.RangesOverlap(100, 160, 150, 210), Is.True);
+
+    [Test]
+    public void RangesOverlap_OverlapFromTheLeft_IsTrue() =>
+        Assert.That(_layout.RangesOverlap(150, 210, 100, 160), Is.True);
+
+    [Test]
+    public void RangesOverlap_Disjoint_IsFalse() =>
+        Assert.That(_layout.RangesOverlap(100, 160, 200, 260), Is.False);
+
+    [Test]
+    public void RangesOverlap_JustTouching_IsFalse() =>
+        Assert.That(_layout.RangesOverlap(100, 160, 160, 220), Is.False);
+
+    [Test]
+    public void RangesOverlap_JustTouchingFromTheLeft_IsFalse() =>
+        Assert.That(_layout.RangesOverlap(160, 220, 100, 160), Is.False);
+
+    [Test]
+    public void CenteredLabelX_CentersTheLabelOnTheCursor() =>
+        Assert.That(_layout.CenteredLabelX(cursorX: 100, labelWidth: 40, viewportWidth: 800), Is.EqualTo(80));
+
+    [Test]
+    public void CenteredLabelX_NearLeftEdge_ClampsToZero() =>
+        Assert.That(_layout.CenteredLabelX(cursorX: 5, labelWidth: 40, viewportWidth: 800), Is.EqualTo(0));
+
+    [Test]
+    public void CenteredLabelX_NearRightEdge_ClampsSoLabelStaysVisible() =>
+        Assert.That(_layout.CenteredLabelX(cursorX: 795, labelWidth: 40, viewportWidth: 800), Is.EqualTo(760));
+
+    [Test]
+    public void CenteredLabelX_LabelWiderThanViewport_ClampsToZero() =>
+        Assert.That(_layout.CenteredLabelX(cursorX: 100, labelWidth: 900, viewportWidth: 800), Is.EqualTo(0));
 }

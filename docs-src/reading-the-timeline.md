@@ -78,6 +78,8 @@ The whole recording is kept, so you can look as far back as the session goes:
 
 Scrolling or zooming pauses the live follow so the view holds still while you study it; drag the scrollbar back to the right-hand edge to snap back to following the present moment. Nothing is lost while you look around — the recording keeps running underneath.
 
+Wherever your mouse sits over the timeline, a thin grey dotted line follows it straight down through every row, and the exact time under the cursor — down to hundredths of a second — is printed on the time axis at the bottom. It's the quickest way to answer "when did that happen?" for any bar or edge you're looking at. The line sits in the background alongside the grid lines, and the time label is centred right under it; the fixed axis label it would overlap simply steps aside while the cursor is near it. Move the mouse off the timeline and the line disappears.
+
 You can always zoom out up to a full hour, even seconds into a fresh recording. When the window is wider than the recording is old, the present stays pinned to the right edge and the not-yet-recorded past simply shows as empty space on the left — so you never have to wait for time to pass before you can zoom out comfortably.
 
 ## The legend

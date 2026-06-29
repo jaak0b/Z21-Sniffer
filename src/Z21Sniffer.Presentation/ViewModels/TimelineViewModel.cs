@@ -61,6 +61,8 @@ public sealed partial class TimelineViewModel : ObservableObject
 
     public event EventHandler? RowsReordered;
 
+    public event EventHandler? CursorMoved;
+
     public ObservableCollection<LegendRowViewModel> LegendRows { get; } = new();
 
     public BarChartRenderer Renderer { get; }
@@ -76,6 +78,25 @@ public sealed partial class TimelineViewModel : ObservableObject
     public DateTimeOffset ViewportEnd { get; private set; }
 
     public double ZoomFraction { get; private set; }
+
+    public double? CursorFraction { get; private set; }
+
+    public DateTimeOffset? CursorTime =>
+        CursorFraction is { } fraction ? ViewportStart + (ViewportEnd - ViewportStart) * fraction : null;
+
+    public void SetCursor(double x, double width)
+    {
+        if (width <= 0) return;
+        CursorFraction = Math.Clamp(x / width, 0, 1);
+        CursorMoved?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ClearCursor()
+    {
+        if (CursorFraction is null) return;
+        CursorFraction = null;
+        CursorMoved?.Invoke(this, EventArgs.Empty);
+    }
 
     public double? HighlightUnderSeconds => HighlightThresholdSeconds > 0 ? HighlightThresholdSeconds : null;
 

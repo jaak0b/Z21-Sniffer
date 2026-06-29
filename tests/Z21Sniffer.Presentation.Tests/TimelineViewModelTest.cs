@@ -294,6 +294,108 @@ public class TimelineViewModelTest
     }
 
     [Test]
+    public void SetCursor_PlacesCursorTimeAtThatFractionOfTheViewport()
+    {
+        var vm = ViewportVm();
+
+        vm.SetCursor(0.25 * 800, 800);
+
+        var expected = vm.ViewportStart + (vm.ViewportEnd - vm.ViewportStart) * 0.25;
+        Assert.That(vm.CursorTime, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void SetCursor_BeyondRightEdge_ClampsToViewportEnd()
+    {
+        var vm = ViewportVm();
+
+        vm.SetCursor(2000, 800);
+
+        Assert.That(vm.CursorTime, Is.EqualTo(vm.ViewportEnd));
+    }
+
+    [Test]
+    public void SetCursor_BeforeLeftEdge_ClampsToViewportStart()
+    {
+        var vm = ViewportVm();
+
+        vm.SetCursor(-50, 800);
+
+        Assert.That(vm.CursorTime, Is.EqualTo(vm.ViewportStart));
+    }
+
+    [Test]
+    public void SetCursor_ZeroWidth_LeavesCursorUnset()
+    {
+        var vm = ViewportVm();
+
+        vm.SetCursor(100, 0);
+
+        Assert.That(vm.CursorTime, Is.Null);
+    }
+
+    [Test]
+    public void ClearCursor_RemovesCursorTime()
+    {
+        var vm = ViewportVm();
+        vm.SetCursor(100, 800);
+
+        vm.ClearCursor();
+
+        Assert.That(vm.CursorTime, Is.Null);
+    }
+
+    [Test]
+    public void SetCursor_RaisesCursorMoved()
+    {
+        var vm = ViewportVm();
+        var raised = false;
+        vm.CursorMoved += (_, _) => raised = true;
+
+        vm.SetCursor(100, 800);
+
+        Assert.That(raised, Is.True);
+    }
+
+    [Test]
+    public void ClearCursor_WhenCursorWasSet_RaisesCursorMoved()
+    {
+        var vm = ViewportVm();
+        vm.SetCursor(100, 800);
+        var raised = false;
+        vm.CursorMoved += (_, _) => raised = true;
+
+        vm.ClearCursor();
+
+        Assert.That(raised, Is.True);
+    }
+
+    [Test]
+    public void ClearCursor_WhenAlreadyUnset_DoesNotRaiseCursorMoved()
+    {
+        var vm = ViewportVm();
+        var raised = false;
+        vm.CursorMoved += (_, _) => raised = true;
+
+        vm.ClearCursor();
+
+        Assert.That(raised, Is.False);
+    }
+
+    [Test]
+    public void CursorTime_FollowsTheCursorPixelWhenTheWindowScrolls()
+    {
+        var vm = ViewportVm();
+        vm.SetCursor(400, 800);
+        var before = vm.CursorTime;
+
+        vm.PanBySeconds(-30);
+
+        Assert.That(vm.CursorTime, Is.Not.EqualTo(before));
+        Assert.That(vm.CursorTime, Is.EqualTo(vm.ViewportStart + (vm.ViewportEnd - vm.ViewportStart) * 0.5));
+    }
+
+    [Test]
     public void FreshRecording_CanZoomOutFurtherThanTheElapsedTime()
     {
         _vm.BeginSession();

@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
+using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FakeItEasy;
@@ -72,6 +74,40 @@ public class WorkspaceViewTest
 
         Assert.That(control.Bounds.Width, Is.GreaterThan(0));
         Assert.That(timeline.Vm.Sources.OfType<AccessorySource>(), Is.Not.Empty);
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_PointerMove_SetsCursorTime()
+    {
+        var clock = new StubClock { Now = DateTimeOffset.UnixEpoch.AddMinutes(1) };
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        window.MouseMove(new Point(400, 150), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(timeline.Vm.CursorTime, Is.Not.Null);
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_PointerExited_ClearsCursorTime()
+    {
+        var clock = new StubClock { Now = DateTimeOffset.UnixEpoch.AddMinutes(1) };
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+        window.MouseMove(new Point(400, 150), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        window.MouseMove(new Point(-20, -20), RawInputModifiers.None);
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(timeline.Vm.CursorTime, Is.Null);
     }
 
     [AvaloniaTest]

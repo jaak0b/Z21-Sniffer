@@ -10,6 +10,12 @@ public sealed class TimelineLayout
     public DateTimeOffset XToTime(TimelineViewport viewport, double x) =>
         _geometry.XToTime(viewport.Start, viewport.End, viewport.Width, x);
 
+    public bool RangesOverlap(double startA, double endA, double startB, double endB) =>
+        startA < endB && startB < endA;
+
+    public double CenteredLabelX(double cursorX, double labelWidth, double viewportWidth) =>
+        Math.Clamp(cursorX - labelWidth / 2, 0, Math.Max(0, viewportWidth - labelWidth));
+
     public IReadOnlyList<TimelineTick> Ticks(TimelineViewport viewport, TimeSpan step)
     {
         var ticks = new List<TimelineTick>();
