@@ -169,7 +169,7 @@ public partial class WorkspaceView : UserControl
     private void AddGroup(StackPanel tree, SourceVisibilityGroup group, Action rebuild)
     {
         var expandable = group.Sources.Count > 1;
-        var expanded = expandable && (!_rowsExpanded.TryGetValue(group.TypeLabel, out var stored) || stored);
+        var expanded = expandable && _rowsExpanded.TryGetValue(group.TypeLabel, out var stored) && stored;
 
         var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("18,*,Auto") };
 
