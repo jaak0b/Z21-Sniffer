@@ -4,6 +4,10 @@ The timeline shows you *that* a sensor flickered. The **traffic log** — its ow
 
 Switch to the **Datenverkehr / Traffic log** tab at the top of the workspace. New lines stream in at the bottom as they arrive.
 
+## It follows the recording
+
+The traffic log is tied to the timeline recording, not to the connection. While you're **not** recording it stays empty — being connected isn't enough. Hit **Start recording** and the log begins capturing everything the station says; hit **Stop recording** and it freezes where it is. Starting a fresh recording clears the previous log, exactly as it clears the timeline, so each recording carries its own self-contained log. And because the two belong together, **saving a session writes the traffic log alongside the timeline**, and **importing a session brings the log back** — open an old session and its log is right there next to the bars. Importing is unavailable while a recording is in progress (stop recording first), so an imported session can never get mixed up with live traffic.
+
 ## What's in it
 
 Every line has a timestamp (to the millisecond), a colour-coded **type badge**, and a message:
@@ -18,9 +22,8 @@ Every line has a timestamp (to the millisecond), a colour-coded **type badge**, 
 
 - **Filter by type** — the **Types ▾** dropdown lists every message type with a checkbox; tick the ones you want. It has **Select all** / **Deselect all** buttons too. Hunting a sensor? Deselect all, then tick just **Sensor** and **System**.
 - **Search** — type into the search box to keep only lines whose text matches (case-insensitive). Search for a sensor's name to isolate just its activity.
-- **Follow** — while enabled, the view sticks to the newest line. Scroll up to study history and it stops jumping around; the toggle puts it back.
-- **Copy** — select one or more lines and **Copy** puts them on the clipboard (or copies the whole filtered view if nothing is selected).
-- **Export** — writes the current, *filtered* log to a text file — handy for attaching to a forum post or keeping next to a saved session.
-- **Clear** — empties the log without touching the timeline.
+- **Follow** — the view sticks to the newest line on its own. Scroll up to study history and it stops jumping around; scroll back to the bottom and it resumes following.
+
+To keep a log, save the session (the log travels with it) — there's no separate export.
 
 Everything respects the current language and theme: switch to German and the type badges and messages follow; switch to dark mode and the colours recolour with it.

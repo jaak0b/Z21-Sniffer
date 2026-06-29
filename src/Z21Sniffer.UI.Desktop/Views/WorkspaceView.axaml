@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:Z21Sniffer.Presentation.ViewModels;assembly=Z21Sniffer.Presentation"
-             xmlns:logging="clr-namespace:Z21Sniffer.Presentation.Logging;assembly=Z21Sniffer.Presentation"
+             xmlns:model="clr-namespace:Z21Sniffer.Core.Model;assembly=Z21Sniffer.Core"
              xmlns:controls="clr-namespace:Z21Sniffer.UI.Desktop.Controls"
              xmlns:conv="clr-namespace:Z21Sniffer.UI.Desktop.Converters"
              xmlns:views="clr-namespace:Z21Sniffer.UI.Desktop.Views"
@@ -159,16 +159,12 @@
             <controls:MultiSelectDropDown VerticalAlignment="Center" Title="{Binding Localization[FilterTypes]}"
                                           ItemsSource="{Binding Log.KindToggles}" />
             <TextBox Width="220" Text="{Binding Log.SearchText}" Watermark="{Binding Localization[Search]}" />
-            <ToggleButton x:Name="FollowToggle" Content="{Binding Localization[Follow]}" IsChecked="True" />
-            <Button Content="{Binding Localization[Copy]}" Click="OnCopyLog" />
-            <Button Content="{Binding Localization[Export]}" Command="{Binding ExportLogCommand}" />
-            <Button Content="{Binding Localization[Clear]}" Command="{Binding Log.ClearCommand}" />
           </StackPanel>
 
           <ListBox x:Name="LogList" ItemsSource="{Binding Log.Filtered}" SelectionMode="Multiple"
                    Margin="12,0,0,0" FontFamily="Consolas" Background="{DynamicResource BackgroundBrush}">
             <ListBox.ItemTemplate>
-              <DataTemplate x:DataType="logging:LogEntry">
+              <DataTemplate x:DataType="model:LogEntry">
                 <Grid ColumnDefinitions="Auto,Auto,*" >
                   <TextBlock Grid.Column="0" Text="{Binding Timestamp, StringFormat='HH:mm:ss.fff'}"
                              Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />

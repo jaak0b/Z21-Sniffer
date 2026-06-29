@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Z21Sniffer.Core.Model;
 using Z21Sniffer.Presentation.Controls;
 using Z21Sniffer.Presentation.Localization;
 

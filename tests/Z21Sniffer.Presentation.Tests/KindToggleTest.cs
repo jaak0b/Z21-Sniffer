@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Z21Sniffer.Core.Model;
 using Z21Sniffer.Presentation.Controls;
 using Z21Sniffer.Presentation.Localization;
 using Z21Sniffer.Presentation.Logging;

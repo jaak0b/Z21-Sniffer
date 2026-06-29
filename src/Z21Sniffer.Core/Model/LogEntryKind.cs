@@ -1,4 +1,4 @@
-namespace Z21Sniffer.Presentation.Logging;
+namespace Z21Sniffer.Core.Model;
 
 public enum LogEntryKind
 {

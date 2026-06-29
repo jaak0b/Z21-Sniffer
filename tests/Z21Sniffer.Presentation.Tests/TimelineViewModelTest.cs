@@ -227,7 +227,7 @@ public class TimelineViewModelTest
         var changed = false;
         _vm.Changed += (_, _) => changed = true;
 
-        _vm.LoadSession(new RecordingSession(_clock.Now, new IIntervalSource[] { reloaded }));
+        _vm.LoadSession(new RecordingSession(_clock.Now, new IIntervalSource[] { reloaded }, Array.Empty<LogEntry>()));
 
         Assert.That(changed, Is.True);
     }
@@ -320,7 +320,7 @@ public class TimelineViewModelTest
     {
         Feed(SensorA, occupied: true);
 
-        var session = _vm.ToSession();
+        var session = _vm.ToSession(Array.Empty<LogEntry>());
 
         Assert.That(session.StartedAt, Is.EqualTo(_vm.StartedAt));
         Assert.That(session.Sources, Has.Count.EqualTo(1));
@@ -339,7 +339,7 @@ public class TimelineViewModelTest
         _vm.RowsReordered += (_, _) => reordered = true;
         _vm.Changed += (_, _) => changed = true;
 
-        _vm.LoadSession(new RecordingSession(start, new IIntervalSource[] { sa, sb }));
+        _vm.LoadSession(new RecordingSession(start, new IIntervalSource[] { sa, sb }, Array.Empty<LogEntry>()));
 
         Assert.That(_vm.LegendRows, Has.Count.EqualTo(2));
         Assert.That(_vm.StartedAt, Is.EqualTo(start));

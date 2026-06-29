@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Presentation.Localization;
@@ -16,7 +15,7 @@ public sealed partial class TrafficLogViewModel : ObservableObject
     private readonly int _maxEntries;
     private readonly List<LogEntry> _all = new();
     private readonly LogFilter _filter = new();
-    private readonly LogTextFormatter _formatter = new();
+    private bool _recording;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -43,6 +42,24 @@ public sealed partial class TrafficLogViewModel : ObservableObject
     public ObservableCollection<LogEntry> Filtered { get; } = new();
 
     public ObservableCollection<KindToggle> KindToggles { get; } = new();
+
+    public IReadOnlyList<LogEntry> Entries => _all;
+
+    public void StartRecording()
+    {
+        _all.Clear();
+        Filtered.Clear();
+        _recording = true;
+    }
+
+    public void StopRecording() => _recording = false;
+
+    public void LoadSession(IEnumerable<LogEntry> entries)
+    {
+        _all.Clear();
+        _all.AddRange(entries);
+        Refilter();
+    }
 
     public void AppendConnection(bool connected, bool simulated)
     {
@@ -98,19 +115,12 @@ public sealed partial class TrafficLogViewModel : ObservableObject
     public IReadOnlyList<LogLine> RecentLines(int max) =>
         _all.TakeLast(max).Select(e => new LogLine(e.Timestamp, e.Kind.ToString(), e.Message)).ToList();
 
-    public string BuildExportText() => _formatter.Format(Filtered);
-
-    [RelayCommand]
-    private void Clear()
-    {
-        _all.Clear();
-        Filtered.Clear();
-    }
-
     partial void OnSearchTextChanged(string value) => Refilter();
 
     private void Append(LogEntry entry)
     {
+        if (!_recording) return;
+
         _all.Add(entry);
         if (_all.Count > _maxEntries)
         {

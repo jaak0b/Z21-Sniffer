@@ -35,7 +35,13 @@ public class JsonSessionStoreTest : TempDirectoryTest
         trackPower.Set(TrackPowerStatus.On, Start);
         trackPower.Set(TrackPowerStatus.Short, Start.AddSeconds(4));
 
-        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco, current, trackPower });
+        var log = new LogEntry[]
+        {
+            new(Start, LogEntryKind.Connection, "Connected"),
+            new(Start.AddSeconds(4), LogEntryKind.System, "Short circuit", Fault: true),
+        };
+
+        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco, current, trackPower }, log);
     }
 
     private static TrackPowerSource TrackPower(RecordingSession session) =>
@@ -68,6 +74,20 @@ public class JsonSessionStoreTest : TempDirectoryTest
         Assert.That(loaded.Sources.OfType<LocoIntervalSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<SystemCurrentSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<TrackPowerSource>().Count(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SaveJson_ThenLoadJson_RoundTripsTheTrafficLog()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        _store.SaveJson(SampleSession(), path);
+        var loaded = _store.LoadJson(path);
+
+        Assert.That(loaded.TrafficLog, Is.Not.Null);
+        Assert.That(loaded.TrafficLog!.Select(e => e.Message), Is.EqualTo(new[] { "Connected", "Short circuit" }));
+        Assert.That(loaded.TrafficLog[1].Kind, Is.EqualTo(LogEntryKind.System));
+        Assert.That(loaded.TrafficLog[1].Fault, Is.True);
     }
 
     [Test]
@@ -156,7 +176,7 @@ public class JsonSessionStoreTest : TempDirectoryTest
         var sensor = new FeedbackSensorSource { Id = "sensor:3.5", Sensor = new SensorKey(3, 5), Label = "Renamed yard", Order = 7 };
         sensor.Apply(occupied: true, Start);
 
-        _store.SaveJson(new RecordingSession(Start, new IIntervalSource[] { sensor }), path);
+        _store.SaveJson(new RecordingSession(Start, new IIntervalSource[] { sensor }, Array.Empty<LogEntry>()), path);
         var loaded = Sensor(_store.LoadJson(path));
 
         Assert.That(loaded.Label, Is.EqualTo("M3.5"), "Label is a local preference, reconstructed from the key-value store, not the portable session");

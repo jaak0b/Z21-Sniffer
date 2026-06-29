@@ -112,6 +112,7 @@ public class WorkspaceViewTest
         window.Show();
         Dispatcher.UIThread.RunJobs();
 
+        workspace.Vm.Log.StartRecording();
         workspace.Ingest.Apply([new SensorState(new SensorKey(1, 1), Occupied: true)], DateTimeOffset.UnixEpoch);
         var tabs = window.GetVisualDescendants().OfType<TabControl>().First();
         tabs.SelectedIndex = 1;

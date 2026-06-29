@@ -57,7 +57,6 @@ public partial class App : Application
                 container.Resolve<IIndex<Type, IIntervalLegendDrawingStrategy>>(),
                 mcpController,
                 new AvaloniaThemeController(),
-                container.Resolve<ILogTextStore>(),
                 container.Resolve<IStationCurrentLimits>(),
                 action => Dispatcher.UIThread.Post(() =>
                 {
@@ -72,7 +71,6 @@ public partial class App : Application
                 }),
                 picker.SaveJsonAsync,
                 picker.OpenJsonAsync,
-                picker.ExportLogAsync,
                 () => new SettingsWindow { DataContext = workspace }.ShowDialog(window));
 
             api = new AvaloniaSnifferApi(workspace, workspace.TimelineClock, new SensorSummaryCalculator());

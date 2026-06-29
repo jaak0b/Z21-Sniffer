@@ -24,6 +24,7 @@ public class TrafficLogViewModelTest
         LocalizationService.Instance.Apply("en");
         _clock = new StubClock();
         _vm = new TrafficLogViewModel(LocalizationService.Instance, _clock);
+        _vm.StartRecording();
     }
 
     [TearDown]
@@ -193,6 +194,7 @@ public class TrafficLogViewModelTest
     public void Append_BeyondCap_DropsOldest()
     {
         var vm = new TrafficLogViewModel(LocalizationService.Instance, _clock, maxEntries: 2);
+        vm.StartRecording();
 
         vm.AppendTrackPower(true);
         vm.AppendTrackPower(false);
@@ -238,32 +240,65 @@ public class TrafficLogViewModelTest
     }
 
     [Test]
-    public void ClearCommand_DoesNotRaiseEntryAppended()
+    public void Append_WhenNotRecording_IsIgnored()
     {
-        _vm.AppendTrackPower(true);
-        var raised = 0;
-        _vm.EntryAppended += (_, _) => raised++;
+        var vm = new TrafficLogViewModel(LocalizationService.Instance, _clock);
 
-        _vm.ClearCommand.Execute(null);
+        vm.AppendTrackPower(true);
 
-        Assert.That(raised, Is.EqualTo(0));
+        Assert.That(vm.Filtered, Is.Empty);
+        Assert.That(vm.Entries, Is.Empty);
     }
 
     [Test]
-    public void ClearCommand_EmptiesEntries()
+    public void StopRecording_IgnoresFurtherAppends()
+    {
+        _vm.AppendTrackPower(true);
+        _vm.StopRecording();
+
+        _vm.AppendTrackPower(false);
+
+        Assert.That(_vm.Entries, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public void StartRecording_ClearsPreviousEntries()
     {
         _vm.AppendTrackPower(true);
 
-        _vm.ClearCommand.Execute(null);
+        _vm.StartRecording();
 
         Assert.That(_vm.Filtered, Is.Empty);
-        Assert.That(_vm.RecentLines(10), Is.Empty);
+        Assert.That(_vm.Entries, Is.Empty);
+    }
+
+    [Test]
+    public void LoadSession_PopulatesEntriesEvenWhenNotRecording()
+    {
+        var vm = new TrafficLogViewModel(LocalizationService.Instance, _clock);
+
+        vm.LoadSession(new[] { new LogEntry(DateTimeOffset.UnixEpoch, LogEntryKind.Sensor, "Yard 3 occupied") });
+
+        Assert.That(vm.Entries, Has.Count.EqualTo(1));
+        Assert.That(vm.Filtered[0].Message, Is.EqualTo("Yard 3 occupied"));
+    }
+
+    [Test]
+    public void LoadSession_ReplacesAnyExistingEntries()
+    {
+        _vm.AppendTrackPower(true);
+
+        _vm.LoadSession(new[] { new LogEntry(DateTimeOffset.UnixEpoch, LogEntryKind.Sensor, "Yard 3 occupied") });
+
+        Assert.That(_vm.Entries, Has.Count.EqualTo(1));
+        Assert.That(_vm.Filtered[0].Message, Is.EqualTo("Yard 3 occupied"));
     }
 
     [Test]
     public void Append_BeyondCap_DropsOldestFromBacklog()
     {
         var vm = new TrafficLogViewModel(LocalizationService.Instance, _clock, maxEntries: 2);
+        vm.StartRecording();
 
         vm.AppendTrackPower(true);
         vm.AppendTrackPower(false);
@@ -308,11 +343,4 @@ public class TrafficLogViewModelTest
         Assert.That(lines[0].Message, Is.Not.Empty);
     }
 
-    [Test]
-    public void BuildExportText_IncludesFilteredLines()
-    {
-        _vm.AppendSensorEdge("Yard 3", new SensorKey(1, 1), true, _clock.Now);
-
-        Assert.That(_vm.BuildExportText(), Does.Contain("Yard 3"));
-    }
 }

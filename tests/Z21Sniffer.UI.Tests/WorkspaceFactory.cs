@@ -56,12 +56,10 @@ internal static class WorkspaceFactory
             LegendStrategies(registry),
             A.Fake<IMcpServerController>(),
             A.Fake<IThemeController>(),
-            A.Fake<ILogTextStore>(),
             A.Fake<IStationCurrentLimits>(),
             post: action => action(),
             chooseSaveJsonPath: () => Task.FromResult<string?>(null),
             chooseOpenJsonPath: () => Task.FromResult<string?>(null),
-            chooseExportLogPath: () => Task.FromResult<string?>(null),
             openSettings: () => Task.CompletedTask);
         return new WorkspaceContext(vm, ingest, registry);
     }

@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
@@ -10,7 +9,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Z21Sniffer.Presentation.Localization;
-using Z21Sniffer.Presentation.Logging;
 using Z21Sniffer.Presentation.ViewModels;
 using Z21Sniffer.UI.Desktop.Controls;
 using Path = Avalonia.Controls.Shapes.Path;
@@ -19,8 +17,8 @@ namespace Z21Sniffer.UI.Desktop.Views;
 
 public partial class WorkspaceView : UserControl
 {
-    private readonly LogTextFormatter _logFormatter = new();
     private readonly DispatcherTimer _scrollSync = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private bool _logAtBottom = true;
 
     private Canvas? _ghostLayer;
     private Border? _ghost;
@@ -114,8 +112,12 @@ public partial class WorkspaceView : UserControl
         var localization = LocalizationService.Instance;
         var save = new Button { Content = localization["SaveSession"], HorizontalAlignment = HorizontalAlignment.Stretch };
         save.Click += (_, _) => ViewModel.SaveSessionCommand.Execute(null);
-        var import = new Button { Content = localization["ImportSession"], HorizontalAlignment = HorizontalAlignment.Stretch };
-        import.Click += (_, _) => ViewModel.ImportSessionCommand.Execute(null);
+        var import = new Button
+        {
+            Content = localization["ImportSession"],
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Command = ViewModel.ImportSessionCommand
+        };
 
         var panel = new StackPanel { Spacing = 4, MinWidth = 150 };
         panel.Children.Add(save);
@@ -133,7 +135,7 @@ public partial class WorkspaceView : UserControl
 
     private void OnEntryAppended(object? sender, EventArgs e)
     {
-        if (this.FindControl<ToggleButton>("FollowToggle")?.IsChecked != true) return;
+        if (!_logAtBottom) return;
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -181,27 +183,13 @@ public partial class WorkspaceView : UserControl
 
         _hookedLogScroll = scroll;
         scroll.ScrollChanged += (_, _) =>
-        {
-            var follow = this.FindControl<ToggleButton>("FollowToggle");
-            if (follow is null) return;
-            var atBottom = scroll.Offset.Y >= scroll.Extent.Height - scroll.Viewport.Height - 4;
-            if (follow.IsChecked != atBottom) follow.IsChecked = atBottom;
-        };
+            _logAtBottom = scroll.Offset.Y >= scroll.Extent.Height - scroll.Viewport.Height - 4;
     }
 
     private void OnTimeScroll(object? sender, ScrollEventArgs e)
     {
         _lastUserScroll = DateTime.UtcNow;
         if (sender is ScrollBar bar) ViewModel?.Timeline.SetScrollSeconds(bar.Value);
-    }
-
-    private void OnCopyLog(object? sender, RoutedEventArgs e)
-    {
-        if (ViewModel is null) return;
-        var list = this.FindControl<ListBox>("LogList");
-        var selected = list?.SelectedItems?.OfType<LogEntry>().ToList();
-        var entries = selected is { Count: > 0 } ? selected : ViewModel.Log.Filtered.ToList();
-        _ = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(_logFormatter.Format(entries));
     }
 
     private void OnDragHandlePressed(object? sender, PointerPressedEventArgs e)

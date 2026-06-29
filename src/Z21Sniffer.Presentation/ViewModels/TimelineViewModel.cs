@@ -87,7 +87,8 @@ public sealed partial class TimelineViewModel : ObservableObject
     partial void OnHighlightThresholdSecondsChanged(double value) =>
         HighlightMinSeconds = Math.Min(HighlightMinSeconds, value);
 
-    public RecordingSession ToSession() => new(_startedAt, _registry.Sources.ToList());
+    public RecordingSession ToSession(IReadOnlyList<LogEntry> trafficLog) =>
+        new(_startedAt, _registry.Sources.ToList(), trafficLog);
 
     public void LoadSession(RecordingSession session)
     {

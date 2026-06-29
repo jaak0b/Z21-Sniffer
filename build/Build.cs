@@ -209,7 +209,8 @@ class Build : NukeBuild
             .Select(p => p.Trim().Replace('\\', '/'))
             .Where(p => p.StartsWith("src/", StringComparison.OrdinalIgnoreCase)
                         && p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)
-                        && !IsExcludedFromMutation(p))
+                        && !IsExcludedFromMutation(p)
+                        && System.IO.File.Exists(RootDirectory / p))
             .Distinct()
             .ToList();
     }
@@ -385,5 +386,8 @@ class Build : NukeBuild
         || path.EndsWith("Module.cs", StringComparison.OrdinalIgnoreCase)
         || path.EndsWith("KestrelMcpServerController.cs", StringComparison.OrdinalIgnoreCase)
         || path.EndsWith("SimulatedCommandStationConnection.cs", StringComparison.OrdinalIgnoreCase)
-        || path.EndsWith("AppSettings.cs", StringComparison.OrdinalIgnoreCase);
+        || path.EndsWith("AppSettings.cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith("RecordingSession.cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith("LogEntry.cs", StringComparison.OrdinalIgnoreCase)
+        || path.EndsWith("LogEntryKind.cs", StringComparison.OrdinalIgnoreCase);
 }

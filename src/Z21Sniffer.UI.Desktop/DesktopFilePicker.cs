@@ -11,8 +11,6 @@ public sealed class DesktopFilePicker
 
     public Task<string?> SaveJsonAsync() => PickAsync("session.json", "json", "JSON");
 
-    public Task<string?> ExportLogAsync() => PickAsync("traffic-log.txt", "txt", "Text");
-
     public async Task<string?> OpenJsonAsync()
     {
         var files = await _topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions

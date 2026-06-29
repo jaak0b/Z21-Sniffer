@@ -29,12 +29,10 @@ public class WorkspaceViewModelTest
     private ISettingsStore _settings = null!;
     private ISessionStore _sessionStore = null!;
     private ICommandStationConnection _connection = null!;
-    private ILogTextStore _logTextStore = null!;
     private IStationCurrentLimits _currentLimits = null!;
     private StubClock _clock = null!;
     private string? _savePath;
     private string? _importPath;
-    private string? _exportLogPath;
     private bool _openSettingsCalled;
     private WorkspaceViewModel _vm = null!;
 
@@ -45,7 +43,6 @@ public class WorkspaceViewModelTest
         _settings = A.Fake<ISettingsStore>();
         _sessionStore = A.Fake<ISessionStore>();
         _connection = A.Fake<ICommandStationConnection>();
-        _logTextStore = A.Fake<ILogTextStore>();
         _currentLimits = A.Fake<IStationCurrentLimits>();
         _clock = new StubClock();
         A.CallTo(() => _settings.Load()).Returns(new AppSettings("192.168.0.5", 21105, "en"));
@@ -53,7 +50,6 @@ public class WorkspaceViewModelTest
         A.CallTo(() => _connection.IsConnected).Returns(true);
         _savePath = null;
         _importPath = null;
-        _exportLogPath = null;
         _openSettingsCalled = false;
 
         _vm = Build();
@@ -83,12 +79,10 @@ public class WorkspaceViewModelTest
             _factory, _settings, _sessionStore, _clock, registry, new FeedbackSensorIngest(registry), chart, legend,
             A.Fake<IMcpServerController>(),
             A.Fake<IThemeController>(),
-            _logTextStore,
             _currentLimits,
             post: action => action(),
             chooseSaveJsonPath: () => Task.FromResult(_savePath),
             chooseOpenJsonPath: () => Task.FromResult(_importPath),
-            chooseExportLogPath: () => Task.FromResult(_exportLogPath),
             openSettings: () => { _openSettingsCalled = true; return Task.CompletedTask; });
     }
 
@@ -124,7 +118,7 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
-    public async Task LocoInfo_WhenNotRecording_IsIgnoredButStillLogged()
+    public async Task LocoInfo_WhenNotRecording_IsNeitherTimelineFedNorLogged()
     {
         _vm.CaptureTrainData = true;
         await ActivateConnection();
@@ -133,7 +127,7 @@ public class WorkspaceViewModelTest
         _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(482, 40, Forward: true, MaxSpeed: 126));
 
         Assert.That(_vm.Timeline.Sources.OfType<LocoIntervalSource>(), Is.Empty);
-        Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Loco), Is.True);
+        Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Loco), Is.False);
     }
 
     [Test]
@@ -382,7 +376,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ActivatedConnectionTrackPower_AppendsLog()
     {
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.TrackPowerChanged += Raise.With(_connection, true);
 
@@ -392,7 +386,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ActivatedConnectionSystemState_AppendsSystemLog()
     {
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.SystemStateReceived += Raise.With(_connection,
             new SystemSnapshot(320, 15000, 30, false, false, false, false, false, false));
@@ -415,7 +409,7 @@ public class WorkspaceViewModelTest
     public async Task ActivatedConnectionLoco_AppendsLocoLog()
     {
         _vm.CaptureTrainData = true;
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.LocoInfoReceived += Raise.With(_connection, new LocoSnapshot(3, 42, true));
 
@@ -425,7 +419,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ActivatedConnectionTurnout_AppendsTurnoutLog()
     {
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.TurnoutInfoReceived += Raise.With(_connection, new TurnoutSnapshot(5, TurnoutPosition.Output1));
 
@@ -435,7 +429,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ConnectionChanged_AppendsConnectionLog()
     {
-        await ActivateConnection();
+        await StartRecording();
 
         _connection.ConnectionChanged += Raise.With(_connection, true);
 
@@ -476,7 +470,7 @@ public class WorkspaceViewModelTest
     [Test]
     public async Task ReconnectingSameConnection_DoesNotDoubleWireEvents()
     {
-        await ActivateConnection();
+        await StartRecording();
         await ActivateConnection();
 
         _connection.SystemStateReceived += Raise.With(_connection,
@@ -506,6 +500,102 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
+    public async Task SaveSessionCommand_IncludesTheRecordedTrafficLog()
+    {
+        _savePath = "session.json";
+        await StartRecording();
+        _connection.TrackPowerChanged += Raise.With(_connection, true);
+        RecordingSession? saved = null;
+        A.CallTo(() => _sessionStore.SaveJson(A<RecordingSession>._, "session.json"))
+            .Invokes((RecordingSession s, string _) => saved = s);
+
+        await _vm.SaveSessionCommand.ExecuteAsync(null);
+
+        Assert.That(saved!.TrafficLog, Is.Not.Null);
+        Assert.That(saved.TrafficLog!.Any(e => e.Kind == LogEntryKind.TrackPower), Is.True);
+    }
+
+    [Test]
+    public async Task StoppingRecording_StopsLoggingFurtherEvents()
+    {
+        await StartRecording();
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        _connection.TrackPowerChanged += Raise.With(_connection, true);
+
+        Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.TrackPower), Is.False);
+    }
+
+    [Test]
+    public async Task RestartingRecording_ClearsThePreviousLog()
+    {
+        await StartRecording();
+        _connection.TrackPowerChanged += Raise.With(_connection, true);
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        Assert.That(_vm.Log.Filtered, Is.Empty);
+    }
+
+    [Test]
+    public async Task ImportSessionCommand_LoadsTheTrafficLogIntoTheLogView()
+    {
+        _importPath = "session.json";
+        var entry = new LogEntry(DateTimeOffset.UnixEpoch, LogEntryKind.Sensor, "Yard 3 occupied");
+        A.CallTo(() => _sessionStore.LoadJson("session.json")).Returns(
+            new RecordingSession(DateTimeOffset.UnixEpoch, Array.Empty<IIntervalSource>(), new[] { entry }));
+
+        await _vm.ImportSessionCommand.ExecuteAsync(null);
+
+        Assert.That(_vm.Log.Entries.Select(e => e.Message), Does.Contain("Yard 3 occupied"));
+    }
+
+    [Test]
+    public void ImportSessionCommand_WhenNotRecording_CanExecute() =>
+        Assert.That(_vm.ImportSessionCommand.CanExecute(null), Is.True);
+
+    [Test]
+    public async Task ImportSessionCommand_WhileRecording_CannotExecute()
+    {
+        await StartRecording();
+
+        Assert.That(_vm.ImportSessionCommand.CanExecute(null), Is.False);
+    }
+
+    [Test]
+    public async Task ImportSessionCommand_BecomesExecutableAgainAfterRecordingStops()
+    {
+        await StartRecording();
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        Assert.That(_vm.ImportSessionCommand.CanExecute(null), Is.True);
+    }
+
+    [Test]
+    public async Task TogglingRecording_RefreshesImportSessionCanExecute()
+    {
+        var raised = 0;
+        _vm.ImportSessionCommand.CanExecuteChanged += (_, _) => raised++;
+
+        await StartRecording();
+
+        Assert.That(raised, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public async Task ImportSessionCommand_WithNoTrafficLog_LoadsAnEmptyLogWithoutThrowing()
+    {
+        _importPath = "session.json";
+        A.CallTo(() => _sessionStore.LoadJson("session.json")).Returns(
+            new RecordingSession(DateTimeOffset.UnixEpoch, Array.Empty<IIntervalSource>(), null));
+
+        await _vm.ImportSessionCommand.ExecuteAsync(null);
+
+        Assert.That(_vm.Log.Entries, Is.Empty);
+    }
+
+    [Test]
     public async Task ImportSessionCommand_WithPath_LoadsSessionIntoTimeline()
     {
         _importPath = "session.json";
@@ -513,7 +603,7 @@ public class WorkspaceViewModelTest
         var source = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = SensorA };
         source.Apply(occupied: true, startedAt);
         A.CallTo(() => _sessionStore.LoadJson("session.json")).Returns(
-            new RecordingSession(startedAt, new IIntervalSource[] { source }));
+            new RecordingSession(startedAt, new IIntervalSource[] { source }, Array.Empty<LogEntry>()));
 
         await _vm.ImportSessionCommand.ExecuteAsync(null);
 
@@ -537,26 +627,6 @@ public class WorkspaceViewModelTest
         await _vm.OpenSettingsCommand.ExecuteAsync(null);
 
         Assert.That(_openSettingsCalled, Is.True);
-    }
-
-    [Test]
-    public async Task ExportLogCommand_WithPath_SavesLogText()
-    {
-        _exportLogPath = "log.txt";
-
-        await _vm.ExportLogCommand.ExecuteAsync(null);
-
-        A.CallTo(() => _logTextStore.Save(A<string>._, "log.txt")).MustHaveHappened();
-    }
-
-    [Test]
-    public async Task ExportLogCommand_WhenCancelled_DoesNotSave()
-    {
-        _exportLogPath = null;
-
-        await _vm.ExportLogCommand.ExecuteAsync(null);
-
-        A.CallTo(() => _logTextStore.Save(A<string>._, A<string>._)).MustNotHaveHappened();
     }
 
     [Test]

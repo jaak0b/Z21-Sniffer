@@ -13,7 +13,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 {
     private readonly ISettingsStore _settings;
     private readonly ISessionStore _sessionStore;
-    private readonly ILogTextStore _logTextStore;
     private readonly FeedbackSensorIngest _ingest;
     private readonly LocoIngest _locoIngest;
     private readonly IIntervalSourceRegistry _registry;
@@ -25,7 +24,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     private StationCurrentLimit? _stationLimit;
     private readonly Func<Task<string?>> _chooseSaveJsonPath;
     private readonly Func<Task<string?>> _chooseOpenJsonPath;
-    private readonly Func<Task<string?>> _chooseExportLogPath;
     private readonly Func<Task> _openSettings;
     private readonly HashSet<ICommandStationConnection> _wired = new();
 
@@ -49,17 +47,14 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         IIndex<Type, IIntervalLegendDrawingStrategy> legendStrategies,
         IMcpServerController mcpController,
         IThemeController themeController,
-        ILogTextStore logTextStore,
         IStationCurrentLimits stationCurrentLimits,
         Action<Action> post,
         Func<Task<string?>> chooseSaveJsonPath,
         Func<Task<string?>> chooseOpenJsonPath,
-        Func<Task<string?>> chooseExportLogPath,
         Func<Task> openSettings)
     {
         _settings = settings;
         _sessionStore = sessionStore;
-        _logTextStore = logTextStore;
         _stationCurrentLimits = stationCurrentLimits;
         _ingest = ingest;
         _locoIngest = new LocoIngest(registry);
@@ -69,7 +64,6 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         _post = post;
         _chooseSaveJsonPath = chooseSaveJsonPath;
         _chooseOpenJsonPath = chooseOpenJsonPath;
-        _chooseExportLogPath = chooseExportLogPath;
         _openSettings = openSettings;
 
         var loaded = settings.Load();
@@ -95,11 +89,19 @@ public sealed partial class WorkspaceViewModel : ObservableObject
         };
         Recording.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(RecordingViewModel.IsRecording) && Recording.IsRecording)
+            if (e.PropertyName != nameof(RecordingViewModel.IsRecording)) return;
+            if (Recording.IsRecording)
             {
+                Log.StartRecording();
                 Timeline.BeginSession();
                 _ = Connection.RequestCurrentStateAsync();
             }
+            else
+            {
+                Log.StopRecording();
+            }
+
+            ImportSessionCommand.NotifyCanExecuteChanged();
         };
     }
 
@@ -170,27 +172,23 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     {
         var path = await _chooseSaveJsonPath();
         if (string.IsNullOrEmpty(path)) return;
-        _sessionStore.SaveJson(Timeline.ToSession(), path);
+        _sessionStore.SaveJson(Timeline.ToSession(Log.Entries.ToList()), path);
     }
 
-    [RelayCommand]
+    private bool CanImportSession => !Recording.IsRecording;
+
+    [RelayCommand(CanExecute = nameof(CanImportSession))]
     private async Task ImportSession()
     {
         var path = await _chooseOpenJsonPath();
         if (string.IsNullOrEmpty(path)) return;
-        Timeline.LoadSession(_sessionStore.LoadJson(path));
+        var session = _sessionStore.LoadJson(path);
+        Timeline.LoadSession(session);
+        Log.LoadSession(session.TrafficLog ?? Array.Empty<LogEntry>());
     }
 
     [RelayCommand]
     private Task OpenSettings() => _openSettings();
-
-    [RelayCommand]
-    private async Task ExportLog()
-    {
-        var path = await _chooseExportLogPath();
-        if (string.IsNullOrEmpty(path)) return;
-        _logTextStore.Save(Log.BuildExportText(), path);
-    }
 
     partial void OnCaptureTrainDataChanged(bool value) =>
         _settings.Save(_settings.Load() with { CaptureTrainData = value });

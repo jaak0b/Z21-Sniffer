@@ -1,3 +1,5 @@
+using Z21Sniffer.Core.Model;
+
 namespace Z21Sniffer.Presentation.Logging;
 
 public sealed class LogKindStyle

@@ -64,7 +64,6 @@
   <data name="Connect" xml:space="preserve"><value>Verbinden</value></data>
   <data name="Disconnect" xml:space="preserve"><value>Trennen</value></data>
   <data name="TrackPower" xml:space="preserve"><value>Gleisspannung</value></data>
-  <data name="Clear" xml:space="preserve"><value>Leeren</value></data>
   <data name="Pause" xml:space="preserve"><value>Pause</value></data>
   <data name="Resume" xml:space="preserve"><value>Fortsetzen</value></data>
   <data name="StartRecording" xml:space="preserve"><value>Aufnahme starten</value></data>
@@ -111,9 +110,6 @@
   <data name="No" xml:space="preserve"><value>Nein</value></data>
   <data name="TimelineTab" xml:space="preserve"><value>Zeitleiste</value></data>
   <data name="Search" xml:space="preserve"><value>Suchen</value></data>
-  <data name="Copy" xml:space="preserve"><value>Kopieren</value></data>
-  <data name="Export" xml:space="preserve"><value>Exportieren</value></data>
-  <data name="Follow" xml:space="preserve"><value>Folgen</value></data>
   <data name="FilterTypes" xml:space="preserve"><value>Typen ▾</value></data>
   <data name="SelectAll" xml:space="preserve"><value>Alle auswählen</value></data>
   <data name="DeselectAll" xml:space="preserve"><value>Alle abwählen</value></data>

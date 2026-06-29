@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Z21Sniffer.Core.Model;
 using Z21Sniffer.Presentation.Logging;
 
 namespace Z21Sniffer.Presentation.Tests;

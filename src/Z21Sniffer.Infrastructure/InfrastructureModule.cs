@@ -36,7 +36,6 @@ public sealed class InfrastructureModule : Module
         builder.RegisterType<SimulatedFeedbackScript>().AsSelf().SingleInstance();
 
         builder.RegisterType<JsonSessionStore>().As<ISessionStore>().SingleInstance();
-        builder.RegisterType<FileLogTextStore>().As<ILogTextStore>().SingleInstance();
         builder.Register(c => new JsonSettingsStore(c.Resolve<IAppPaths>().SettingsFile))
             .As<ISettingsStore>().SingleInstance();
         builder.Register(c => new JsonKeyValueStore(c.Resolve<IAppPaths>().KeyValueFile))
