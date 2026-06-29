@@ -18,7 +18,7 @@ namespace Z21Sniffer.UI.Desktop.Views;
 public partial class WorkspaceView : UserControl
 {
     private readonly DispatcherTimer _scrollSync = new() { Interval = TimeSpan.FromMilliseconds(100) };
-    private bool _logAtBottom = true;
+    private bool _logAtTop = true;
 
     private Canvas? _ghostLayer;
     private Border? _ghost;
@@ -135,12 +135,12 @@ public partial class WorkspaceView : UserControl
 
     private void OnEntryAppended(object? sender, EventArgs e)
     {
-        if (!_logAtBottom) return;
+        if (!_logAtTop) return;
 
         Dispatcher.UIThread.Post(() =>
         {
             var list = this.FindControl<ListBox>("LogList");
-            if (list is { ItemCount: > 0 }) list.ScrollIntoView(list.ItemCount - 1);
+            if (list is { ItemCount: > 0 }) list.ScrollIntoView(0);
         }, DispatcherPriority.Background);
     }
 
@@ -182,8 +182,7 @@ public partial class WorkspaceView : UserControl
         if (scroll is null || ReferenceEquals(scroll, _hookedLogScroll)) return;
 
         _hookedLogScroll = scroll;
-        scroll.ScrollChanged += (_, _) =>
-            _logAtBottom = scroll.Offset.Y >= scroll.Extent.Height - scroll.Viewport.Height - 4;
+        scroll.ScrollChanged += (_, _) => _logAtTop = scroll.Offset.Y <= 4;
     }
 
     private void OnTimeScroll(object? sender, ScrollEventArgs e)

@@ -191,6 +191,28 @@ public class TrafficLogViewModelTest
     }
 
     [Test]
+    public void Append_PutsTheNewestEntryFirst()
+    {
+        _vm.AppendTrackPower(true);
+        _vm.AppendTrackPower(false);
+
+        Assert.That(_vm.Filtered[0].Message, Is.EqualTo("Track power off"));
+        Assert.That(_vm.Filtered[1].Message, Is.EqualTo("Track power on"));
+    }
+
+    [Test]
+    public void Refilter_KeepsTheNewestEntryFirst()
+    {
+        _vm.AppendTrackPower(true);
+        _vm.AppendTrackPower(false);
+
+        _vm.SearchText = "power";
+
+        Assert.That(_vm.Filtered[0].Message, Is.EqualTo("Track power off"));
+        Assert.That(_vm.Filtered[1].Message, Is.EqualTo("Track power on"));
+    }
+
+    [Test]
     public void Append_BeyondCap_DropsOldest()
     {
         var vm = new TrafficLogViewModel(LocalizationService.Instance, _clock, maxEntries: 2);

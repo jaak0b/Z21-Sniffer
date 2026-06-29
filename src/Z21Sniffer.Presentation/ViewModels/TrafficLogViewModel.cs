@@ -130,7 +130,7 @@ public sealed partial class TrafficLogViewModel : ObservableObject
         }
 
         if (!_filter.Matches(entry, EnabledKinds(), SearchText)) return;
-        Filtered.Add(entry);
+        Filtered.Insert(0, entry);
         EntryAppended?.Invoke(this, EventArgs.Empty);
     }
 
@@ -138,9 +138,9 @@ public sealed partial class TrafficLogViewModel : ObservableObject
     {
         var enabled = EnabledKinds();
         Filtered.Clear();
-        foreach (var entry in _all)
+        for (var index = _all.Count - 1; index >= 0; index--)
         {
-            if (_filter.Matches(entry, enabled, SearchText)) Filtered.Add(entry);
+            if (_filter.Matches(_all[index], enabled, SearchText)) Filtered.Add(_all[index]);
         }
     }
 

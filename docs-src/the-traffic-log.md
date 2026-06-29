@@ -2,7 +2,7 @@
 
 The timeline shows you *that* a sensor flickered. The **traffic log** — its own tab next to the timeline — shows you everything else the command station said around that moment, in plain words. When a ghost occupancy lines up with a short circuit or a voltage dip, this is where you see it.
 
-Switch to the **Datenverkehr / Traffic log** tab at the top of the workspace. New lines stream in at the bottom as they arrive.
+Switch to the **Datenverkehr / Traffic log** tab at the top of the workspace. New lines stream in at the top as they arrive, so the most recent traffic is always right under the toolbar.
 
 ## It follows the recording
 
@@ -22,7 +22,7 @@ Every line has a timestamp (to the millisecond), a colour-coded **type badge**, 
 
 - **Filter by type** — the **Types ▾** dropdown lists every message type with a checkbox; tick the ones you want. It has **Select all** / **Deselect all** buttons too. Hunting a sensor? Deselect all, then tick just **Sensor** and **System**.
 - **Search** — type into the search box to keep only lines whose text matches (case-insensitive). Search for a sensor's name to isolate just its activity.
-- **Follow** — the view sticks to the newest line on its own. Scroll up to study history and it stops jumping around; scroll back to the bottom and it resumes following.
+- **Follow** — the view sticks to the newest line (at the top) on its own. Scroll down to study history and it stops jumping around; scroll back to the top and it resumes following.
 
 To keep a log, save the session (the log travels with it) — there's no separate export.
 
