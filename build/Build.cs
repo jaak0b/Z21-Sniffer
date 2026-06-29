@@ -243,6 +243,19 @@ class Build : NukeBuild
                 .SetOutput(DesktopPublishDirectory));
         });
 
+    AbsolutePath PortableZip(string version) => ArtifactsDirectory / $"Z21Sniffer-{version}-win-x64-portable.zip";
+
+    Target PackPortable => _ => _
+        .Description("Zips the self-contained desktop publish into a portable, no-install archive.")
+        .DependsOn(PublishDesktop)
+        .Executes(() =>
+        {
+            var zip = PortableZip(ReleaseVersion());
+            zip.DeleteFile();
+            DesktopPublishDirectory.ZipTo(zip);
+            Log.Information("Portable zip → {Zip}", zip);
+        });
+
     Target Pack => _ => _
         .Description("Builds the Velopack Windows installer and update feed into artifacts/velopack.")
         .DependsOn(PublishDesktop)
@@ -266,8 +279,8 @@ class Build : NukeBuild
         });
 
     Target Release => _ => _
-        .Description("Publishes a GitHub release: the Windows installer + update feed, with notes built from PR labels.")
-        .DependsOn(Pack)
+        .Description("Publishes a GitHub release: the Windows installer + update feed + portable zip, with notes built from PR labels.")
+        .DependsOn(Pack, PackPortable)
         .Requires(() => GitHubToken)
         .Executes(() =>
         {
@@ -284,8 +297,17 @@ class Build : NukeBuild
                 + $" --outputDir \"{VelopackDirectory}\"",
                 logInvocation: false);
 
-            Log.Information("Released {Tag}: installer + update feed", tag);
+            Gh($"release upload {tag} \"{PortableZip(version)}\" --clobber");
+
+            Log.Information("Released {Tag}: installer + update feed + portable zip", tag);
         });
+
+    void Gh(string arguments)
+    {
+        var gh = ToolPathResolver.GetPathExecutable("gh");
+        ProcessTasks.StartProcess(gh, arguments, RootDirectory, GitHubEnvironment(), logInvocation: false)
+            .AssertZeroExitCode();
+    }
 
     void Vpk(string arguments, bool logInvocation = true)
     {

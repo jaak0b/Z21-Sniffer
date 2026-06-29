@@ -1,7 +1,8 @@
 name: Release
 
-# Manual release: publishes a GitHub release with the Windows installer + update feed,
-# and notes built from the labelled pull requests since the previous release tag.
+# Manual release: publishes a GitHub release with the Windows installer + update feed
+# and a self-contained portable zip (no install required), with notes built from the
+# labelled pull requests since the previous release tag.
 # Run it from the Actions tab after bumping the major/minor version in version.json.
 
 on:

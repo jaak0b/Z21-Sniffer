@@ -28,6 +28,7 @@
         "Coverage",
         "Mutate",
         "Pack",
+        "PackPortable",
         "PublishDesktop",
         "Release",
         "Restore",
