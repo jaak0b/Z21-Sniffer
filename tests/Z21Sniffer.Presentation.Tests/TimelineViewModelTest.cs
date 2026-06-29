@@ -199,7 +199,7 @@ public class TimelineViewModelTest
         _registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3).Apply(40, forward: true, maxSpeed: 126, _clock.Now);
         _vm.Tick();
 
-        Assert.That(_vm.LegendRows.Single().Height, Is.EqualTo(55.74).Within(0.05));
+        Assert.That(_vm.LegendRows.Single().Height, Is.EqualTo(51.0).Within(0.05));
     }
 
     [Test]
@@ -291,6 +291,17 @@ public class TimelineViewModelTest
         vm.Tick();
 
         Assert.That(vm.ViewportEnd, Is.EqualTo(_clock.Now));
+    }
+
+    [Test]
+    public void FreshRecording_CanZoomOutFurtherThanTheElapsedTime()
+    {
+        _vm.BeginSession();
+
+        _vm.ZoomByFactor(100, anchorFraction: 1);
+
+        Assert.That(_vm.WindowSeconds, Is.GreaterThan(60));
+        Assert.That(_vm.ViewportEnd, Is.EqualTo(_clock.Now));
     }
 
     [Test]

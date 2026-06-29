@@ -9,15 +9,13 @@ public sealed class TimelineViewportCalculator
 {
     public TimeSpan MinDuration { get; } = TimeSpan.FromSeconds(1);
 
-    public TimeSpan MaxDuration { get; } = TimeSpan.FromHours(24);
+    public TimeSpan MaxDuration { get; } = TimeSpan.FromHours(1);
 
     public TimelineWindow Clamp(TimelineWindow window, DateTimeOffset earliest, DateTimeOffset now)
     {
-        var span = now - earliest;
-        var maxDuration = span < MinDuration ? MinDuration : (span > MaxDuration ? MaxDuration : span);
         var duration = window.Duration < MinDuration
             ? MinDuration
-            : (window.Duration > maxDuration ? maxDuration : window.Duration);
+            : (window.Duration > MaxDuration ? MaxDuration : window.Duration);
 
         var minEnd = earliest + duration;
         var end = window.End;

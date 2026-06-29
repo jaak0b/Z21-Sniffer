@@ -39,12 +39,28 @@ public class TimelineViewportCalculatorTest
     }
 
     [Test]
-    public void Clamp_DurationBeyondHistory_CappedToHistorySpan()
+    public void MaxDuration_IsOneHour()
+    {
+        Assert.That(_calc.MaxDuration, Is.EqualTo(TimeSpan.FromHours(1)));
+    }
+
+    [Test]
+    public void Clamp_DurationBeyondHistory_KeepsItAndAnchorsLiveEdgeToNow()
+    {
+        var result = _calc.Clamp(new TimelineWindow(Now, TimeSpan.FromMinutes(30)), Earliest, Now);
+
+        Assert.That(result.Duration, Is.EqualTo(TimeSpan.FromMinutes(30)));
+        Assert.That(result.End, Is.EqualTo(Now));
+        Assert.That(result.Start, Is.EqualTo(Now.AddMinutes(-30)));
+    }
+
+    [Test]
+    public void Clamp_DurationBeyondMax_CappedToMaxDuration()
     {
         var result = _calc.Clamp(new TimelineWindow(Now, TimeSpan.FromHours(2)), Earliest, Now);
 
-        Assert.That(result.Duration, Is.EqualTo(Now - Earliest));
-        Assert.That(result.Start, Is.EqualTo(Earliest));
+        Assert.That(result.Duration, Is.EqualTo(_calc.MaxDuration));
+        Assert.That(result.End, Is.EqualTo(Now));
     }
 
     [Test]

@@ -78,6 +78,8 @@ The whole recording is kept, so you can look as far back as the session goes:
 
 Scrolling or zooming pauses the live follow so the view holds still while you study it; drag the scrollbar back to the right-hand edge to snap back to following the present moment. Nothing is lost while you look around — the recording keeps running underneath.
 
+You can always zoom out up to a full hour, even seconds into a fresh recording. When the window is wider than the recording is old, the present stays pinned to the right edge and the not-yet-recorded past simply shows as empty space on the left — so you never have to wait for time to pass before you can zoom out comfortably.
+
 ## The legend
 
 The panel on the left is the legend — one entry per row, lined up with its bar:
