@@ -26,7 +26,8 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.Connected] = "SuccessBrush",
         [TimelineInkKeys.Disconnected] = "DangerBrush",
         [TimelineInkKeys.StoppedFlag] = "DangerBrush",
-        [TimelineInkKeys.LocoBar] = "SurfaceAltBrush",
+        [TimelineInkKeys.LocoBar] = "TimelineLaneBrush",
+        [TimelineInkKeys.LaneBorder] = "TimelineLaneBorderBrush",
         [TimelineInkKeys.LocoSpeedLine] = "LocoSpeedLineBrush",
         [TimelineInkKeys.LocoBaseline] = "TextSecondaryBrush",
         [TimelineInkKeys.LocoText] = "TextSecondaryBrush",
@@ -36,7 +37,7 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.TrackPowerOff] = "SurfaceAltBrush",
         [TimelineInkKeys.TrackPowerText] = "PrimaryForegroundBrush",
         [TimelineInkKeys.TrackPowerOffText] = "TextPrimaryBrush",
-        [TimelineInkKeys.SystemCurrentBar] = "SurfaceAltBrush",
+        [TimelineInkKeys.SystemCurrentBar] = "TimelineLaneBrush",
         [TimelineInkKeys.SystemCurrentLine] = "WarningBrush",
         [TimelineInkKeys.SystemCurrentBaseline] = "TextSecondaryBrush",
         [TimelineInkKeys.SystemCurrentText] = "TextSecondaryBrush",
@@ -156,7 +157,7 @@ public sealed class FeedbackTimelineControl : Control
         var end = _viewModel.ViewportEnd;
 
         var gridStep = TimeSpan.FromSeconds(Math.Max(1, (end - start).TotalSeconds / 6));
-        var gridPen = new Pen(Brush("BorderBrush"));
+        var gridPen = new Pen(Brush("TimelineGridLineBrush"));
         var axisViewport = new TimelineViewport(start, end, Bounds.Width, Bounds.Height, RowHeight);
         foreach (var tick in _layout.Ticks(axisViewport, gridStep))
         {
@@ -166,7 +167,7 @@ public sealed class FeedbackTimelineControl : Control
         if (_viewModel.CursorFraction is { } cursorFraction)
         {
             var cursorX = cursorFraction * Bounds.Width;
-            var cursorPen = new Pen(Brush("BorderBrush")) { DashStyle = new DashStyle(new double[] { 2, 3 }, 0) };
+            var cursorPen = new Pen(Brush("TimelineCursorBrush")) { DashStyle = new DashStyle(new double[] { 2, 3 }, 0) };
             context.DrawLine(cursorPen, new Point(cursorX, 0), new Point(cursorX, Bounds.Height));
         }
 

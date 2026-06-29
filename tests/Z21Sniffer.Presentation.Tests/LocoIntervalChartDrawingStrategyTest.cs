@@ -63,6 +63,14 @@ public class LocoIntervalChartDrawingStrategyTest
     }
 
     [Test]
+    public void Draw_StrokesTheLaneBorder()
+    {
+        Draw(Interval(forward: true, maxSpeed: 100, (2, 50)));
+
+        Assert.That(_surface.Strokes, Has.Some.Matches<RecordingTimelineSurface.StrokeOp>(s => s.Ink.Key == TimelineInkKeys.LaneBorder));
+    }
+
+    [Test]
     public void Draw_Forward_MaxSpeedPlotsAtTop()
     {
         Draw(Interval(forward: true, maxSpeed: 100, (2, 100)));

@@ -24,6 +24,10 @@
     <Color x:Key="LocoSpeedLineColor">#FFFFFF</Color>
     <Color x:Key="AccessoryOutput1Color">#538062</Color>
     <Color x:Key="AccessoryOutput2Color">#AE5757</Color>
+    <Color x:Key="TimelineGridLineColor">#3F4147</Color>
+    <Color x:Key="TimelineCursorColor">#3F4147</Color>
+    <Color x:Key="TimelineLaneColor">#383A40</Color>
+    <Color x:Key="TimelineLaneBorderColor">#383A40</Color>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
@@ -49,4 +53,8 @@
     <SolidColorBrush x:Key="LocoSpeedLineBrush" Color="{StaticResource LocoSpeedLineColor}"/>
     <SolidColorBrush x:Key="AccessoryOutput1Brush" Color="{StaticResource AccessoryOutput1Color}"/>
     <SolidColorBrush x:Key="AccessoryOutput2Brush" Color="{StaticResource AccessoryOutput2Color}"/>
+    <SolidColorBrush x:Key="TimelineGridLineBrush" Color="{StaticResource TimelineGridLineColor}"/>
+    <SolidColorBrush x:Key="TimelineCursorBrush" Color="{StaticResource TimelineCursorColor}"/>
+    <SolidColorBrush x:Key="TimelineLaneBrush" Color="{StaticResource TimelineLaneColor}"/>
+    <SolidColorBrush x:Key="TimelineLaneBorderBrush" Color="{StaticResource TimelineLaneBorderColor}"/>
 </ResourceDictionary>

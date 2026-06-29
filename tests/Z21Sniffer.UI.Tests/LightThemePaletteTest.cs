@@ -61,6 +61,71 @@ public class LightThemePaletteTest
         Assert.That(Color("LocoSpeedLineColor", ThemeVariant.Dark), Is.EqualTo(Colors.White));
     }
 
+    [AvaloniaTest]
+    public void TimelineLaneColor_IsDistinctFromBackgroundInLight()
+    {
+        new AvaloniaThemeController().Apply(dark: false);
+
+        Assert.That(Color("TimelineLaneColor", ThemeVariant.Light), Is.Not.EqualTo(Color("BackgroundColor", ThemeVariant.Light)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineLaneColor_DarkMatchesTheOldNeutralBar_SoDarkIsUnchanged()
+    {
+        new AvaloniaThemeController().Apply(dark: true);
+
+        Assert.That(Color("TimelineLaneColor", ThemeVariant.Dark), Is.EqualTo(Color("SurfaceAltColor", ThemeVariant.Dark)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineLaneBorderColor_IsVisibleAgainstTheLaneInLight()
+    {
+        new AvaloniaThemeController().Apply(dark: false);
+
+        Assert.That(Color("TimelineLaneBorderColor", ThemeVariant.Light), Is.Not.EqualTo(Color("TimelineLaneColor", ThemeVariant.Light)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineLaneBorderColor_DarkIsInvisible_SoDarkIsUnchanged()
+    {
+        new AvaloniaThemeController().Apply(dark: true);
+
+        Assert.That(Color("TimelineLaneBorderColor", ThemeVariant.Dark), Is.EqualTo(Color("TimelineLaneColor", ThemeVariant.Dark)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineGridLineColor_IsDistinctFromBackgroundInLight()
+    {
+        new AvaloniaThemeController().Apply(dark: false);
+
+        Assert.That(Color("TimelineGridLineColor", ThemeVariant.Light), Is.Not.EqualTo(Color("BackgroundColor", ThemeVariant.Light)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineGridLineColor_DarkMatchesTheOldBorder_SoDarkIsUnchanged()
+    {
+        new AvaloniaThemeController().Apply(dark: true);
+
+        Assert.That(Color("TimelineGridLineColor", ThemeVariant.Dark), Is.EqualTo(Color("BorderColor", ThemeVariant.Dark)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineCursorColor_IsDarkerThanTheGridLineInLight()
+    {
+        new AvaloniaThemeController().Apply(dark: false);
+
+        Assert.That(Color("TimelineCursorColor", ThemeVariant.Light), Is.Not.EqualTo(Color("TimelineGridLineColor", ThemeVariant.Light)));
+        Assert.That(Color("TimelineCursorColor", ThemeVariant.Light), Is.Not.EqualTo(Color("BackgroundColor", ThemeVariant.Light)));
+    }
+
+    [AvaloniaTest]
+    public void TimelineCursorColor_DarkMatchesTheOldBorder_SoDarkIsUnchanged()
+    {
+        new AvaloniaThemeController().Apply(dark: true);
+
+        Assert.That(Color("TimelineCursorColor", ThemeVariant.Dark), Is.EqualTo(Color("BorderColor", ThemeVariant.Dark)));
+    }
+
     private Color Color(string key, ThemeVariant variant) =>
         Application.Current!.Resources.TryGetResource(key, variant, out var value) && value is Color color
             ? color

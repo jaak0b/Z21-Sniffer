@@ -32,6 +32,7 @@ public abstract class SampledSeriesChartDrawingStrategy : IIntervalChartDrawingS
     public void Draw(IIntervalSource source, IInterval interval, ITimelineSurface surface, BarRect rect, BarContentContext context, ChartViewport viewport)
     {
         surface.Fill(rect, new TimelineInk(BarInk));
+        surface.Stroke(rect, new TimelineInk(TimelineInkKeys.LaneBorder), 1);
 
         if (interval.EndReason == IntervalEndReason.Stopped)
         {

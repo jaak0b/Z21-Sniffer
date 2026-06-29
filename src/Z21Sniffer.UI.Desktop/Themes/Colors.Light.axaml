@@ -1,16 +1,16 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Color x:Key="BackgroundColor">#FFFFFF</Color>
-    <Color x:Key="SurfaceColor">#F4F5F7</Color>
+    <Color x:Key="SurfaceColor">#E9ECF1</Color>
     <Color x:Key="SurfaceAltColor">#E7E9ED</Color>
     <Color x:Key="PrimaryColor">#2563EB</Color>
     <Color x:Key="PrimaryHoverColor">#1D4ED8</Color>
     <Color x:Key="PrimaryPressedColor">#1E40AF</Color>
     <Color x:Key="PrimaryForegroundColor">#FFFFFF</Color>
     <Color x:Key="TextPrimaryColor">#1F2937</Color>
-    <Color x:Key="TextSecondaryColor">#6B7280</Color>
+    <Color x:Key="TextSecondaryColor">#5B6370</Color>
     <Color x:Key="TextDisabledColor">#9CA3AF</Color>
-    <Color x:Key="BorderColor">#E5E7EB</Color>
+    <Color x:Key="BorderColor">#C7CCD5</Color>
     <Color x:Key="BorderStrongColor">#2563EB</Color>
     <Color x:Key="ControlHoverColor">#EEF2F7</Color>
     <Color x:Key="FocusRingColor">#2563EB</Color>
@@ -24,6 +24,10 @@
     <Color x:Key="LocoSpeedLineColor">#374151</Color>
     <Color x:Key="AccessoryOutput1Color">#538062</Color>
     <Color x:Key="AccessoryOutput2Color">#AE5757</Color>
+    <Color x:Key="TimelineGridLineColor">#C3C9D2</Color>
+    <Color x:Key="TimelineCursorColor">#99A1AE</Color>
+    <Color x:Key="TimelineLaneColor">#DCE0E7</Color>
+    <Color x:Key="TimelineLaneBorderColor">#C7CCD5</Color>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
@@ -49,4 +53,8 @@
     <SolidColorBrush x:Key="LocoSpeedLineBrush" Color="{StaticResource LocoSpeedLineColor}"/>
     <SolidColorBrush x:Key="AccessoryOutput1Brush" Color="{StaticResource AccessoryOutput1Color}"/>
     <SolidColorBrush x:Key="AccessoryOutput2Brush" Color="{StaticResource AccessoryOutput2Color}"/>
+    <SolidColorBrush x:Key="TimelineGridLineBrush" Color="{StaticResource TimelineGridLineColor}"/>
+    <SolidColorBrush x:Key="TimelineCursorBrush" Color="{StaticResource TimelineCursorColor}"/>
+    <SolidColorBrush x:Key="TimelineLaneBrush" Color="{StaticResource TimelineLaneColor}"/>
+    <SolidColorBrush x:Key="TimelineLaneBorderBrush" Color="{StaticResource TimelineLaneBorderColor}"/>
 </ResourceDictionary>

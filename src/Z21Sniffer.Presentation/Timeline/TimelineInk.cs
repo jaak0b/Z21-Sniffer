@@ -20,6 +20,8 @@ public static class TimelineInkKeys
 
     public const string LocoBar = "LocoBar";
 
+    public const string LaneBorder = "LaneBorder";
+
     public const string LocoSpeedLine = "LocoSpeedLine";
 
     public const string LocoBaseline = "LocoBaseline";
