@@ -85,6 +85,21 @@ public class SettingsWindowTest
     }
 
     [AvaloniaTest]
+    public void ResetButtons_AreWiredToTheirCommands()
+    {
+        var workspace = BuildWorkspace();
+        var window = new SettingsWindow { DataContext = workspace };
+
+        var names = window.FindControl<Button>("ResetRowNamesButton");
+        var order = window.FindControl<Button>("ResetRowOrderButton");
+
+        Assert.That(names, Is.Not.Null);
+        Assert.That(order, Is.Not.Null);
+        Assert.That(names!.Command, Is.SameAs(workspace.ResetAliasesCommand));
+        Assert.That(order!.Command, Is.SameAs(workspace.ResetOrderCommand));
+    }
+
+    [AvaloniaTest]
     public void LanguageCombo_SelectingGerman_SwitchesLanguage()
     {
         var workspace = BuildWorkspace();

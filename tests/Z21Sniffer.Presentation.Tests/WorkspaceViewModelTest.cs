@@ -429,6 +429,34 @@ public class WorkspaceViewModelTest
     }
 
     [Test]
+    public async Task ResetAliasesCommand_RestoresDefaultLabels()
+    {
+        await StartRecording();
+        _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
+            [new SensorState(SensorA, true)]);
+        var sensor = _vm.Timeline.Sources.OfType<FeedbackSensorSource>().Single();
+        sensor.Label = "Yard 3";
+
+        _vm.ResetAliasesCommand.Execute(null);
+
+        Assert.That(sensor.Label, Is.EqualTo("M1.1"));
+    }
+
+    [Test]
+    public async Task ResetOrderCommand_RevertsToCreationOrder()
+    {
+        await StartRecording();
+        _connection.FeedbackReceived += Raise.With(_connection, (IReadOnlyList<SensorState>)
+            [new SensorState(new SensorKey(1, 1), true), new SensorState(new SensorKey(1, 2), true)]);
+        var ids = _vm.Timeline.Sources.OfType<FeedbackSensorSource>().Select(s => s.Id).ToList();
+        _vm.Timeline.MoveRow(0, 1);
+
+        _vm.ResetOrderCommand.Execute(null);
+
+        Assert.That(_vm.Timeline.Sources.OfType<FeedbackSensorSource>().Select(s => s.Id), Is.EqualTo(ids));
+    }
+
+    [Test]
     public async Task ActivatedConnectionTurnout_WhileRecording_FeedsTimeline()
     {
         await StartRecording();

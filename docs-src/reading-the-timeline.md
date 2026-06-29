@@ -87,6 +87,8 @@ The panel on the left is the legend — one entry per row, lined up with its bar
 - **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs, and it holds no matter *when* each source first becomes active: drag `M1.8` above `System current`, restart the app, and `M1.8` stays above it even though it only gets a row once its sensor reports again. A source you've never positioned joins next to the last row of its own kind — a new sensor lands below the other sensors rather than at the very bottom — so the list stays grouped by type as it fills in.
 - **Remove** a sensor with the **✕** that appears when you hover its entry; you'll be asked to confirm. It disappears from both the legend and the timeline.
 
+If you want to start fresh, **Settings → Timeline rows** has two buttons: **Reset names** clears every custom name you've typed and restores the default labels (`M1.5`, `A12`, …) — including for rows that aren't on screen right now — and **Reset order** forgets the remembered drag arrangement and rebuilds the natural order — rows grouped by type, each placed by when its first bar began, exactly as they'd have lined up had you never dragged anything.
+
 With a lot of sensors the legend and bars scroll together, only drawing what's on screen so it stays smooth.
 
 ## Showing and hiding rows

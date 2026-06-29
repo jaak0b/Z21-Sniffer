@@ -80,6 +80,11 @@
   <data name="CaptureTrainData" xml:space="preserve"><value>Capture train data</value></data>
   <data name="CaptureTrainDataWarning" xml:space="preserve"><value>Loco speed and direction are only captured when this app is the only software talking to the Z21 on this PC. If another program is connected at the same time, the Z21 stops sending loco updates.</value></data>
   <data name="Live" xml:space="preserve"><value>Live</value></data>
+  <data name="TimelineRowsSection" xml:space="preserve"><value>Timeline rows</value></data>
+  <data name="ResetRowNames" xml:space="preserve"><value>Reset names</value></data>
+  <data name="ResetRowNamesHint" xml:space="preserve"><value>Clear every custom row name and restore the default labels (M1.5, A12, …).</value></data>
+  <data name="ResetRowOrder" xml:space="preserve"><value>Reset order</value></data>
+  <data name="ResetRowOrderHint" xml:space="preserve"><value>Forget the remembered drag order and return the rows to their default arrangement.</value></data>
   <data name="Dark" xml:space="preserve"><value>Dark</value></data>
   <data name="Light" xml:space="preserve"><value>Light</value></data>
   <data name="Theme" xml:space="preserve"><value>Theme</value></data>

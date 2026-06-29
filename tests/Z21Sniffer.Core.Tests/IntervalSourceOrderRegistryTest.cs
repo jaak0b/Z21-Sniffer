@@ -35,6 +35,28 @@ public class IntervalSourceOrderRegistryTest
     }
 
     [Test]
+    public void Clear_ForgetsEveryId()
+    {
+        _order.Register("a");
+        _order.Register("b");
+
+        _order.Clear();
+
+        Assert.That(_order.IndexOf("a"), Is.EqualTo(-1));
+        Assert.That(_order.IndexOf("b"), Is.EqualTo(-1));
+    }
+
+    [Test]
+    public void Clear_IsPersistedForLaterRuns()
+    {
+        _order.Register("a");
+        _order.Clear();
+
+        var nextRun = new IntervalSourceOrderRegistry(_store);
+        Assert.That(nextRun.IndexOf("a"), Is.EqualTo(-1));
+    }
+
+    [Test]
     public void Register_KnownId_DoesNotMoveOrDuplicateIt()
     {
         _order.Register("a");

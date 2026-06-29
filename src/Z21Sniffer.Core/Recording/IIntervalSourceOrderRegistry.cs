@@ -9,4 +9,6 @@ public interface IIntervalSourceOrderRegistry
     void Insert(string id, string? afterId);
 
     void Reorder(IReadOnlyList<string> orderedIds);
+
+    void Clear();
 }

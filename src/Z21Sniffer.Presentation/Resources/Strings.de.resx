@@ -80,6 +80,11 @@
   <data name="CaptureTrainData" xml:space="preserve"><value>Zugdaten erfassen</value></data>
   <data name="CaptureTrainDataWarning" xml:space="preserve"><value>Geschwindigkeit und Fahrtrichtung der Loks werden nur erfasst, wenn diese App das einzige Programm ist, das auf diesem PC mit der Z21 kommuniziert. Ist gleichzeitig ein anderes Programm verbunden, sendet die Z21 keine Lok-Updates mehr.</value></data>
   <data name="Live" xml:space="preserve"><value>Live</value></data>
+  <data name="TimelineRowsSection" xml:space="preserve"><value>Zeitachsenzeilen</value></data>
+  <data name="ResetRowNames" xml:space="preserve"><value>Namen zurücksetzen</value></data>
+  <data name="ResetRowNamesHint" xml:space="preserve"><value>Alle benutzerdefinierten Zeilennamen löschen und die Standardbezeichnungen (M1.5, A12, …) wiederherstellen.</value></data>
+  <data name="ResetRowOrder" xml:space="preserve"><value>Reihenfolge zurücksetzen</value></data>
+  <data name="ResetRowOrderHint" xml:space="preserve"><value>Die gemerkte Reihenfolge verwerfen und die Zeilen in ihre Standardanordnung zurücksetzen.</value></data>
   <data name="Dark" xml:space="preserve"><value>Dunkel</value></data>
   <data name="Light" xml:space="preserve"><value>Hell</value></data>
   <data name="Theme" xml:space="preserve"><value>Design</value></data>

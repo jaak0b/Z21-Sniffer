@@ -108,6 +108,109 @@ public class IntervalSourceRegistryTest
     }
 
     [Test]
+    public void ResetOrder_GroupsByTypeThenOrdersByFirstIntervalStart()
+    {
+        var t0 = DateTimeOffset.UnixEpoch;
+        var sensorB = _registry.GetOrCreate<FeedbackSensorSource>("sensor:b");
+        var connection = _registry.GetOrCreate<ConnectionSource>("connection");
+        var sensorA = _registry.GetOrCreate<FeedbackSensorSource>("sensor:a");
+        sensorB.Apply(occupied: true, t0 + TimeSpan.FromSeconds(30));
+        connection.Set(connected: true, t0 + TimeSpan.FromSeconds(10));
+        sensorA.Apply(occupied: true, t0 + TimeSpan.FromSeconds(20));
+        _registry.Reorder(new[] { "sensor:a", "connection", "sensor:b" });
+
+        _registry.ResetOrder();
+
+        Assert.That(_registry.Sources.Select(source => source.Id),
+            Is.EqualTo(new[] { "connection", "sensor:a", "sensor:b" }));
+    }
+
+    [Test]
+    public void ResetOrder_PlacesSourcesWithoutIntervalsLast()
+    {
+        var t0 = DateTimeOffset.UnixEpoch;
+        var quiet = _registry.GetOrCreate<FeedbackSensorSource>("sensor:quiet");
+        var active = _registry.GetOrCreate<FeedbackSensorSource>("sensor:active");
+        active.Apply(occupied: true, t0 + TimeSpan.FromSeconds(5));
+        _registry.Reorder(new[] { "sensor:quiet", "sensor:active" });
+
+        _registry.ResetOrder();
+
+        Assert.That(_registry.Sources.Select(source => source.Id),
+            Is.EqualTo(new[] { "sensor:active", "sensor:quiet" }));
+    }
+
+    [Test]
+    public void ResetOrder_IsPersistedForLaterRuns()
+    {
+        var t0 = DateTimeOffset.UnixEpoch;
+        var sensorB = _registry.GetOrCreate<FeedbackSensorSource>("sensor:b");
+        var sensorA = _registry.GetOrCreate<FeedbackSensorSource>("sensor:a");
+        sensorB.Apply(occupied: true, t0 + TimeSpan.FromSeconds(20));
+        sensorA.Apply(occupied: true, t0 + TimeSpan.FromSeconds(10));
+
+        _registry.ResetOrder();
+
+        var nextRun = new IntervalSourceRegistry(_store);
+        nextRun.GetOrCreate<FeedbackSensorSource>("sensor:b");
+        nextRun.GetOrCreate<FeedbackSensorSource>("sensor:a");
+        Assert.That(nextRun.Sources.Select(source => source.Id), Is.EqualTo(new[] { "sensor:a", "sensor:b" }));
+    }
+
+    [Test]
+    public void ResetOrder_RaisesChanged()
+    {
+        var raised = 0;
+        _registry.Changed += (_, _) => raised++;
+
+        _registry.ResetOrder();
+
+        Assert.That(raised, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ResetAliases_RestoresDefaultLabelOnAPresentSource()
+    {
+        var sensor = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1.1", s => s.Sensor = new SensorKey(1, 1));
+        sensor.Label = "Yard 3";
+
+        _registry.ResetAliases();
+
+        Assert.That(sensor.Label, Is.EqualTo("M1.1"));
+    }
+
+    [Test]
+    public void ResetAliases_ClearsStoredAliasesForAbsentSourcesToo()
+    {
+        _store.SetValue("sensor:9.9/label", "Hidden yard");
+
+        _registry.ResetAliases();
+
+        Assert.That(_store.GetValue<string>("sensor:9.9/label"), Is.Null);
+    }
+
+    [Test]
+    public void ResetAliases_LeavesNonAliasKeysUntouched()
+    {
+        _store.SetValue("source-order", new List<string> { "sensor:1" });
+
+        _registry.ResetAliases();
+
+        Assert.That(_store.GetValue<List<string>>("source-order"), Is.Not.Null);
+    }
+
+    [Test]
+    public void ResetAliases_RaisesChanged()
+    {
+        var raised = 0;
+        _registry.Changed += (_, _) => raised++;
+
+        _registry.ResetAliases();
+
+        Assert.That(raised, Is.EqualTo(1));
+    }
+
+    [Test]
     public void Remove_StopsTheSourceFromBubblingFurtherChanges()
     {
         var source = _registry.GetOrCreate<ConnectionSource>("connection");

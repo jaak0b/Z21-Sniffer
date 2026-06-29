@@ -46,6 +46,28 @@ public class JsonKeyValueStoreTest : TempDirectoryTest
     }
 
     [Test]
+    public void Remove_DeletesTheKeyAndPersistsAcrossInstances()
+    {
+        var store = new JsonKeyValueStore(Path);
+        store.SetValue("sensor:1.1/label", "Yard 3");
+
+        store.Remove("sensor:1.1/label");
+
+        Assert.That(store.GetValue<string>("sensor:1.1/label"), Is.Null);
+        Assert.That(new JsonKeyValueStore(Path).GetValue<string>("sensor:1.1/label"), Is.Null);
+    }
+
+    [Test]
+    public void Keys_ReturnsEveryStoredKey()
+    {
+        var store = new JsonKeyValueStore(Path);
+        store.SetValue("a/label", "x");
+        store.SetValue("source-order", new List<string> { "a" });
+
+        Assert.That(store.Keys(), Is.EquivalentTo(new[] { "a/label", "source-order" }));
+    }
+
+    [Test]
     public void SetValue_CreatesMissingDirectory()
     {
         var nested = System.IO.Path.Combine(TempDir, "nested", "kv.json");

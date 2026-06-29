@@ -10,4 +10,8 @@ public sealed class InMemoryKeyValueStore : IKeyValueStore
         _data.TryGetValue(key, out var value) && value is T typed ? typed : defaultValue;
 
     public void SetValue<T>(string key, T value) => _data[key] = value;
+
+    public void Remove(string key) => _data.Remove(key);
+
+    public IReadOnlyCollection<string> Keys() => _data.Keys.ToList();
 }

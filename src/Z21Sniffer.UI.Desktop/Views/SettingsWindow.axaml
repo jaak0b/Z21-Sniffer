@@ -90,6 +90,22 @@
                  IsVisible="{Binding CaptureTrainData, FallbackValue=False}" />
     </StackPanel>
 
+    <TextBlock Text="{Binding Localization[TimelineRowsSection]}" FontWeight="SemiBold" />
+    <StackPanel Spacing="10" Margin="8,0,0,0">
+      <StackPanel Spacing="2">
+        <Button x:Name="ResetRowNamesButton" Content="{Binding Localization[ResetRowNames]}"
+                Command="{Binding ResetAliasesCommand}" HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding Localization[ResetRowNamesHint]}" Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontSize="11" TextWrapping="Wrap" />
+      </StackPanel>
+      <StackPanel Spacing="2">
+        <Button x:Name="ResetRowOrderButton" Content="{Binding Localization[ResetRowOrder]}"
+                Command="{Binding ResetOrderCommand}" HorizontalAlignment="Left" />
+        <TextBlock Text="{Binding Localization[ResetRowOrderHint]}" Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontSize="11" TextWrapping="Wrap" />
+      </StackPanel>
+    </StackPanel>
+
     <Button Content="{Binding Localization[Close]}" HorizontalAlignment="Right" Click="OnClose" />
   </StackPanel>
 </Window>

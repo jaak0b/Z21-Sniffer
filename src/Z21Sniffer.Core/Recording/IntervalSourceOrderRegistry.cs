@@ -46,5 +46,11 @@ public sealed class IntervalSourceOrderRegistry : IIntervalSourceOrderRegistry
         Save();
     }
 
+    public void Clear()
+    {
+        _ids.Clear();
+        Save();
+    }
+
     private void Save() => _store.SetValue(Key, new List<string>(_ids));
 }

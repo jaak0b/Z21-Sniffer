@@ -42,6 +42,35 @@ public sealed class IntervalSourceRegistry : IIntervalSourceRegistry
 
     public void Reorder(IReadOnlyList<string> orderedIds) => _order.Reorder(orderedIds);
 
+    public void ResetOrder()
+    {
+        _order.Clear();
+        foreach (var source in CanonicalOrder()) _order.Register(source.Id);
+        RaiseChanged();
+    }
+
+    private IReadOnlyList<IIntervalSource> CanonicalOrder()
+    {
+        DateTimeOffset FirstStart(IIntervalSource source) =>
+            source.Intervals.Count > 0 ? source.Intervals.Min(interval => interval.Start) : DateTimeOffset.MaxValue;
+
+        return _sources
+            .GroupBy(source => source.IntervalType)
+            .OrderBy(group => group.Min(FirstStart))
+            .SelectMany(group => group.OrderBy(FirstStart))
+            .ToList();
+    }
+
+    public void ResetAliases()
+    {
+        foreach (var key in _store.Keys().Where(key => key.EndsWith(AliasKeys.Suffix, StringComparison.Ordinal)).ToList())
+        {
+            _store.Remove(key);
+        }
+
+        RaiseChanged();
+    }
+
     public IIntervalSource? Find(string key) => _sources.FirstOrDefault(source => source.Id == key);
 
     public void Remove(IIntervalSource source)

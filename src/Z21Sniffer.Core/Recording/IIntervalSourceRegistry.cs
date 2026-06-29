@@ -14,6 +14,10 @@ public interface IIntervalSourceRegistry
 
     void Reorder(IReadOnlyList<string> orderedIds);
 
+    void ResetOrder();
+
+    void ResetAliases();
+
     void Clear();
 
     event EventHandler? Changed;

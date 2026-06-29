@@ -177,6 +177,12 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ResetAliases() => _registry.ResetAliases();
+
+    [RelayCommand]
+    private void ResetOrder() => _registry.ResetOrder();
+
+    [RelayCommand]
     private async Task SaveSession()
     {
         var path = await _chooseSaveJsonPath();

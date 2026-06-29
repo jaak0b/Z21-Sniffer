@@ -34,4 +34,29 @@ public class InMemoryKeyValueStoreTest
 
         Assert.That(_store.GetValue<string>("k"), Is.EqualTo("second"));
     }
+
+    [Test]
+    public void Remove_DeletesTheKey()
+    {
+        _store.SetValue("k", "value");
+
+        _store.Remove("k");
+
+        Assert.That(_store.GetValue<string>("k", "gone"), Is.EqualTo("gone"));
+    }
+
+    [Test]
+    public void Remove_MissingKey_DoesNothing()
+    {
+        Assert.DoesNotThrow(() => _store.Remove("absent"));
+    }
+
+    [Test]
+    public void Keys_ReturnsEveryStoredKey()
+    {
+        _store.SetValue("a", 1);
+        _store.SetValue("b", 2);
+
+        Assert.That(_store.Keys(), Is.EquivalentTo(new[] { "a", "b" }));
+    }
 }

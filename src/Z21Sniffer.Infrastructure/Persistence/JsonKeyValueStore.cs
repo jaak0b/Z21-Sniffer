@@ -32,6 +32,17 @@ public sealed class JsonKeyValueStore : IKeyValueStore
         File.WriteAllText(_filePath, JsonSerializer.Serialize(_data.Value, _options));
     }
 
+    public void Remove(string key)
+    {
+        if (!_data.Value.TryRemove(key, out _)) return;
+
+        var directory = Path.GetDirectoryName(_filePath);
+        if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
+        File.WriteAllText(_filePath, JsonSerializer.Serialize(_data.Value, _options));
+    }
+
+    public IReadOnlyCollection<string> Keys() => _data.Value.Keys.ToList();
+
     private ConcurrentDictionary<string, object?> Load()
     {
         if (!File.Exists(_filePath)) return new ConcurrentDictionary<string, object?>();
