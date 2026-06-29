@@ -22,6 +22,8 @@
     <Color x:Key="SuccessColor">#16A34A</Color>
     <Color x:Key="SensorBarColor">#C4B5F0</Color>
     <Color x:Key="LocoSpeedLineColor">#374151</Color>
+    <Color x:Key="AccessoryOutput1Color">#538062</Color>
+    <Color x:Key="AccessoryOutput2Color">#AE5757</Color>
 
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
@@ -45,4 +47,6 @@
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
     <SolidColorBrush x:Key="SensorBarBrush" Color="{StaticResource SensorBarColor}"/>
     <SolidColorBrush x:Key="LocoSpeedLineBrush" Color="{StaticResource LocoSpeedLineColor}"/>
+    <SolidColorBrush x:Key="AccessoryOutput1Brush" Color="{StaticResource AccessoryOutput1Color}"/>
+    <SolidColorBrush x:Key="AccessoryOutput2Brush" Color="{StaticResource AccessoryOutput2Color}"/>
 </ResourceDictionary>

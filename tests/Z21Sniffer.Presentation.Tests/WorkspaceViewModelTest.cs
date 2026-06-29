@@ -65,6 +65,7 @@ public class WorkspaceViewModelTest
             [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
             [typeof(TrackPowerInterval)] = new TrackPowerIntervalChartDrawingStrategy(),
             [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalChartDrawingStrategy(),
+            [typeof(AccessoryInterval)] = new AccessoryIntervalChartDrawingStrategy(),
         });
         var legend = new FakeIndex<Type, IIntervalLegendDrawingStrategy>(new Dictionary<Type, IIntervalLegendDrawingStrategy>
         {
@@ -73,6 +74,7 @@ public class WorkspaceViewModelTest
             [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
             [typeof(TrackPowerInterval)] = new TrackPowerIntervalLegendDrawingStrategy(),
             [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalLegendDrawingStrategy(),
+            [typeof(AccessoryInterval)] = new AccessoryIntervalLegendDrawingStrategy(registry, new StubRemovalConfirmation()),
         });
 
         return new WorkspaceViewModel(
@@ -424,6 +426,42 @@ public class WorkspaceViewModelTest
         _connection.TurnoutInfoReceived += Raise.With(_connection, new TurnoutSnapshot(5, TurnoutPosition.Output1));
 
         Assert.That(_vm.Log.Filtered.Any(e => e.Kind == LogEntryKind.Turnout), Is.True);
+    }
+
+    [Test]
+    public async Task ActivatedConnectionTurnout_WhileRecording_FeedsTimeline()
+    {
+        await StartRecording();
+
+        _connection.TurnoutInfoReceived += Raise.With(_connection, new TurnoutSnapshot(7, TurnoutPosition.Output1));
+
+        var accessory = _vm.Timeline.Sources.OfType<AccessorySource>().Single();
+        Assert.That(accessory.Address, Is.EqualTo(7));
+        Assert.That(accessory.Intervals, Has.Count.EqualTo(1));
+    }
+
+    [Test]
+    public async Task ActivatedConnectionTurnout_WhileNotRecording_DoesNotFeedTimeline()
+    {
+        await ActivateConnection();
+
+        _connection.TurnoutInfoReceived += Raise.With(_connection, new TurnoutSnapshot(7, TurnoutPosition.Output1));
+
+        Assert.That(_vm.Timeline.Sources.OfType<AccessorySource>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task ActivatingTheSameConnectionTwice_WiresItOnlyOnce()
+    {
+        await ActivateConnection();
+        await ActivateConnection();
+        _connection.ConnectionChanged += Raise.With(_connection, true);
+        _vm.Recording.ToggleCommand.Execute(null);
+
+        _connection.TurnoutInfoReceived += Raise.With(_connection, new TurnoutSnapshot(7, TurnoutPosition.Output1));
+
+        var accessory = _vm.Timeline.Sources.OfType<AccessorySource>().Single();
+        Assert.That(accessory.Intervals, Has.Count.EqualTo(1), "a double-wired connection would record the same turnout twice");
     }
 
     [Test]

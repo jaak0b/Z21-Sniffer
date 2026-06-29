@@ -38,6 +38,7 @@ public class WorkspaceViewTest
         context.Registry.GetOrCreate<LocoIntervalSource>("loco:3", source => source.Address = 3);
         context.Registry.GetOrCreate<TrackPowerSource>("trackpower");
         context.Registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+        context.Registry.GetOrCreate<AccessorySource>("accessory:12", source => source.Address = 12);
 
         var window = new Window { Content = new WorkspaceView { DataContext = context.Vm }, Width = 1000, Height = 600 };
         window.Show();
@@ -50,6 +51,27 @@ public class WorkspaceViewTest
         Assert.That(rendered, Does.Contain(typeof(TrackPowerLegendContentView)));
         Assert.That(rendered, Does.Contain(typeof(SystemCurrentLegendContentView)),
             "the System current legend row fell back to its type name instead of resolving to SystemCurrentLegendContentView");
+        Assert.That(rendered, Does.Contain(typeof(AccessoryLegendContentView)),
+            "the Accessory legend row fell back to its type name instead of resolving to AccessoryLegendContentView");
+    }
+
+    [AvaloniaTest]
+    public void TimelineControl_WithAccessoryLane_RendersBothPositionsWithoutThrowing()
+    {
+        var clock = new StubClock();
+        var timeline = WorkspaceFactory.BuildTimelineContext(clock);
+        var accessory = timeline.Registry.GetOrCreate<AccessorySource>("accessory:12", source => source.Address = 12);
+        accessory.Apply(TurnoutPosition.Output1, clock.Now);
+        accessory.Apply(TurnoutPosition.Output2, clock.Now.AddSeconds(3));
+        accessory.Apply(TurnoutPosition.Unknown, clock.Now.AddSeconds(6));
+        var control = new FeedbackTimelineControl { DataContext = timeline.Vm };
+        var window = new Window { Content = control, Width = 800, Height = 300 };
+
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        Assert.That(control.Bounds.Width, Is.GreaterThan(0));
+        Assert.That(timeline.Vm.Sources.OfType<AccessorySource>(), Is.Not.Empty);
     }
 
     [AvaloniaTest]

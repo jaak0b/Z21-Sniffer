@@ -89,6 +89,9 @@
   <data name="Connection" xml:space="preserve"><value>Verbindung</value></data>
   <data name="TypeSensor" xml:space="preserve"><value>Sensor</value></data>
   <data name="TypeLoco" xml:space="preserve"><value>Lok</value></data>
+  <data name="TypeAccessory" xml:space="preserve"><value>Zubehör</value></data>
+  <data name="AccessoryPosition1" xml:space="preserve"><value>Stellung 1</value></data>
+  <data name="AccessoryPosition2" xml:space="preserve"><value>Stellung 2</value></data>
   <data name="Rows" xml:space="preserve"><value>Filter</value></data>
   <data name="RowsShowAll" xml:space="preserve"><value>Alle anzeigen</value></data>
   <data name="RowsHideAll" xml:space="preserve"><value>Alle ausblenden</value></data>
@@ -146,6 +149,7 @@
   <data name="ConnectionDetails" xml:space="preserve"><value>Verbindung zur Zentrale</value></data>
   <data name="SensorDetails" xml:space="preserve"><value>R-Bus-Rückmeldung · Modul {0}, Kontakt {1}</value></data>
   <data name="LocoDetails" xml:space="preserve"><value>Lokomotive · Adresse {0}</value></data>
+  <data name="AccessoryDetails" xml:space="preserve"><value>Zubehör · Adresse {0}</value></data>
   <data name="SystemCurrent" xml:space="preserve"><value>Systemstrom</value></data>
   <data name="SystemCurrentDetails" xml:space="preserve"><value>Stromaufnahme des Boosters</value></data>
   <data name="SystemCurrentReading" xml:space="preserve"><value>{0} mA</value></data>

@@ -2,15 +2,11 @@ using Z21Sniffer.Core.Model;
 
 namespace Z21Sniffer.Core.Recording;
 
-public sealed class FeedbackSensorSource : IntervalSourceBase<FeedbackSensorInterval>
+public sealed class FeedbackSensorSource : AliasedIntervalSource<FeedbackSensorInterval>
 {
     public SensorKey Sensor { get; set; }
 
-    public string Label
-    {
-        get => Persistence.GetValue($"{Id}/label", $"M{Sensor.Module}.{Sensor.Contact}") ?? string.Empty;
-        set => Persistence.SetValue($"{Id}/label", value);
-    }
+    protected override string DefaultLabel => $"M{Sensor.Module}.{Sensor.Contact}";
 
     public void Apply(bool occupied, DateTimeOffset at)
     {

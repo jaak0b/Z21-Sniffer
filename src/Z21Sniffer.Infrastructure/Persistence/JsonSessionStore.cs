@@ -46,6 +46,7 @@ public sealed class JsonSessionStore : ISessionStore
                 new JsonDerivedType(typeof(LocoIntervalSource), "loco"),
                 new JsonDerivedType(typeof(TrackPowerSource), "trackpower"),
                 new JsonDerivedType(typeof(SystemCurrentSource), "systemcurrent"),
+                new JsonDerivedType(typeof(AccessorySource), "accessory"),
             },
         };
     }

@@ -45,4 +45,10 @@ public static class TimelineInkKeys
     public const string SystemCurrentBaseline = "SystemCurrentBaseline";
 
     public const string SystemCurrentText = "SystemCurrentText";
+
+    public const string AccessoryOutput1 = "AccessoryOutput1";
+
+    public const string AccessoryOutput2 = "AccessoryOutput2";
+
+    public const string AccessoryText = "AccessoryText";
 }

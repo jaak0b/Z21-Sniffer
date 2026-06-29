@@ -40,6 +40,9 @@ public sealed class FeedbackTimelineControl : Control
         [TimelineInkKeys.SystemCurrentLine] = "WarningBrush",
         [TimelineInkKeys.SystemCurrentBaseline] = "TextSecondaryBrush",
         [TimelineInkKeys.SystemCurrentText] = "TextSecondaryBrush",
+        [TimelineInkKeys.AccessoryOutput1] = "AccessoryOutput1Brush",
+        [TimelineInkKeys.AccessoryOutput2] = "AccessoryOutput2Brush",
+        [TimelineInkKeys.AccessoryText] = "PrimaryForegroundBrush",
     };
 
     private TimelineViewModel? _viewModel;

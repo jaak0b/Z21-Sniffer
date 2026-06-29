@@ -3,17 +3,13 @@ using Z21Sniffer.Core.Model;
 
 namespace Z21Sniffer.Core.Recording;
 
-public sealed class LocoIntervalSource : IntervalSourceBase<LocoInterval>
+public sealed class LocoIntervalSource : AliasedIntervalSource<LocoInterval>
 {
     public override bool HighlightsShortIntervals => false;
 
     public int Address { get; set; }
 
-    public string Label
-    {
-        get => Persistence.GetValue<string>($"{Id}/label") ?? Address.ToString(CultureInfo.InvariantCulture);
-        set => Persistence.SetValue($"{Id}/label", value);
-    }
+    protected override string DefaultLabel => Address.ToString(CultureInfo.InvariantCulture);
 
     public bool HasAlias =>
         Persistence.GetValue<string>($"{Id}/label") is { } stored

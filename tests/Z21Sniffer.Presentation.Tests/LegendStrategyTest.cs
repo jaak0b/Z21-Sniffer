@@ -150,9 +150,10 @@ public class LegendStrategyTest
             new ConnectionIntervalLegendDrawingStrategy().IconGeometry,
             new TrackPowerIntervalLegendDrawingStrategy().IconGeometry,
             new SystemCurrentIntervalLegendDrawingStrategy().IconGeometry,
+            new AccessoryIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconGeometry,
         };
 
         Assert.That(icons, Has.All.StartWith("M"));
-        Assert.That(icons.Distinct().Count(), Is.EqualTo(5));
+        Assert.That(icons.Distinct().Count(), Is.EqualTo(6));
     }
 }

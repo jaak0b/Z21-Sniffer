@@ -35,14 +35,21 @@ public class JsonSessionStoreTest : TempDirectoryTest
         trackPower.Set(TrackPowerStatus.On, Start);
         trackPower.Set(TrackPowerStatus.Short, Start.AddSeconds(4));
 
+        var accessory = new AccessorySource { Id = "accessory:12", Address = 12 };
+        accessory.Apply(TurnoutPosition.Output1, Start);
+        accessory.Apply(TurnoutPosition.Output2, Start.AddSeconds(7));
+
         var log = new LogEntry[]
         {
             new(Start, LogEntryKind.Connection, "Connected"),
             new(Start.AddSeconds(4), LogEntryKind.System, "Short circuit", Fault: true),
         };
 
-        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco, current, trackPower }, log);
+        return new RecordingSession(Start, new IIntervalSource[] { sensor, connection, loco, current, trackPower, accessory }, log);
     }
+
+    private static AccessorySource Accessory(RecordingSession session) =>
+        session.Sources.OfType<AccessorySource>().Single();
 
     private static TrackPowerSource TrackPower(RecordingSession session) =>
         session.Sources.OfType<TrackPowerSource>().Single();
@@ -68,12 +75,13 @@ public class JsonSessionStoreTest : TempDirectoryTest
         var loaded = _store.LoadJson(path);
 
         Assert.That(loaded.StartedAt, Is.EqualTo(Start));
-        Assert.That(loaded.Sources, Has.Count.EqualTo(5));
+        Assert.That(loaded.Sources, Has.Count.EqualTo(6));
         Assert.That(loaded.Sources.OfType<FeedbackSensorSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<ConnectionSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<LocoIntervalSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<SystemCurrentSource>().Count(), Is.EqualTo(1));
         Assert.That(loaded.Sources.OfType<TrackPowerSource>().Count(), Is.EqualTo(1));
+        Assert.That(loaded.Sources.OfType<AccessorySource>().Count(), Is.EqualTo(1));
     }
 
     [Test]
@@ -155,6 +163,23 @@ public class JsonSessionStoreTest : TempDirectoryTest
     }
 
     [Test]
+    public void SaveJson_ThenLoadJson_RoundTripsAccessorySource()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        _store.SaveJson(SampleSession(), path);
+        var accessory = Accessory(_store.LoadJson(path));
+
+        Assert.That(accessory.Address, Is.EqualTo(12));
+        Assert.That(accessory.Intervals, Has.Count.EqualTo(2));
+        Assert.That(accessory.Intervals[0].Position, Is.EqualTo(TurnoutPosition.Output1));
+        Assert.That(accessory.Intervals[0].Address, Is.EqualTo(12));
+        Assert.That(accessory.Intervals[0].End, Is.EqualTo(Start.AddSeconds(7)));
+        Assert.That(accessory.Intervals[1].Position, Is.EqualTo(TurnoutPosition.Output2));
+        Assert.That(accessory.Intervals[1].IsOpen, Is.True);
+    }
+
+    [Test]
     public void SaveJson_ThenLoadJson_RoundTripsConnectionSource()
     {
         var path = Path.Combine(TempDir, "session.json");
@@ -201,7 +226,7 @@ public class JsonSessionStoreTest : TempDirectoryTest
         new JsonSessionStore().SaveJson(SampleSession(), path);
         var json = File.ReadAllText(path);
 
-        foreach (var discriminator in new[] { "sensor", "connection", "loco", "trackpower", "systemcurrent" })
+        foreach (var discriminator in new[] { "sensor", "connection", "loco", "trackpower", "systemcurrent", "accessory" })
         {
             Assert.That(json, Does.Contain($"\"$type\": \"{discriminator}\""), discriminator);
         }

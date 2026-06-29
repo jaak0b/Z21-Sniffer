@@ -47,6 +47,16 @@ Locomotives get their own kind of row. Instead of a plain on/off bar, a loco bar
 - Like sensors, each loco is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry); the name is remembered between runs.
 - When a loco bar runs off the **left edge** of the view — because you've scrolled or zoomed into the middle of a long run — the graph doesn't crowd every earlier reading against the edge. Instead the line simply enters at the speed that was in effect at that moment (the last reading before the edge) and carries on, so the start of an off-screen run stays clean rather than smearing into a vertical streak.
 
+## Watching accessories (turnouts and signals)
+
+The Z21 doesn't have a separate notion of "turnout" versus "signal" — anything driven by an accessory decoder (a point motor, a colour-light signal, an uncoupler) is just an *accessory* at some address, reported as being in one of two positions. The app draws each accessory that reports as its own **Accessory** row.
+
+- The row is a coloured band, sensor height, that switches colour every time the accessory moves: **green for Position 1, red for Position 2** — the same green/red you see on a PIKO or Viessmann switch panel. We deliberately *don't* label the positions "straight" and "diverging", because the command station never tells us which way the points actually lie; you know your own layout, so rename the row (below) to whatever it really is.
+- Each segment is labelled with its position and how long it held — `A12 · Position 1 · 4.2 s` — and you can hover anywhere across the row to read the same thing at that instant.
+- Every report from the station starts a **fresh segment**, even when the accessory is told to go to the position it's already in, so a burst of repeated commands shows as a run of back-to-back blocks rather than one long bar. If the station ever reports an accessory as being in an *unknown* state, the band simply stops until the next real position arrives.
+- A row only appears once an accessory actually reports — exactly like a sensor that hasn't fired yet. Multi-motor turnouts (three-way points, double slips) use more than one address, so they show up as one row per address.
+- Like sensors, each accessory is keyed by its address and can be given a friendly **alias** in the legend (type a name into its entry — `Yard ladder`, `Signal 3`); the name is remembered between runs. **Remove** an accessory row with the **✕** that appears when you hover it, just like a sensor.
+
 ## Watching the system current
 
 The command station reports how much current the booster is drawing, and that gets its own **System current** row — a line graph of the amperage over time, in milliamps. A spike that lines up with a sensor blip or a short on the track-power row is a strong clue to what tripped: an overloaded section, a partial short, a motor stalling.
@@ -72,7 +82,7 @@ Scrolling or zooming pauses the live follow so the view holds still while you st
 
 The panel on the left is the legend — one entry per row, lined up with its bar:
 
-- Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, a locomotive for a loco, and a small waveform for the system-current row. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
+- Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, a locomotive for a loco, a small points/turnout symbol for an accessory, and a small waveform for the system-current row. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
 - **Rename** a sensor by typing a friendly name straight into its entry (press Enter or click away to keep it). The name is remembered between runs.
 - **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs, and it holds no matter *when* each source first becomes active: drag `M1.8` above `System current`, restart the app, and `M1.8` stays above it even though it only gets a row once its sensor reports again. A source you've never positioned joins next to the last row of its own kind — a new sensor lands below the other sensors rather than at the very bottom — so the list stays grouped by type as it fills in.
 - **Remove** a sensor with the **✕** that appears when you hover its entry; you'll be asked to confirm. It disappears from both the legend and the timeline.
@@ -83,7 +93,7 @@ With a lot of sensors the legend and bars scroll together, only drawing what's o
 
 When a lot is happening — many locos running, many sections flickering — the timeline can get crowded. The **Filter** button — on the right of the timeline's tab row, where it sits beside the Timeline / Traffic log tabs and shows only on the Timeline tab — opens a tidy, two-level checklist of everything that has a row, so you can hide the noise and keep only what you're watching.
 
-- The top level is the **type** of row — Sensor, Loco, Connection, Track power, System current — each with its type icon and a checkbox. A type with more than one source has a triangle you can click to expand it and reveal the **individual sources** beneath, listed by their label, each with its own checkbox.
+- The top level is the **type** of row — Sensor, Loco, Accessory, Connection, Track power, System current — each with its type icon and a checkbox. A type with more than one source has a triangle you can click to expand it and reveal the **individual sources** beneath, listed by their label, each with its own checkbox.
 - A type's checkbox is **three-state**: ticked when all of its rows are shown, empty when all are hidden, and a dash when only some are. Click it to show or hide the whole type at once.
 - **Show all** / **Hide all** flip everything, the **filter** box narrows the list to rows whose name (or type) matches what you type, and each type shows a small **shown / total** count on its right.
 - Hiding a row only removes it from view — **the source keeps recording in the background**. Un-hide it and its full history is right there, nothing lost. Visibility is a per-session view preference: it isn't saved, and every fresh **Start recording** brings all rows back.

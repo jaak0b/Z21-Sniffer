@@ -71,6 +71,7 @@ internal static class WorkspaceFactory
         [typeof(LocoInterval)] = new LocoIntervalChartDrawingStrategy(),
         [typeof(TrackPowerInterval)] = new TrackPowerIntervalChartDrawingStrategy(),
         [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalChartDrawingStrategy(),
+        [typeof(AccessoryInterval)] = new AccessoryIntervalChartDrawingStrategy(),
     });
 
     private static FakeIndex<Type, IIntervalLegendDrawingStrategy> LegendStrategies(IIntervalSourceRegistry registry) => new(new()
@@ -80,5 +81,6 @@ internal static class WorkspaceFactory
         [typeof(LocoInterval)] = new LocoIntervalLegendDrawingStrategy(registry, new AlwaysConfirm()),
         [typeof(TrackPowerInterval)] = new TrackPowerIntervalLegendDrawingStrategy(),
         [typeof(SystemCurrentInterval)] = new SystemCurrentIntervalLegendDrawingStrategy(),
+        [typeof(AccessoryInterval)] = new AccessoryIntervalLegendDrawingStrategy(registry, new AlwaysConfirm()),
     });
 }

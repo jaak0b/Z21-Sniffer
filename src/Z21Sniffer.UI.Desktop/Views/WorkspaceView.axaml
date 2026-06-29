@@ -30,6 +30,9 @@
     <DataTemplate DataType="vm:SystemCurrentLegendContentViewModel">
       <views:SystemCurrentLegendContentView />
     </DataTemplate>
+    <DataTemplate DataType="vm:AccessoryLegendContentViewModel">
+      <views:AccessoryLegendContentView />
+    </DataTemplate>
   </UserControl.DataTemplates>
 
   <UserControl.Styles>
