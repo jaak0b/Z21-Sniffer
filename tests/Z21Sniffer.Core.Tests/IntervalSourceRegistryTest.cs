@@ -37,22 +37,144 @@ public class IntervalSourceRegistryTest
     }
 
     [Test]
-    public void GetOrCreate_AssignsIncreasingOrder()
+    public void GetOrCreate_KeepsCreationOrder()
     {
         var first = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
         var second = _registry.GetOrCreate<ConnectionSource>("connection");
 
-        Assert.That(second.Order, Is.GreaterThan(first.Order));
+        Assert.That(_registry.Sources, Is.EqualTo(new IIntervalSource[] { first, second }));
     }
 
     [Test]
-    public void Sources_AreReturnedOrderedByOrder()
+    public void Reorder_RepositionsSourcesByTheGivenIds()
     {
         var first = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
         var second = _registry.GetOrCreate<FeedbackSensorSource>("sensor:2");
-        second.Order = -1;
+
+        _registry.Reorder(new[] { "sensor:2", "sensor:1" });
 
         Assert.That(_registry.Sources, Is.EqualTo(new IIntervalSource[] { second, first }));
+    }
+
+    [Test]
+    public void Sources_HonourRememberedOrderRegardlessOfArrivalTime()
+    {
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:2");
+        _registry.Reorder(new[] { "sensor:2", "sensor:1" });
+
+        var nextRun = new IntervalSourceRegistry(_store);
+        var late = nextRun.GetOrCreate<FeedbackSensorSource>("sensor:1");
+        var early = nextRun.GetOrCreate<FeedbackSensorSource>("sensor:2");
+
+        Assert.That(nextRun.Sources, Is.EqualTo(new IIntervalSource[] { early, late }));
+    }
+
+    [Test]
+    public void GetOrCreate_NewSourceOfExistingType_InsertsAfterTheLastOfThatType()
+    {
+        _registry.GetOrCreate<ConnectionSource>("connection");
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
+        _registry.GetOrCreate<TrackPowerSource>("trackpower");
+
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:2");
+
+        Assert.That(_registry.Sources.Select(source => source.Id),
+            Is.EqualTo(new[] { "connection", "sensor:1", "sensor:2", "trackpower" }));
+    }
+
+    [Test]
+    public void GetOrCreate_FirstSourceOfAType_AppendsAtTheBottom()
+    {
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
+
+        _registry.GetOrCreate<ConnectionSource>("connection");
+
+        Assert.That(_registry.Sources.Select(source => source.Id),
+            Is.EqualTo(new[] { "sensor:1", "connection" }));
+    }
+
+    [Test]
+    public void GetOrCreate_AfterReorder_NewSourceLandsAtTheBottom()
+    {
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
+        _registry.GetOrCreate<FeedbackSensorSource>("sensor:2");
+        _registry.Reorder(new[] { "sensor:2", "sensor:1" });
+
+        var late = _registry.GetOrCreate<FeedbackSensorSource>("sensor:3");
+
+        Assert.That(_registry.Sources.Last(), Is.SameAs(late));
+        Assert.That(_registry.Sources.Select(source => source.Id), Is.EqualTo(new[] { "sensor:2", "sensor:1", "sensor:3" }));
+    }
+
+    [Test]
+    public void Remove_StopsTheSourceFromBubblingFurtherChanges()
+    {
+        var source = _registry.GetOrCreate<ConnectionSource>("connection");
+        _registry.Remove(source);
+        var raised = 0;
+        _registry.Changed += (_, _) => raised++;
+
+        source.Set(connected: true, DateTimeOffset.UnixEpoch);
+
+        Assert.That(raised, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void Clear_StopsSourcesFromBubblingFurtherChanges()
+    {
+        var source = _registry.GetOrCreate<ConnectionSource>("connection");
+        _registry.Clear();
+        var raised = 0;
+        _registry.Changed += (_, _) => raised++;
+
+        source.Set(connected: true, DateTimeOffset.UnixEpoch);
+
+        Assert.That(raised, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void Load_DetachesPreviousSourcesAndAttachesLoadedOnes()
+    {
+        var previous = _registry.GetOrCreate<ConnectionSource>("connection");
+        var loaded = new ConnectionSource { Id = "connection2" };
+        _registry.Load(new IIntervalSource[] { loaded });
+        var fromPrevious = 0;
+        var fromLoaded = 0;
+        _registry.Changed += (_, _) => fromPrevious++;
+        previous.Set(connected: true, DateTimeOffset.UnixEpoch);
+        Assert.That(fromPrevious, Is.EqualTo(0), "a source replaced by Load must no longer bubble");
+
+        _registry.Changed += (_, _) => fromLoaded++;
+        loaded.Set(connected: true, DateTimeOffset.UnixEpoch);
+        Assert.That(fromLoaded, Is.GreaterThanOrEqualTo(1), "a loaded source must bubble its changes");
+    }
+
+    [Test]
+    public void Load_RemembersTheLoadedOrderForLaterRuns()
+    {
+        _registry.Load(new IIntervalSource[]
+        {
+            new ConnectionSource { Id = "connection" },
+            new FeedbackSensorSource { Id = "sensor:1" },
+        });
+
+        var nextRun = new IntervalSourceRegistry(_store);
+        var sensor = nextRun.GetOrCreate<FeedbackSensorSource>("sensor:1");
+        var connection = nextRun.GetOrCreate<ConnectionSource>("connection");
+
+        Assert.That(nextRun.Sources, Is.EqualTo(new IIntervalSource[] { connection, sensor }));
+    }
+
+    [Test]
+    public void Load_BindsTheRegistryStoreToLoadedSources()
+    {
+        var loaded = new FeedbackSensorSource { Id = "sensor:1", Sensor = new SensorKey(1, 1) };
+        _registry.Load(new IIntervalSource[] { loaded });
+
+        loaded.Label = "Yard 3";
+
+        Assert.That(_store.GetValue<string>("sensor:1/label"), Is.EqualTo("Yard 3"));
     }
 
     [Test]
@@ -79,7 +201,7 @@ public class IntervalSourceRegistryTest
     public void Load_ReplacesContentsWithGivenSources()
     {
         _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
-        var restored = new ConnectionSource { Id = "connection", Order = 0 };
+        var restored = new ConnectionSource { Id = "connection" };
 
         _registry.Load(new IIntervalSource[] { restored });
 
@@ -87,7 +209,7 @@ public class IntervalSourceRegistryTest
     }
 
     [Test]
-    public void GetOrCreate_AfterLoad_ContinuesOrderAboveLoaded()
+    public void GetOrCreate_AfterLoad_AppendsBelowLoaded()
     {
         _registry.Load(new IIntervalSource[]
         {
@@ -97,7 +219,12 @@ public class IntervalSourceRegistryTest
 
         var added = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1");
 
-        Assert.That(added.Order, Is.GreaterThan(_registry.Find("sensor:9")!.Order));
+        Assert.That(_registry.Sources, Is.EqualTo(new IIntervalSource[]
+        {
+            _registry.Find("connection")!,
+            _registry.Find("sensor:9")!,
+            added,
+        }));
     }
 
     [Test]

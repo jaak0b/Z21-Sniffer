@@ -74,10 +74,19 @@ The panel on the left is the legend — one entry per row, lined up with its bar
 
 - Each entry carries a small **type icon** so you can tell at a glance what kind of row it is: linked nodes for the command-station connection, a track contact for a feedback sensor, a locomotive for a loco, and a small waveform for the system-current row. **Hover an entry** for a tooltip that spells out the exact source behind it — which module and contact a sensor decodes to, a loco's address, or that it's the command-station connection.
 - **Rename** a sensor by typing a friendly name straight into its entry (press Enter or click away to keep it). The name is remembered between runs.
-- **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs.
+- **Reorder** sensors by dragging an entry by its `≡` handle — a ghost follows your cursor and the rows (and their bars) rearrange when you drop. The order is remembered between runs, and it holds no matter *when* each source first becomes active: drag `M1.8` above `System current`, restart the app, and `M1.8` stays above it even though it only gets a row once its sensor reports again. A source you've never positioned joins next to the last row of its own kind — a new sensor lands below the other sensors rather than at the very bottom — so the list stays grouped by type as it fills in.
 - **Remove** a sensor with the **✕** that appears when you hover its entry; you'll be asked to confirm. It disappears from both the legend and the timeline.
 
 With a lot of sensors the legend and bars scroll together, only drawing what's on screen so it stays smooth.
+
+## Showing and hiding rows
+
+When a lot is happening — many locos running, many sections flickering — the timeline can get crowded. The **Filter** button — on the right of the timeline's tab row, where it sits beside the Timeline / Traffic log tabs and shows only on the Timeline tab — opens a tidy, two-level checklist of everything that has a row, so you can hide the noise and keep only what you're watching.
+
+- The top level is the **type** of row — Sensor, Loco, Connection, Track power, System current — each with its type icon and a checkbox. A type with more than one source has a triangle you can click to expand it and reveal the **individual sources** beneath, listed by their label, each with its own checkbox.
+- A type's checkbox is **three-state**: ticked when all of its rows are shown, empty when all are hidden, and a dash when only some are. Click it to show or hide the whole type at once.
+- **Show all** / **Hide all** flip everything, the **filter** box narrows the list to rows whose name (or type) matches what you type, and each type shows a small **shown / total** count on its right.
+- Hiding a row only removes it from view — **the source keeps recording in the background**. Un-hide it and its full history is right there, nothing lost. Visibility is a per-session view preference: it isn't saved, and every fresh **Start recording** brings all rows back.
 
 ## Hunting a flaky sensor
 

@@ -73,6 +73,7 @@ public sealed partial class WorkspaceViewModel : ObservableObject
 
         Connection = new ConnectionViewModel(factory, settings);
         Timeline = new TimelineViewModel(registry, chartStrategies, legendStrategies, _recordingClock);
+        Rows = new SourceVisibilityViewModel(registry, legendStrategies);
         Recording = new RecordingViewModel(registry, _recordingClock, () => Connection.IsConnected);
         Log = new TrafficLogViewModel(Localization, clock);
         Mcp = new McpServerViewModel(mcpController, loaded.McpPort);
@@ -112,6 +113,8 @@ public sealed partial class WorkspaceViewModel : ObservableObject
     public ConnectionViewModel Connection { get; }
 
     public TimelineViewModel Timeline { get; }
+
+    public SourceVisibilityViewModel Rows { get; }
 
     public IClock TimelineClock => _recordingClock;
 

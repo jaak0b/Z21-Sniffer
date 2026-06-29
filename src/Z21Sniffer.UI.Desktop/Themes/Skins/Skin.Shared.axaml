@@ -297,6 +297,51 @@
 
     <Style Selector="CheckBox">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border x:Name="CheckBorder" Grid.Column="0" Width="18" Height="18" CornerRadius="4"
+                            BorderThickness="1.5" BorderBrush="{DynamicResource BorderStrongBrush}"
+                            Background="Transparent" VerticalAlignment="Center">
+                        <Panel>
+                            <Viewbox x:Name="CheckGlyph" Width="10" Height="10" Stretch="Uniform"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">
+                                <Path Data="M1,5 L4.2,8.4 L10,1.6"
+                                      Stroke="{DynamicResource PrimaryForegroundBrush}" StrokeThickness="2"
+                                      StrokeLineCap="Round" StrokeJoin="Round"/>
+                            </Viewbox>
+                            <Border x:Name="DashGlyph" Width="9" Height="2" CornerRadius="1"
+                                    Background="{DynamicResource PrimaryForegroundBrush}"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False"/>
+                        </Panel>
+                    </Border>
+                    <ContentPresenter x:Name="PART_ContentPresenter" Grid.Column="1"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                      Margin="8,0,0,0" VerticalAlignment="Center"
+                                      Foreground="{TemplateBinding Foreground}"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="CheckBox:pointerover /template/ Border#CheckBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+    <Style Selector="CheckBox:checked /template/ Border#CheckBorder">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+    <Style Selector="CheckBox:checked /template/ Viewbox#CheckGlyph">
+        <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="CheckBox:indeterminate /template/ Border#CheckBorder">
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+    </Style>
+    <Style Selector="CheckBox:indeterminate /template/ Border#DashGlyph">
+        <Setter Property="IsVisible" Value="True"/>
     </Style>
     <Style Selector="RadioButton">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>

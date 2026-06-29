@@ -38,7 +38,7 @@ public class BarChartRendererTest
 
     private static FeedbackSensorSource Sensor(SensorKey key, int order, params (double Start, double? End)[] intervals)
     {
-        var source = new FeedbackSensorSource { Id = $"sensor:{key.Module}.{key.Contact}", Sensor = key, Label = $"M{key.Module}.{key.Contact}", Order = order };
+        var source = new FeedbackSensorSource { Id = $"sensor:{key.Module}.{key.Contact}", Sensor = key, Label = $"M{key.Module}.{key.Contact}" };
         foreach (var (start, end) in intervals)
         {
             source.Apply(occupied: true, T0.AddSeconds(start));
@@ -52,7 +52,7 @@ public class BarChartRendererTest
     public void Render_DrawsEachSourceWithItsKeyedStrategy()
     {
         var sensor = Sensor(SensorA, order: 0, (2, null));
-        var connection = new ConnectionSource { Id = "connection", Order = 1 };
+        var connection = new ConnectionSource { Id = "connection" };
         connection.Set(connected: true, T0.AddSeconds(2));
 
         Render(new IIntervalSource[] { sensor, connection });
@@ -166,7 +166,7 @@ public class BarChartRendererTest
     [Test]
     public void Render_ShortInterval_OnAnOptedOutSource_DrawsNoHighlightOutline()
     {
-        var loco = new LocoIntervalSource { Id = "loco:3", Address = 3, Order = 0 };
+        var loco = new LocoIntervalSource { Id = "loco:3", Address = 3 };
         loco.Apply(speed: 5, forward: true, maxSpeed: 100, T0.AddSeconds(2));
         loco.Apply(speed: 0, forward: true, maxSpeed: 100, T0.AddSeconds(2.4));
 

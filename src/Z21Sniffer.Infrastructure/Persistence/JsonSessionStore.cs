@@ -53,7 +53,7 @@ public sealed class JsonSessionStore : ISessionStore
     private void DropTransientMembers(JsonTypeInfo typeInfo)
     {
         foreach (var property in typeInfo.Properties
-                     .Where(property => property.Name is "IntervalType" or "CurrentInterval" or "Order" or "Label")
+                     .Where(property => property.Name is "IntervalType" or "CurrentInterval" or "IsVisible" or "Label")
                      .ToList())
         {
             typeInfo.Properties.Remove(property);

@@ -22,18 +22,18 @@ public class RowLayoutTest
         }));
 
     private static FeedbackSensorSource Sensor(int order) =>
-        new() { Id = $"sensor:{order}", Sensor = new SensorKey(1, order), Order = order };
+        new() { Id = $"sensor:{order}", Sensor = new SensorKey(1, order) };
 
     private static LocoIntervalSource Loco(int order) =>
-        new() { Id = $"loco:{order}", Address = order, Order = order };
+        new() { Id = $"loco:{order}", Address = order };
 
     [Test]
-    public void Compute_StacksRowsByOrderUsingPerStrategyHeights()
+    public void Compute_StacksRowsInTheGivenOrderUsingPerStrategyHeights()
     {
         var sensor = Sensor(0);
         var loco = Loco(1);
 
-        var rows = _layout.Compute(new IIntervalSource[] { loco, sensor }, zoomFraction: 0);
+        var rows = _layout.Compute(new IIntervalSource[] { sensor, loco }, zoomFraction: 0);
 
         Assert.That(rows[0].Source, Is.SameAs(sensor));
         Assert.That(rows[0].Top, Is.EqualTo(0));
@@ -41,6 +41,20 @@ public class RowLayoutTest
         Assert.That(rows[1].Source, Is.SameAs(loco));
         Assert.That(rows[1].Top, Is.EqualTo(26));
         Assert.That(rows[1].Height, Is.EqualTo(34));
+    }
+
+    [Test]
+    public void Compute_SkipsHiddenSources()
+    {
+        var sensor = Sensor(0);
+        var loco = Loco(1);
+        sensor.IsVisible = false;
+
+        var rows = _layout.Compute(new IIntervalSource[] { sensor, loco }, zoomFraction: 0);
+
+        Assert.That(rows, Has.Count.EqualTo(1));
+        Assert.That(rows[0].Source, Is.SameAs(loco));
+        Assert.That(rows[0].Top, Is.EqualTo(0));
     }
 
     [Test]

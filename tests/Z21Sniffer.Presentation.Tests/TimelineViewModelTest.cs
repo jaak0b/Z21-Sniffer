@@ -114,7 +114,20 @@ public class TimelineViewModelTest
     }
 
     [Test]
-    public void MoveRow_ReordersRowsSetsOrderAndRaises()
+    public void BeginSession_RestoresHiddenSourcesToVisible()
+    {
+        Feed(SensorA, occupied: true);
+        var source = _registry.Find("sensor:1.1")!;
+        source.IsVisible = false;
+
+        _vm.BeginSession();
+
+        Assert.That(source.IsVisible, Is.True);
+        Assert.That(Lane(_vm), Is.EqualTo(new[] { SensorA }));
+    }
+
+    [Test]
+    public void MoveRow_ReordersRowsPersistsOrderAndRaises()
     {
         Feed(SensorA, occupied: true);
         Feed(SensorB, occupied: true);
@@ -124,7 +137,7 @@ public class TimelineViewModelTest
         _vm.MoveRow(0, 1);
 
         Assert.That(Lane(_vm), Is.EqualTo(new[] { SensorB, SensorA }));
-        Assert.That(_vm.Sources.Select(s => s.Order), Is.Ordered);
+        Assert.That(_vm.Sources.Select(s => s.Id), Is.EqualTo(_vm.LegendRows.Select(r => r.Source.Id)));
         Assert.That(reordered, Is.True);
     }
 

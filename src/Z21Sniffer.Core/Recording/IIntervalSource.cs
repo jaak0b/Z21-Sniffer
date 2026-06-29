@@ -11,13 +11,11 @@ public interface IIntervalSource
 
     bool HighlightsShortIntervals { get; }
 
-    int Order { get; set; }
+    bool IsVisible { get; set; }
 
     IReadOnlyList<IInterval> Intervals { get; }
 
     void UsePersistence(IKeyValueStore store);
-
-    void SeedOrder(int order);
 
     void CloseOpenIntervals(DateTimeOffset at, IntervalEndReason reason);
 

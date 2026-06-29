@@ -15,7 +15,7 @@ public sealed class RowLayout
     {
         var rows = new List<RowBound>();
         var top = 0.0;
-        foreach (var source in sources.OrderBy(source => source.Order))
+        foreach (var source in sources.Where(source => source.IsVisible))
         {
             var height = _strategies[source.IntervalType].LaneHeight(zoomFraction);
             rows.Add(new RowBound(source, top, height));

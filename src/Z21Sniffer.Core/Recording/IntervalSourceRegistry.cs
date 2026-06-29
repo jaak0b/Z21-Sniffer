@@ -6,14 +6,19 @@ public sealed class IntervalSourceRegistry : IIntervalSourceRegistry
 {
     private readonly List<IIntervalSource> _sources = new();
     private readonly IKeyValueStore _store;
+    private readonly IntervalSourceOrderRegistry _order;
 
     public IntervalSourceRegistry() : this(new InMemoryKeyValueStore())
     {
     }
 
-    public IntervalSourceRegistry(IKeyValueStore store) => _store = store;
+    public IntervalSourceRegistry(IKeyValueStore store)
+    {
+        _store = store;
+        _order = new IntervalSourceOrderRegistry(store);
+    }
 
-    public IReadOnlyList<IIntervalSource> Sources => _sources.OrderBy(source => source.Order).ToList();
+    public IReadOnlyList<IIntervalSource> Sources => _sources.OrderBy(source => _order.IndexOf(source.Id)).ToList();
 
     public event EventHandler? Changed;
 
@@ -23,13 +28,19 @@ public sealed class IntervalSourceRegistry : IIntervalSourceRegistry
 
         var created = new T { Id = key };
         created.UsePersistence(_store);
-        created.SeedOrder(NextOrder());
+        var lastOfType = _sources
+            .Where(source => source.IntervalType == created.IntervalType)
+            .OrderBy(source => _order.IndexOf(source.Id))
+            .LastOrDefault();
+        _order.Insert(created.Id, lastOfType?.Id);
         initialize?.Invoke(created);
         Attach(created);
         _sources.Add(created);
         RaiseChanged();
         return created;
     }
+
+    public void Reorder(IReadOnlyList<string> orderedIds) => _order.Reorder(orderedIds);
 
     public IIntervalSource? Find(string key) => _sources.FirstOrDefault(source => source.Id == key);
 
@@ -46,11 +57,10 @@ public sealed class IntervalSourceRegistry : IIntervalSourceRegistry
         foreach (var existing in _sources) Detach(existing);
         _sources.Clear();
 
-        var seed = 0;
         foreach (var source in sources)
         {
             source.UsePersistence(_store);
-            source.SeedOrder(seed++);
+            _order.Register(source.Id);
             Attach(source);
             _sources.Add(source);
         }
@@ -64,8 +74,6 @@ public sealed class IntervalSourceRegistry : IIntervalSourceRegistry
         _sources.Clear();
         RaiseChanged();
     }
-
-    private int NextOrder() => _sources.Count == 0 ? 0 : _sources.Max(source => source.Order) + 1;
 
     private void Attach(IIntervalSource source) => source.Changed += OnSourceChanged;
 

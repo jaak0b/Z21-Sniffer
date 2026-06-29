@@ -12,6 +12,8 @@ public interface IIntervalSourceRegistry
 
     void Load(IEnumerable<IIntervalSource> sources);
 
+    void Reorder(IReadOnlyList<string> orderedIds);
+
     void Clear();
 
     event EventHandler? Changed;

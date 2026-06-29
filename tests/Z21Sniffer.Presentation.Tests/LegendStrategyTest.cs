@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Z21Sniffer.Core.Model;
 using Z21Sniffer.Core.Ports;
 using Z21Sniffer.Core.Recording;
 using Z21Sniffer.Presentation.Localization;
@@ -75,5 +76,83 @@ public class LegendStrategyTest
 
         Assert.That(content, Is.TypeOf<ConnectionLegendContentViewModel>());
         Assert.That(((ConnectionLegendContentViewModel)content).Label, Is.EqualTo(LocalizationService.Instance["Connection"]));
+    }
+
+    [Test]
+    public async Task SensorStrategy_WiresRegistryAndConfirmationIntoContent()
+    {
+        var source = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1.1");
+        var strategy = new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation());
+
+        var content = (SensorLegendContentViewModel)strategy.CreateContent(source);
+        await content.RemoveCommand.ExecuteAsync(null);
+
+        Assert.That(_registry.Sources, Does.Not.Contain(source));
+    }
+
+    [Test]
+    public void SensorStrategy_LabelsTheTypeAndTheRow()
+    {
+        var source = _registry.GetOrCreate<FeedbackSensorSource>("sensor:1.1", s => s.Sensor = new SensorKey(1, 1));
+        var strategy = new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation());
+
+        Assert.That(strategy.TypeLabel, Is.EqualTo("Sensor"));
+        Assert.That(strategy.RowLabel(source), Is.EqualTo("M1.1"));
+    }
+
+    [Test]
+    public void LocoStrategy_LabelsTheTypeAndTheRow()
+    {
+        var source = _registry.GetOrCreate<LocoIntervalSource>("loco:482", s => s.Address = 482);
+        var strategy = new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation());
+
+        Assert.That(strategy.TypeLabel, Is.EqualTo("Loco"));
+        Assert.That(strategy.RowLabel(source), Is.EqualTo("482"));
+    }
+
+    [Test]
+    public void ConnectionStrategy_LabelsTheTypeAndTheRow()
+    {
+        var source = _registry.GetOrCreate<ConnectionSource>("connection");
+        var strategy = new ConnectionIntervalLegendDrawingStrategy();
+
+        Assert.That(strategy.TypeLabel, Is.EqualTo("Connection"));
+        Assert.That(strategy.RowLabel(source), Is.EqualTo("Connection"));
+    }
+
+    [Test]
+    public void TrackPowerStrategy_LabelsTheTypeAndTheRow()
+    {
+        var source = _registry.GetOrCreate<TrackPowerSource>("trackpower");
+        var strategy = new TrackPowerIntervalLegendDrawingStrategy();
+
+        Assert.That(strategy.TypeLabel, Is.EqualTo("Track power"));
+        Assert.That(strategy.RowLabel(source), Is.EqualTo("Track power"));
+    }
+
+    [Test]
+    public void SystemCurrentStrategy_LabelsTheTypeAndTheRow()
+    {
+        var source = _registry.GetOrCreate<SystemCurrentSource>("systemcurrent");
+        var strategy = new SystemCurrentIntervalLegendDrawingStrategy();
+
+        Assert.That(strategy.TypeLabel, Is.EqualTo("System current"));
+        Assert.That(strategy.RowLabel(source), Is.EqualTo("System current"));
+    }
+
+    [Test]
+    public void EveryStrategy_ProvidesADistinctNonEmptyIconGeometry()
+    {
+        var icons = new[]
+        {
+            new SensorIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconGeometry,
+            new LocoIntervalLegendDrawingStrategy(_registry, new StubRemovalConfirmation()).IconGeometry,
+            new ConnectionIntervalLegendDrawingStrategy().IconGeometry,
+            new TrackPowerIntervalLegendDrawingStrategy().IconGeometry,
+            new SystemCurrentIntervalLegendDrawingStrategy().IconGeometry,
+        };
+
+        Assert.That(icons, Has.All.StartWith("M"));
+        Assert.That(icons.Distinct().Count(), Is.EqualTo(5));
     }
 }

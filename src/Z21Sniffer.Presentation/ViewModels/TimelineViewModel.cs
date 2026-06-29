@@ -100,9 +100,9 @@ public sealed partial class TimelineViewModel : ObservableObject
     public void MoveRow(int fromIndex, int toIndex)
     {
         LegendRows.Move(fromIndex, toIndex);
-        for (var index = 0; index < LegendRows.Count; index++) LegendRows[index].Source.Order = index;
         _rowOrder.Clear();
         _rowOrder.AddRange(LegendRows.Select(row => row.Source.Id));
+        _registry.Reorder(_rowOrder.ToList());
         RowsReordered?.Invoke(this, EventArgs.Empty);
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -113,6 +113,7 @@ public sealed partial class TimelineViewModel : ObservableObject
     {
         _startedAt = _clock.Now;
         Following = true;
+        foreach (var source in _registry.Sources) source.IsVisible = true;
         Refresh();
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -182,7 +183,7 @@ public sealed partial class TimelineViewModel : ObservableObject
 
     private void ReconcileCore()
     {
-        var ordered = _registry.Sources;
+        var ordered = _registry.Sources.Where(source => source.IsVisible).ToList();
         var ids = ordered.Select(source => source.Id).ToList();
         if (ids.SequenceEqual(_rowOrder)) return;
 

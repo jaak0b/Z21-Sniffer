@@ -29,7 +29,7 @@ public class TimelineHoverTest
 
     private static LocoIntervalSource LocoWith(int order, params (double At, int Speed)[] samples)
     {
-        var source = new LocoIntervalSource { Id = $"loco:{order}", Address = order, Order = order };
+        var source = new LocoIntervalSource { Id = $"loco:{order}", Address = order };
         foreach (var sample in samples) source.Apply(sample.Speed, forward: true, maxSpeed: 100, T0.AddSeconds(sample.At));
         return source;
     }
@@ -50,7 +50,7 @@ public class TimelineHoverTest
     [Test]
     public void ValueAt_OverASensorBar_DescribesTheSensor()
     {
-        var sensor = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = new SensorKey(1, 1), Label = "Yard", Order = 0 };
+        var sensor = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = new SensorKey(1, 1), Label = "Yard" };
         sensor.Apply(occupied: true, T0.AddSeconds(1));
 
         var value = _hover.ValueAt(new IIntervalSource[] { sensor }, Viewport(), 0, x: 50, y: 10);
@@ -87,7 +87,7 @@ public class TimelineHoverTest
     [Test]
     public void ValueAt_AfterAClosedIntervalHasEnded_IsNull()
     {
-        var loco = new LocoIntervalSource { Id = "loco:0", Address = 0, Order = 0 };
+        var loco = new LocoIntervalSource { Id = "loco:0", Address = 0 };
         loco.Apply(40, forward: true, maxSpeed: 100, T0);
         loco.Apply(0, forward: true, maxSpeed: 100, T0.AddSeconds(5));
 
@@ -97,7 +97,7 @@ public class TimelineHoverTest
     [Test]
     public void ValueAt_BeforeABarsStart_IsNull()
     {
-        var sensor = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = new SensorKey(1, 1), Label = "Yard", Order = 0 };
+        var sensor = new FeedbackSensorSource { Id = "sensor:1.1", Sensor = new SensorKey(1, 1), Label = "Yard" };
         sensor.Apply(occupied: true, T0.AddSeconds(5));
 
         Assert.That(_hover.ValueAt(new IIntervalSource[] { sensor }, Viewport(), 0, x: 10, y: 5), Is.Null);

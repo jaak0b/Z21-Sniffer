@@ -126,6 +126,143 @@ public partial class WorkspaceView : UserControl
         new Flyout { Content = panel }.ShowAt(button);
     }
 
+    private readonly Dictionary<string, bool> _rowsExpanded = new();
+
+    private void OnRowsMenu(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is null || sender is not Button button) return;
+
+        var rows = ViewModel.Rows;
+        var localization = LocalizationService.Instance;
+
+        var filter = new TextBox { PlaceholderText = localization["RowsFilter"], Margin = new Thickness(0, 0, 0, 8) };
+        var tree = new StackPanel();
+
+        void Rebuild()
+        {
+            tree.Children.Clear();
+            foreach (var group in rows.BuildTree(filter.Text ?? string.Empty)) AddGroup(tree, group, Rebuild);
+        }
+
+        filter.TextChanged += (_, _) => Rebuild();
+
+        var showAll = new Button { Content = localization["RowsShowAll"], Padding = new Thickness(10, 4) };
+        showAll.Click += (_, _) => { rows.ShowAll(); Rebuild(); };
+        var hideAll = new Button { Content = localization["RowsHideAll"], Padding = new Thickness(10, 4) };
+        hideAll.Click += (_, _) => { rows.HideAll(); Rebuild(); };
+
+        var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(0, 0, 0, 8) };
+        actions.Children.Add(showAll);
+        actions.Children.Add(hideAll);
+
+        var panel = new StackPanel { MinWidth = 280 };
+        panel.Children.Add(filter);
+        panel.Children.Add(actions);
+        panel.Children.Add(new ScrollViewer { Content = tree, MaxHeight = 380 });
+
+        Rebuild();
+        new Flyout { Content = panel }.ShowAt(button);
+    }
+
+    private IBrush ThemeBrush(string key) => this.FindResource(key) as IBrush ?? Brushes.Transparent;
+
+    private void AddGroup(StackPanel tree, SourceVisibilityGroup group, Action rebuild)
+    {
+        var expandable = group.Sources.Count > 1;
+        var expanded = expandable && (!_rowsExpanded.TryGetValue(group.TypeLabel, out var stored) || stored);
+
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("18,*,Auto") };
+
+        if (expandable)
+        {
+            var chevron = new Path
+            {
+                Data = Geometry.Parse(expanded ? "M0,1 L8,1 L4,7 Z" : "M1,0 L7,4 L1,8 Z"),
+                Fill = ThemeBrush("TextPrimaryBrush"),
+                Width = 9,
+                Height = 9,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            Grid.SetColumn(chevron, 0);
+            grid.Children.Add(chevron);
+        }
+
+        var icon = new Path
+        {
+            Data = Geometry.Parse(group.IconGeometry),
+            Fill = ThemeBrush("TextSecondaryBrush"),
+            Width = 15,
+            Height = 15,
+            Stretch = Stretch.Uniform,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 8, 0),
+        };
+        var content = new StackPanel { Orientation = Orientation.Horizontal };
+        content.Children.Add(icon);
+        content.Children.Add(new TextBlock { Text = group.TypeLabel, FontWeight = FontWeight.Medium, VerticalAlignment = VerticalAlignment.Center });
+
+        var check = new CheckBox
+        {
+            IsThreeState = true,
+            IsChecked = group.State switch
+            {
+                SourceVisibilityState.All => true,
+                SourceVisibilityState.None => false,
+                _ => (bool?)null,
+            },
+            Content = content,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        check.Click += (_, _) => { group.Toggle(); rebuild(); };
+        Grid.SetColumn(check, 1);
+        grid.Children.Add(check);
+
+        var count = new TextBlock
+        {
+            Text = $"{group.Sources.Count(item => item.IsVisible)}/{group.Sources.Count}",
+            FontSize = 12,
+            Foreground = ThemeBrush("TextSecondaryBrush"),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(8, 0, 2, 0),
+        };
+        Grid.SetColumn(count, 2);
+        grid.Children.Add(count);
+
+        tree.Children.Add(HoverRow(grid, new Thickness(8, 5), expandable ? () => { _rowsExpanded[group.TypeLabel] = !expanded; rebuild(); } : null));
+
+        if (!expanded) return;
+        foreach (var item in group.Sources)
+        {
+            var captured = item;
+            var itemCheck = new CheckBox
+            {
+                IsChecked = item.IsVisible,
+                Content = item.Label,
+                Foreground = ThemeBrush(item.IsVisible ? "TextPrimaryBrush" : "TextSecondaryBrush"),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            itemCheck.Click += (_, _) => { captured.Toggle(); rebuild(); };
+            tree.Children.Add(HoverRow(itemCheck, new Thickness(38, 3, 8, 3), null));
+        }
+    }
+
+    private Border HoverRow(Control content, Thickness padding, Action? onClick)
+    {
+        var row = new Border
+        {
+            Padding = padding,
+            Background = Brushes.Transparent,
+            Child = content,
+            Cursor = new Cursor(StandardCursorType.Hand),
+        };
+        row.PointerEntered += (_, _) => row.Background = ThemeBrush("ControlHoverBrush");
+        row.PointerExited += (_, _) => row.Background = Brushes.Transparent;
+        if (onClick is not null) row.PointerPressed += (_, _) => onClick();
+        return row;
+    }
+
     private void HookLog()
     {
         if (ViewModel is null || ReferenceEquals(_hookedLog, ViewModel.Log)) return;
@@ -200,8 +337,8 @@ public partial class WorkspaceView : UserControl
 
         _ghost = new Border
         {
-            Background = this.FindResource("SurfaceAltBrush") as IBrush ?? Brushes.Gray,
-            BorderBrush = this.FindResource("PrimaryBrush") as IBrush ?? Brushes.DodgerBlue,
+            Background = this.FindResource("SurfaceAltBrush") as IBrush ?? Brushes.Transparent,
+            BorderBrush = this.FindResource("PrimaryBrush") as IBrush ?? Brushes.Transparent,
             BorderThickness = new Thickness(1),
             Opacity = 0.85,
             Padding = new Thickness(8, 4),

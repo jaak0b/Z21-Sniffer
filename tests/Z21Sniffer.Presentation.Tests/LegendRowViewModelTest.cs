@@ -10,7 +10,7 @@ public class LegendRowViewModelTest
     [Test]
     public void ExposesSourceAndContent()
     {
-        var source = new FeedbackSensorSource { Id = "sensor:1.1", Order = 4 };
+        var source = new FeedbackSensorSource { Id = "sensor:1.1" };
         var content = new object();
 
         var row = new LegendRowViewModel(source, content);

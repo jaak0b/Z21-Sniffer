@@ -8,25 +8,28 @@ public abstract class IntervalSourceBase<T> : IIntervalSource<T> where T : class
 {
     private List<T> _intervals = new();
     private int _nextKey;
-    private int _orderSeed;
+    private bool _isVisible = true;
 
     public string Id { get; set; } = string.Empty;
-
-    public int Order
-    {
-        get => Persistence.GetValue($"{Id}/order", _orderSeed);
-        set => Persistence.SetValue($"{Id}/order", value);
-    }
 
     public Type IntervalType => typeof(T);
 
     public virtual bool HighlightsShortIntervals => true;
 
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            if (_isVisible == value) return;
+            _isVisible = value;
+            RaiseChanged();
+        }
+    }
+
     protected IKeyValueStore Persistence { get; private set; } = new InMemoryKeyValueStore();
 
     public void UsePersistence(IKeyValueStore store) => Persistence = store;
-
-    public void SeedOrder(int order) => _orderSeed = order;
 
     public T? CurrentInterval { get; private set; }
 

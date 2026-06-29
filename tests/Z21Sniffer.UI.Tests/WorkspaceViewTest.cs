@@ -53,6 +53,26 @@ public class WorkspaceViewTest
     }
 
     [AvaloniaTest]
+    public void WorkspaceView_HidingASourceViaRows_RemovesItsLegendRow()
+    {
+        var context = BuildWorkspace();
+        context.Registry.GetOrCreate<FeedbackSensorSource>("sensor:1.1", source => source.Sensor = new SensorKey(1, 1));
+        context.Registry.GetOrCreate<ConnectionSource>("connection");
+
+        var window = new Window { Content = new WorkspaceView { DataContext = context.Vm }, Width = 1000, Height = 600 };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        var sensorItem = context.Vm.Rows.BuildTree().SelectMany(group => group.Sources).First(item => item.Source.Id == "sensor:1.1");
+        sensorItem.Toggle();
+        Dispatcher.UIThread.RunJobs();
+
+        var rendered = window.GetVisualDescendants().Select(visual => visual.GetType()).ToHashSet();
+        Assert.That(rendered, Does.Not.Contain(typeof(SensorLegendContentView)));
+        Assert.That(rendered, Does.Contain(typeof(ConnectionLegendContentView)));
+    }
+
+    [AvaloniaTest]
     public void WorkspaceView_RendersTheSystemCurrentLegendWithItsOwnView()
     {
         var view = new WorkspaceView();

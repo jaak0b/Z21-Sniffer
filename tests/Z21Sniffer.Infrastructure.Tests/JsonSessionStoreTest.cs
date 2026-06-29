@@ -170,17 +170,57 @@ public class JsonSessionStoreTest : TempDirectoryTest
     }
 
     [Test]
-    public void SaveJson_ExcludesLocalLabelAndOrderPreferences()
+    public void SaveJson_ExcludesLocalLabelAndVisibilityPreferences()
     {
         var path = Path.Combine(TempDir, "session.json");
-        var sensor = new FeedbackSensorSource { Id = "sensor:3.5", Sensor = new SensorKey(3, 5), Label = "Renamed yard", Order = 7 };
+        var sensor = new FeedbackSensorSource { Id = "sensor:3.5", Sensor = new SensorKey(3, 5), Label = "Renamed yard", IsVisible = false };
         sensor.Apply(occupied: true, Start);
 
         _store.SaveJson(new RecordingSession(Start, new IIntervalSource[] { sensor }, Array.Empty<LogEntry>()), path);
         var loaded = Sensor(_store.LoadJson(path));
 
         Assert.That(loaded.Label, Is.EqualTo("M3.5"), "Label is a local preference, reconstructed from the key-value store, not the portable session");
-        Assert.That(loaded.Order, Is.EqualTo(0), "Order is a local preference, reseeded on load, not the portable session");
+        Assert.That(loaded.IsVisible, Is.True, "Visibility is a local view preference reset each session, not the portable session");
+    }
+
+    [Test]
+    public void SaveJson_WritesIndentedJson()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        new JsonSessionStore().SaveJson(SampleSession(), path);
+
+        Assert.That(File.ReadAllText(path), Does.Contain("\n"));
+    }
+
+    [Test]
+    public void SaveJson_TagsEverySourceWithItsTypeDiscriminator()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        new JsonSessionStore().SaveJson(SampleSession(), path);
+        var json = File.ReadAllText(path);
+
+        foreach (var discriminator in new[] { "sensor", "connection", "loco", "trackpower", "systemcurrent" })
+        {
+            Assert.That(json, Does.Contain($"\"$type\": \"{discriminator}\""), discriminator);
+        }
+    }
+
+    [Test]
+    public void SaveJson_OmitsEveryTransientMemberName()
+    {
+        var path = Path.Combine(TempDir, "session.json");
+
+        new JsonSessionStore().SaveJson(SampleSession(), path);
+        var json = File.ReadAllText(path);
+
+        foreach (var dropped in new[] { "\"IntervalType\"", "\"CurrentInterval\"", "\"IsVisible\"", "\"Label\"" })
+        {
+            Assert.That(json, Does.Not.Contain(dropped), dropped);
+        }
+
+        Assert.That(json, Does.Contain("\"Intervals\""), "non-transient members must still be written");
     }
 
     [Test]

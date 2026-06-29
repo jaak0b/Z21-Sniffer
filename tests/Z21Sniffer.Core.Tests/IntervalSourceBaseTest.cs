@@ -50,6 +50,71 @@ public class IntervalSourceBaseTest
     }
 
     [Test]
+    public void CreateInterval_AssignsSequentiallyIncreasingKeys()
+    {
+        var first = _source.Open(T0);
+        _source.CloseInterval(T0, IntervalEndReason.FallingEdge);
+        var second = _source.Open(T0);
+
+        Assert.That(first.Key, Is.EqualTo("0"));
+        Assert.That(second.Key, Is.EqualTo("1"));
+    }
+
+    [Test]
+    public void Id_DefaultsToEmptyString()
+    {
+        Assert.That(new TestSource().Id, Is.Empty);
+    }
+
+    [Test]
+    public void Intervals_SetWithAList_KeepsTheSameInstance()
+    {
+        var list = new List<TestInterval> { new() { Key = "k" } };
+
+        _source.Intervals = list;
+
+        Assert.That(_source.Intervals, Is.SameAs(list));
+    }
+
+    [Test]
+    public void Intervals_SetWithANonList_CopiesTheItems()
+    {
+        var array = new TestInterval[] { new() { Key = "k" } };
+
+        _source.Intervals = array;
+
+        Assert.That(_source.Intervals, Is.Not.SameAs(array));
+        Assert.That(_source.Intervals.Select(interval => interval.Key), Is.EqualTo(new[] { "k" }));
+    }
+
+    [Test]
+    public void CloseOpenIntervals_WhenSomethingWasOpen_ClosesItAndRaisesChanged()
+    {
+        var interval = _source.Open(T0);
+        var raised = 0;
+        _source.Changed += (_, _) => raised++;
+
+        _source.CloseOpenIntervals(T0.AddSeconds(3), IntervalEndReason.Stopped);
+
+        Assert.That(interval.IsOpen, Is.False);
+        Assert.That(interval.EndReason, Is.EqualTo(IntervalEndReason.Stopped));
+        Assert.That(raised, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void CloseOpenIntervals_WhenNothingWasOpen_DoesNotRaiseChanged()
+    {
+        _source.Open(T0);
+        _source.CloseInterval(T0.AddSeconds(1), IntervalEndReason.FallingEdge);
+        var raised = 0;
+        _source.Changed += (_, _) => raised++;
+
+        _source.CloseOpenIntervals(T0.AddSeconds(3), IntervalEndReason.Stopped);
+
+        Assert.That(raised, Is.EqualTo(0));
+    }
+
+    [Test]
     public void CloseInterval_SetsEndAndReasonInPlaceAndClearsCurrent()
     {
         var interval = _source.Open(T0);
@@ -135,38 +200,43 @@ public class IntervalSourceBaseTest
     }
 
     [Test]
-    public void Order_WithNoPersistedValue_ReturnsSeed()
+    public void IsVisible_DefaultsToTrue()
     {
-        _source.Id = "s1";
-        _source.SeedOrder(5);
-
-        Assert.That(_source.Order, Is.EqualTo(5));
+        Assert.That(_source.IsVisible, Is.True);
     }
 
     [Test]
-    public void Order_Set_PersistsToBoundStoreKeyedById()
+    public void IsVisible_IsNotPersistedToTheBoundStore()
     {
         var store = new InMemoryKeyValueStore();
         _source.Id = "s1";
         _source.UsePersistence(store);
-        _source.SeedOrder(5);
 
-        _source.Order = 9;
+        _source.IsVisible = false;
 
-        Assert.That(store.GetValue<int>("s1/order"), Is.EqualTo(9));
-        Assert.That(_source.Order, Is.EqualTo(9));
+        Assert.That(store.GetValue<bool?>("s1/visible"), Is.Null);
     }
 
     [Test]
-    public void Order_PersistedValueOverridesSeed()
+    public void IsVisible_Changed_RaisesChanged()
     {
-        var store = new InMemoryKeyValueStore();
-        store.SetValue("s1/order", 3);
-        _source.Id = "s1";
-        _source.UsePersistence(store);
-        _source.SeedOrder(99);
+        var raised = 0;
+        _source.Changed += (_, _) => raised++;
 
-        Assert.That(_source.Order, Is.EqualTo(3));
+        _source.IsVisible = false;
+
+        Assert.That(raised, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void IsVisible_SetToSameValue_DoesNotRaiseChanged()
+    {
+        var raised = 0;
+        _source.Changed += (_, _) => raised++;
+
+        _source.IsVisible = true;
+
+        Assert.That(raised, Is.EqualTo(0));
     }
 
     [Test]

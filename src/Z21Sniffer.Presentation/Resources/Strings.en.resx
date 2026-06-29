@@ -87,9 +87,14 @@
   <data name="German" xml:space="preserve"><value>German</value></data>
   <data name="Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="Connection" xml:space="preserve"><value>Connection</value></data>
+  <data name="TypeSensor" xml:space="preserve"><value>Sensor</value></data>
+  <data name="TypeLoco" xml:space="preserve"><value>Loco</value></data>
+  <data name="Rows" xml:space="preserve"><value>Filter</value></data>
+  <data name="RowsShowAll" xml:space="preserve"><value>Show all</value></data>
+  <data name="RowsHideAll" xml:space="preserve"><value>Hide all</value></data>
+  <data name="RowsFilter" xml:space="preserve"><value>Filter rows</value></data>
   <data name="Connected" xml:space="preserve"><value>Connected</value></data>
   <data name="Disconnected" xml:space="preserve"><value>Disconnected</value></data>
-  <data name="TrackPower" xml:space="preserve"><value>Track power</value></data>
   <data name="TrackPowerDetails" xml:space="preserve"><value>Command station track power</value></data>
   <data name="TrackPowerOnState" xml:space="preserve"><value>Power on</value></data>
   <data name="TrackPowerOffState" xml:space="preserve"><value>Power off</value></data>
